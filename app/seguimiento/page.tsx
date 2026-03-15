@@ -59,22 +59,22 @@ function TrackingContent() {
   const currentStep = order ? STATUS_ORDER.indexOf(order.status) : -1;
 
   return (
-    <main className="min-h-screen bg-[#F4F4F5] px-4 py-4 pb-24">
+    <main className="min-h-screen bg-[#0F1117] px-4 py-4 pb-24">
       <div className="max-w-lg mx-auto space-y-3">
 
         {/* Search card */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <label className="text-[#71717A] text-xs mb-2 block font-medium">Número de pedido</label>
+        <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+          <label className="text-[#9CA3AF] text-xs mb-2 block font-medium">Número de pedido</label>
           <div className="flex gap-2">
             <input
-              className="flex-1 bg-[#F4F4F5] border border-[#E4E4E7] rounded-xl px-4 py-2.5 text-[#111217] placeholder-[#9CA3AF] focus:outline-none focus:border-[#D4A017] transition-colors text-sm"
+              className="flex-1 bg-[#22242C] border border-[#2E3038] rounded-xl px-4 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] transition-colors text-sm"
               placeholder="PB-XXXXXX"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
             />
             <button
               onClick={() => setSearchValue(searchInput)}
-              className="bg-[#D4A017] text-white font-bold px-5 py-2.5 rounded-xl text-sm"
+              className="bg-[#D4A017] text-[#0F1117] font-bold px-5 py-2.5 rounded-xl text-sm"
             >
               Buscar
             </button>
@@ -86,28 +86,28 @@ function TrackingContent() {
         )}
 
         {!loading && searchValue && !order && (
-          <div className="text-center py-10 bg-white rounded-2xl shadow-sm">
-            <p className="text-[#9CA3AF] text-sm">No encontramos el pedido <strong className="text-[#111217]">{searchValue}</strong></p>
+          <div className="text-center py-10 bg-[#1A1B21] rounded-2xl border border-[#2E3038]">
+            <p className="text-[#9CA3AF] text-sm">No encontramos el pedido <strong className="text-white">{searchValue}</strong></p>
           </div>
         )}
 
         {order && (
           <>
             {/* Order header card */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm">
+            <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
               <div className="flex justify-between items-center mb-1">
                 <p className="text-[#9CA3AF] text-xs">Número de pedido</p>
                 <p className="text-[#9CA3AF] text-xs">Total</p>
               </div>
               <div className="flex justify-between items-center">
                 <p className="text-[#D4A017] font-bold">{order.order_number}</p>
-                <p className="text-[#111217] font-bold">${order.total?.toLocaleString("es-CO")}</p>
+                <p className="text-white font-bold">${order.total?.toLocaleString("es-CO")}</p>
               </div>
             </div>
 
             {/* Status steps card */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm">
-              <h3 className="text-[#111217] font-bold text-sm mb-4">Estado del pedido</h3>
+            <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+              <h3 className="text-white font-bold text-sm mb-4">Estado del pedido</h3>
               <div className="space-y-3">
                 {STATUS_STEPS.map((step) => {
                   const stepIndex = STATUS_ORDER.indexOf(step.key);
@@ -119,24 +119,24 @@ function TrackingContent() {
                     <div
                       key={step.key}
                       className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                        isActive && !isCancelled ? "bg-[#FDF3D7] border border-[#D4A017]/30" : "bg-[#F4F4F5]"
+                        isActive && !isCancelled ? "bg-[#2A2414] border border-[#D4A017]/30" : "bg-[#22242C]"
                       }`}
                     >
                       <div className={`shrink-0 rounded-full p-2 ${
-                        isDone && !isCancelled ? "bg-[#D4A017] text-white" : "bg-[#E4E4E7] text-[#9CA3AF]"
+                        isDone && !isCancelled ? "bg-[#D4A017] text-[#0F1117]" : "bg-[#2E3038] text-[#6B7280]"
                       }`}>
                         {step.icon}
                       </div>
                       <div className="flex-1">
                         <p className={`font-semibold text-sm ${
-                          isDone && !isCancelled ? "text-[#111217]" : "text-[#9CA3AF]"
+                          isDone && !isCancelled ? "text-white" : "text-[#6B7280]"
                         }`}>
                           {step.label}
                           {isActive && !isCancelled && (
                             <span className="ml-2 text-[#D4A017] text-xs animate-pulse">● Ahora</span>
                           )}
                         </p>
-                        <p className="text-[#9CA3AF] text-xs">{step.desc}</p>
+                        <p className="text-[#6B7280] text-xs">{step.desc}</p>
                       </div>
                     </div>
                   );
@@ -144,20 +144,20 @@ function TrackingContent() {
               </div>
 
               {order.status === "cancelled" && (
-                <div className="mt-3 bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-                  <p className="text-red-500 text-sm font-medium">Pedido cancelado</p>
+                <div className="mt-3 bg-red-900/20 border border-red-800/40 rounded-xl p-3 text-center">
+                  <p className="text-red-400 text-sm font-medium">Pedido cancelado</p>
                 </div>
               )}
             </div>
 
             {/* Items card */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm">
-              <h3 className="text-[#111217] font-bold text-sm mb-3">Productos</h3>
+            <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+              <h3 className="text-white font-bold text-sm mb-3">Productos</h3>
               <div className="space-y-2">
                 {(order.items as any[])?.map((item, i) => (
                   <div key={i} className="flex justify-between text-sm">
-                    <span className="text-[#71717A]">{item.menu_item_name} <span className="text-[#9CA3AF]">x{item.quantity}</span></span>
-                    <span className="text-[#111217] font-medium">${item.subtotal?.toLocaleString("es-CO")}</span>
+                    <span className="text-[#9CA3AF]">{item.menu_item_name} <span className="text-[#6B7280]">x{item.quantity}</span></span>
+                    <span className="text-white font-medium">${item.subtotal?.toLocaleString("es-CO")}</span>
                   </div>
                 ))}
               </div>
@@ -167,8 +167,8 @@ function TrackingContent() {
 
         {!searchValue && (
           <div className="text-center py-12 text-[#9CA3AF]">
-            <div className="w-16 h-16 rounded-full bg-[#E4E4E7] flex items-center justify-center mx-auto mb-3">
-              <Clock size={32} className="text-[#9CA3AF]" />
+            <div className="w-16 h-16 rounded-full bg-[#22242C] flex items-center justify-center mx-auto mb-3">
+              <Clock size={32} className="text-[#6B7280]" />
             </div>
             <p className="text-sm">Ingresa tu número de pedido para ver el estado</p>
           </div>

@@ -30,9 +30,9 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#F0F0F0] flex flex-col">
+      <div className="bg-[#1A1B21] rounded-2xl overflow-hidden border border-[#2E3038] flex flex-col hover:border-[#D4A017]/50 transition-colors">
         {/* Image */}
-        <div className="relative h-36 bg-[#F8F8F8]">
+        <div className="relative h-36 bg-[#22242C]">
           {item.image_url ? (
             <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />
           ) : (
@@ -41,15 +41,15 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
             </div>
           )}
           {!item.available && (
-            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-              <span className="text-[#9CA3AF] text-xs font-semibold bg-white px-3 py-1 rounded-full border border-[#E4E4E7]">
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <span className="text-[#9CA3AF] text-xs font-semibold bg-[#1A1B21] px-3 py-1 rounded-full border border-[#2E3038]">
                 No disponible
               </span>
             </div>
           )}
           {/* Barra libre badge */}
           {hasBarraLibre && (
-            <div className="absolute top-2 left-2 bg-[#D4A017] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+            <div className="absolute top-2 left-2 bg-[#D4A017] text-[#0F1117] text-[9px] font-bold px-2 py-0.5 rounded-full">
               🥗 Barra libre
             </div>
           )}
@@ -57,9 +57,9 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
 
         {/* Info */}
         <div className="p-3 flex flex-col flex-1">
-          <h3 className="text-[#111217] font-bold text-sm leading-tight">{item.name}</h3>
+          <h3 className="text-white font-bold text-sm leading-tight">{item.name}</h3>
           {item.description && (
-            <p className="text-[#9CA3AF] text-[11px] mt-0.5 line-clamp-2 flex-1">{item.description}</p>
+            <p className="text-[#6B7280] text-[11px] mt-0.5 line-clamp-2 flex-1">{item.description}</p>
           )}
 
           {/* Barra libre selected preview */}
@@ -81,7 +81,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
                     onClick={handleAdd}
                     className="w-7 h-7 bg-[#D4A017] rounded-full flex items-center justify-center active:scale-90 transition-transform shadow-sm"
                   >
-                    <Plus size={16} className="text-white" strokeWidth={2.5} />
+                    <Plus size={16} className="text-[#0F1117]" strokeWidth={2.5} />
                   </button>
                 ) : (
                   <div className="flex items-center gap-1.5">
@@ -91,12 +91,12 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
                     >
                       <Minus size={11} className="text-[#D4A017]" strokeWidth={2.5} />
                     </button>
-                    <span className="text-[#111217] font-bold text-sm w-4 text-center">{qty}</span>
+                    <span className="text-white font-bold text-sm w-4 text-center">{qty}</span>
                     <button
                       onClick={handleAdd}
                       className="w-6 h-6 rounded-full bg-[#D4A017] flex items-center justify-center"
                     >
-                      <Plus size={11} className="text-white" strokeWidth={2.5} />
+                      <Plus size={11} className="text-[#0F1117]" strokeWidth={2.5} />
                     </button>
                   </div>
                 )}

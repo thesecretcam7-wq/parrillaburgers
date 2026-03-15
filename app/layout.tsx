@@ -15,11 +15,11 @@ export const metadata: Metadata = {
   description: "Hamburguesas artesanales a la parrilla. Pide online, sigue tu pedido en tiempo real y acumula puntos con cada compra.",
   keywords: ["hamburguesas", "delivery", "parrilla", "burgers"],
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "ParillaBurgers" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "ParillaBurgers" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#D4A017",
+  themeColor: "#0F1117",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -32,18 +32,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <link rel="apple-touch-icon" href="/logo.svg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js'))}` }} />
       </head>
-      <body className={`${geist.variable} antialiased bg-[#F4F4F5] text-[#111217]`}>
+      <body className={`${geist.variable} antialiased bg-[#0F1117] text-white`}>
         <Navbar />
         <div className="pt-14 pb-20 lg:pb-6">{children}</div>
         <BottomNav />
         <Toaster
           position="top-center"
           toastOptions={{
-            style: { background: "#fff", color: "#111217", border: "1px solid #E4E4E7", borderRadius: "12px", fontSize: "14px", fontWeight: 500 },
-            success: { iconTheme: { primary: "#D4A017", secondary: "#fff" } },
+            style: { background: "#1A1B21", color: "#fff", border: "1px solid #2E3038", borderRadius: "12px", fontSize: "14px", fontWeight: 500 },
+            success: { iconTheme: { primary: "#D4A017", secondary: "#1A1B21" } },
           }}
         />
       </body>
