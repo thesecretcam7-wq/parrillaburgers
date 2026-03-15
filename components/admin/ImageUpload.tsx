@@ -196,7 +196,7 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
       {showAI && (
         <div className="rounded-xl border border-[#2E3038] bg-[#16181F] p-3 space-y-3">
           <p className="text-[#9CA3AF] text-[10px]">
-            Describe la imagen que quieres generar. Sé específico para mejores resultados.
+            Describe la imagen que quieres generar. <span className="text-[#D4A017]/70">Tip: en inglés da mejores resultados.</span>
           </p>
 
           <textarea
@@ -235,32 +235,36 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
             <div className="space-y-2 pt-1 border-t border-[#2E3038]">
               <p className="text-[#9CA3AF] text-[10px]">Vista previa:</p>
 
-              <div className="relative w-full h-32 rounded-lg overflow-hidden border border-[#2E3038] bg-[#22242C]">
-                {/* Spinner while img loads */}
-                {aiImgLoading && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                    <Loader2 size={24} className="text-[#D4A017] animate-spin" />
-                    <p className="text-[#6B7280] text-[10px]">Generando imagen (~10-20s)...</p>
+              <div className="relative w-full h-32 rounded-lg overflow-hidden border border-[#2E3038] bg-[#22242C] flex items-center justify-center">
+                {aiImgError ? (
+                  /* Error state — NO img in DOM to avoid infinite onError loop */
+                  <div className="flex flex-col items-center gap-2 px-4 text-center">
+                    <p className="text-red-400 text-xs">Pollinations no pudo generar la imagen.</p>
+                    <p className="text-[#6B7280] text-[10px]">Intenta con otro prompt o pulsa 🔄 para reintentar.</p>
                   </div>
+                ) : (
+                  <>
+                    {aiImgLoading && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
+                        <Loader2 size={24} className="text-[#D4A017] animate-spin" />
+                        <p className="text-[#6B7280] text-[10px]">Generando imagen (~10-20s)...</p>
+                      </div>
+                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={pollinationsUrl}
+                      alt="Imagen generada por IA"
+                      className={`w-full h-full object-cover transition-opacity duration-300 ${aiImgLoading ? "opacity-0" : "opacity-100"}`}
+                      onLoad={() => setAiImgLoading(false)}
+                      onError={() => { setAiImgLoading(false); setAiImgError(true); }}
+                      crossOrigin="anonymous"
+                    />
+                  </>
                 )}
-                {aiImgError && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                    <p className="text-red-400 text-xs">Error al generar. Intenta de nuevo.</p>
-                  </div>
-                )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={pollinationsUrl}
-                  alt="Imagen generada por IA"
-                  className={`w-full h-full object-cover transition-opacity duration-300 ${aiImgLoading || aiImgError ? "opacity-0" : "opacity-100"}`}
-                  onLoad={() => setAiImgLoading(false)}
-                  onError={() => { setAiImgLoading(false); setAiImgError(true); }}
-                  crossOrigin="anonymous"
-                />
               </div>
 
-              {!aiImgLoading && !aiImgError && (
-                <div className="flex gap-2">
+              <div className="flex gap-2">
+                {!aiImgLoading && !aiImgError && (
                   <button
                     type="button"
                     onClick={handleUseAI}
@@ -273,17 +277,18 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
                       "Usar esta imagen"
                     )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleRegenerate}
-                    disabled={aiUploading}
-                    title="Regenerar"
-                    className="bg-[#22242C] border border-[#2E3038] text-[#9CA3AF] px-3 py-2 rounded-lg hover:text-white hover:border-[#D4A017]/30 transition-colors disabled:opacity-50"
-                  >
-                    <RefreshCw size={13} />
-                  </button>
-                </div>
-              )}
+                )}
+                <button
+                  type="button"
+                  onClick={handleRegenerate}
+                  disabled={aiUploading || aiImgLoading}
+                  title="Reintentar"
+                  className="flex items-center gap-1.5 bg-[#22242C] border border-[#2E3038] text-[#9CA3AF] px-3 py-2 rounded-lg hover:text-white hover:border-[#D4A017]/30 transition-colors disabled:opacity-50 text-xs"
+                >
+                  <RefreshCw size={13} />
+                  {aiImgError ? "Reintentar" : ""}
+                </button>
+              </div>
             </div>
           )}
         </div>

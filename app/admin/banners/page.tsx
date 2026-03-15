@@ -154,7 +154,7 @@ export default function AdminBannersPage() {
               <ImageUpload
                 value={form.image_url}
                 onChange={(url) => setForm({ ...form, image_url: url })}
-                aiHint={form.title ? `banner publicitario de restaurante de hamburguesas: ${form.title}${form.subtitle ? `, ${form.subtitle}` : ""}, diseño atractivo, colores cálidos` : "banner publicitario atractivo para restaurante de hamburguesas a la parrilla, colores cálidos y apetitosos"}
+                aiHint={form.title ? `appetizing burger restaurant promotional banner: ${form.title}${form.subtitle ? `, ${form.subtitle}` : ""}, warm colors, professional food photography` : "appetizing burger restaurant promotional banner, warm golden colors, professional food photography, dark background"}
               />
               <div>
                 <label className="text-[#CCCCCC] text-xs mb-1.5 block">Título (opcional)</label>
