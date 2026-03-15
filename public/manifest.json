@@ -4,7 +4,7 @@
   "description": "Hamburguesas artesanales a la parrilla. Pide online y recíbelo en tu puerta.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#0F1117",
   "theme_color": "#D4A017",
   "orientation": "portrait-primary",
   "icons": [
