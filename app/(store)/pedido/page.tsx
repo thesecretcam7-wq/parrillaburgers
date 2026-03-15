@@ -159,7 +159,7 @@ export default function OrderPage() {
           `${appUrl}/seguimiento?order=${order.order_number}`
         );
         // Pre-fill customer data so they don't have to re-enter it
-        wompiUrl.searchParams.set("customer-email", form.email);
+        wompiUrl.searchParams.set("customer-data:email", form.email);
         wompiUrl.searchParams.set("customer-data:full-name", form.name);
         wompiUrl.searchParams.set("customer-data:phone-number", form.phone);
         wompiUrl.searchParams.set("customer-data:phone-number-prefix", "+57");
