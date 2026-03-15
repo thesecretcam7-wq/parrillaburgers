@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import BottomNav from "@/components/layout/BottomNav";
 import { Toaster } from "react-hot-toast";
 
 const geist = Geist({
@@ -35,12 +33,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js'))}` }} />
       </head>
-      <body className={`${geist.variable} antialiased bg-[#0F1117] lg:bg-[#07080C] text-white`}>
-        <Navbar />
-        <div className="pt-14 pb-20 lg:max-w-[430px] lg:mx-auto lg:border-x lg:border-[#2E3038] lg:bg-[#0F1117] lg:min-h-[calc(100vh-56px-64px)]">
-          {children}
-        </div>
-        <BottomNav />
+      <body className={`${geist.variable} antialiased bg-[#0F1117] text-white`}>
+        {children}
         <Toaster
           position="top-center"
           toastOptions={{
