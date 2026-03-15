@@ -1,56 +1,120 @@
+"use client";
+
 import Link from "next/link";
 import NextImage from "next/image";
-import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft } from "lucide-react";
 
 const navLinks = [
-  { href: "/admin", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
-  { href: "/admin/pedidos", label: "Pedidos", icon: <ShoppingBag size={18} /> },
-  { href: "/admin/menu", label: "Menú", icon: <UtensilsCrossed size={18} /> },
-  { href: "/admin/clientes", label: "Clientes", icon: <Users size={18} /> },
-  { href: "/admin/banners", label: "Banners", icon: <Image size={18} /> },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
+  { href: "/admin/menu", label: "Menú", icon: UtensilsCrossed },
+  { href: "/admin/clientes", label: "Clientes", icon: Users },
+  { href: "/admin/banners", label: "Banners", icon: Image },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-[#111217] flex">
-      {/* Sidebar */}
-      <aside className="w-60 bg-[#1A1B21] border-r border-[#2E3038] flex flex-col fixed h-full top-0 left-0 z-40">
-        <div className="p-6 border-b border-[#2E3038]">
-          <div className="flex items-center gap-3">
-            <NextImage src="/logo.svg" alt="ParillaBurgers" width={36} height={36} />
-            <div>
-              <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>
-              <p className="text-[#888899] text-xs">Panel Admin</p>
-            </div>
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const SidebarContent = () => (
+    <>
+      {/* Logo */}
+      <div className="p-5 border-b border-[#2E3038] flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#111217] flex items-center justify-center shrink-0">
+            <NextImage src="/logo.svg" alt="ParillaBurgers" width={26} height={26} />
+          </div>
+          <div>
+            <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>
+            <p className="text-[#888899] text-xs">Panel Admin</p>
           </div>
         </div>
+        {/* Close button — only visible on mobile */}
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden text-[#888899] hover:text-[#F5F0E8] p-1"
+        >
+          <X size={20} />
+        </button>
+      </div>
 
-        <nav className="flex-1 p-4 space-y-1">
-          {navLinks.map((link) => (
+      {/* Nav links */}
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        {navLinks.map(({ href, label, icon: Icon }) => {
+          const isActive = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+          return (
             <Link
-              key={link.href}
-              href={link.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#CCCCCC] hover:text-[#D4A017] hover:bg-[#D4A017]/10 transition-all text-sm"
+              key={href}
+              href={href}
+              onClick={() => setSidebarOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                isActive
+                  ? "bg-[#D4A017]/15 text-[#D4A017] font-semibold"
+                  : "text-[#CCCCCC] hover:text-[#D4A017] hover:bg-[#D4A017]/10"
+              }`}
             >
-              <span className="text-[#D4A017]">{link.icon}</span>
-              {link.label}
+              <Icon size={18} className={isActive ? "text-[#D4A017]" : "text-[#888899]"} />
+              {label}
             </Link>
-          ))}
-        </nav>
+          );
+        })}
+      </nav>
 
-        <div className="p-4 border-t border-[#2E3038]">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors"
-          >
-            ← Ver sitio
-          </Link>
-        </div>
+      {/* Footer */}
+      <div className="p-4 border-t border-[#2E3038]">
+        <Link
+          href="/"
+          onClick={() => setSidebarOpen(false)}
+          className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors"
+        >
+          <ArrowLeft size={14} /> Ver sitio
+        </Link>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#111217] flex">
+
+      {/* ── DESKTOP sidebar (always visible ≥ lg) ── */}
+      <aside className="hidden lg:flex w-60 bg-[#1A1B21] border-r border-[#2E3038] flex-col fixed h-full top-0 left-0 z-40">
+        <SidebarContent />
       </aside>
 
-      {/* Content */}
-      <div className="flex-1 ml-60">
-        <div className="p-8">{children}</div>
+      {/* ── MOBILE drawer overlay ── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* ── MOBILE drawer panel ── */}
+      <aside className={`fixed top-0 left-0 h-full w-64 bg-[#1A1B21] border-r border-[#2E3038] flex flex-col z-50 transition-transform duration-300 lg:hidden ${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
+        <SidebarContent />
+      </aside>
+
+      {/* ── Main content ── */}
+      <div className="flex-1 lg:ml-60 min-w-0">
+
+        {/* Mobile top bar */}
+        <div className="lg:hidden flex items-center gap-3 px-4 h-14 bg-[#1A1B21] border-b border-[#2E3038] sticky top-0 z-30">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg text-[#CCCCCC] hover:text-[#D4A017] hover:bg-[#D4A017]/10 transition-colors"
+          >
+            <Menu size={20} />
+          </button>
+          <p className="text-[#F5F0E8] font-bold text-sm">
+            {navLinks.find(l => l.href === "/admin" ? pathname === "/admin" : pathname.startsWith(l.href))?.label ?? "Admin"}
+          </p>
+        </div>
+
+        <div className="p-4 lg:p-8">{children}</div>
       </div>
     </div>
   );
