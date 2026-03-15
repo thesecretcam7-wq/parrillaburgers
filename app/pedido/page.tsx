@@ -125,6 +125,8 @@ export default function OrderPage() {
         STORAGE_KEY,
         JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address })
       );
+      // Save last order number so tracking page can show it automatically
+      localStorage.setItem("pb-last-order", orderNumber);
 
       const wompiKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
       if (wompiKey && !wompiKey.includes("PEGAR") && order) {
