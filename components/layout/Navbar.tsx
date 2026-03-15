@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/lib/store/cart";
@@ -14,10 +15,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full border-2 border-[#D4A017] flex items-center justify-center bg-[#1A1B21]">
-            <span className="text-[#D4A017] font-bold text-xs leading-tight text-center">
-              PB
-            </span>
+          <div className="w-10 h-10 flex items-center justify-center">
+            <Image src="/logo.svg" alt="ParillaBurgers" width={40} height={40} priority />
           </div>
           <span className="text-[#F5F0E8] font-bold text-lg hidden sm:block">
             Parrilla<span className="text-[#D4A017]">Burgers</span>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import NextImage from "next/image";
 import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image } from "lucide-react";
 
 const navLinks = [
@@ -15,10 +16,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className="w-60 bg-[#1A1B21] border-r border-[#2E3038] flex flex-col fixed h-full top-0 left-0 z-40">
         <div className="p-6 border-b border-[#2E3038]">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full border-2 border-[#D4A017] flex items-center justify-center">
-              <span className="text-[#D4A017] font-black text-xs">PB</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <NextImage src="/logo.svg" alt="ParillaBurgers" width={36} height={36} />
             <div>
               <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>
               <p className="text-[#888899] text-xs">Panel Admin</p>

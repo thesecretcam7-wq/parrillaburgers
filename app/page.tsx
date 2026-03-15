@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Star, Clock, MapPin, Flame } from "lucide-react";
 
 export default function Home() {
@@ -11,11 +12,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#D4A01715_0%,_transparent_70%)]" />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          {/* Logo circle */}
+          {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="w-28 h-28 rounded-full border-4 border-[#D4A017] bg-[#1A1B21] flex flex-col items-center justify-center shadow-[0_0_40px_#D4A01740]">
-              <span className="text-[#D4A017] font-black text-2xl leading-none">PB</span>
-              <span className="text-[#888899] text-[9px] uppercase tracking-widest mt-0.5">Parrilla</span>
+            <div className="w-32 h-32 drop-shadow-[0_0_30px_rgba(212,160,23,0.4)]">
+              <Image src="/logo.svg" alt="ParillaBurgers Logo" width={128} height={128} priority />
             </div>
           </div>
 
