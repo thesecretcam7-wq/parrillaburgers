@@ -5,11 +5,11 @@
   --brand-gold-dark: #B8860B;
   --brand-gold-light: #FDF3D7;
   --brand-black: #111217;
-  --background: #F4F4F5;
-  --foreground: #111217;
-  --card: #FFFFFF;
-  --border: #E4E4E7;
-  --muted: #71717A;
+  --background: #0F1117;
+  --foreground: #FFFFFF;
+  --card: #1A1B21;
+  --border: #2E3038;
+  --muted: #6B7280;
 }
 
 @theme inline {
@@ -19,23 +19,25 @@
   --font-mono: var(--font-geist-mono);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
 
-html, body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  background-color: #F4F4F5;
-  color: #111217;
-  -webkit-font-smoothing: antialiased;
-}
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    background-color: #0F1117;
+    color: #FFFFFF;
+    -webkit-font-smoothing: antialiased;
+  }
 
-/* iOS PWA safe area */
-body {
-  padding-bottom: env(safe-area-inset-bottom);
+  /* iOS PWA safe area */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 /* Scrollbar */
