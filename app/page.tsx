@@ -1,10 +1,32 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import BannerCarousel from "@/components/home/BannerCarousel";
+import { Banner } from "@/lib/types";
 
-export default function Home() {
+export const revalidate = 60;
+
+export default async function Home() {
+  const supabase = await createClient();
+
+  const { data: banners } = await supabase
+    .from("banners")
+    .select("*")
+    .eq("active", true)
+    .order("sort_order");
+
+  const activeBanners: Banner[] = banners ?? [];
+
   return (
-    <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-6 text-center">
+    <main className="min-h-screen bg-[#0F1117] flex flex-col items-center px-6 pt-8 pb-24 text-center">
+
+      {/* Carrusel de banners */}
+      {activeBanners.length > 0 && (
+        <div className="w-full max-w-xs mb-6">
+          <BannerCarousel banners={activeBanners} />
+        </div>
+      )}
 
       {/* Logo */}
       <div className="w-24 h-24 rounded-full bg-[#D4A017] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(212,160,23,0.35)]">
