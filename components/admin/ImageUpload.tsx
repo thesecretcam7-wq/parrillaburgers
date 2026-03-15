@@ -115,6 +115,7 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
       )}
 
       {/* Hidden file input */}
+      {/* Sin capture= para que en móvil muestre: Cámara / Galería / Archivos */}
       <input
         ref={inputRef}
         type="file"

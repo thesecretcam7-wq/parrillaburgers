@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Banner } from "@/lib/types";
 import { Plus, Trash2, X, Eye, EyeOff, Image as ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 type FormState = {
   title: string;
@@ -33,7 +34,7 @@ export default function AdminBannersPage() {
   useEffect(() => { fetchBanners(); }, []);
 
   const handleSave = async () => {
-    if (!form.image_url.trim()) { toast.error("La URL de la imagen es obligatoria"); return; }
+    if (!form.image_url.trim()) { toast.error("Debes subir una imagen para el banner"); return; }
     setSaving(true);
     try {
       const { error } = await supabase.from("banners").insert({
@@ -150,18 +151,10 @@ export default function AdminBannersPage() {
               <button onClick={() => setModalOpen(false)} className="text-[#888899] hover:text-[#F5F0E8]"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4">
-              <div>
-                <label className="text-[#CCCCCC] text-xs mb-1.5 block">URL de imagen *</label>
-                <input className={inputCls} value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
-                <p className="text-[#555566] text-xs mt-1">Sube la imagen a Supabase Storage o usa una URL externa</p>
-              </div>
-              {/* Preview */}
-              {form.image_url && (
-                <div className="h-32 rounded-lg overflow-hidden bg-[#111217]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.image_url} alt="preview" className="w-full h-full object-cover" />
-                </div>
-              )}
+              <ImageUpload
+                value={form.image_url}
+                onChange={(url) => setForm({ ...form, image_url: url })}
+              />
               <div>
                 <label className="text-[#CCCCCC] text-xs mb-1.5 block">Título (opcional)</label>
                 <input className={inputCls} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ej: Promo de la semana" />
