@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 import { MenuItem, Category } from "@/lib/types";
 import { Plus, Pencil, Trash2, X, Check, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
+import Image from "next/image";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 type FormState = {
   name: string;
@@ -209,10 +211,21 @@ export default function AdminMenuPage() {
               {filteredItems.map((item) => (
                 <tr key={item.id} className="border-b border-[#2E3038] last:border-0 hover:bg-[#22232B] transition-colors">
                   <td className="px-5 py-4">
-                    <p className="text-[#F5F0E8] font-semibold">{item.name}</p>
-                    {item.description && (
-                      <p className="text-[#888899] text-xs mt-0.5 line-clamp-1">{item.description}</p>
-                    )}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#22232B] flex items-center justify-center shrink-0 overflow-hidden">
+                        {item.image_url ? (
+                          <Image src={item.image_url} alt={item.name} width={40} height={40} className="object-cover w-full h-full" unoptimized />
+                        ) : (
+                          <span className="text-lg">🍔</span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-[#F5F0E8] font-semibold">{item.name}</p>
+                        {item.description && (
+                          <p className="text-[#888899] text-xs mt-0.5 line-clamp-1">{item.description}</p>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-4">
                     <span className="bg-[#D4A017]/10 text-[#D4A017] text-xs px-2.5 py-1 rounded-full font-medium">
@@ -307,10 +320,10 @@ export default function AdminMenuPage() {
                   </div>
                 </div>
               </div>
-              <div>
-                <label className="text-[#CCCCCC] text-xs mb-1.5 block">URL de imagen (opcional)</label>
-                <input className={inputCls} value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
-              </div>
+              <ImageUpload
+                value={form.image_url}
+                onChange={(url) => setForm({ ...form, image_url: url })}
+              />
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
