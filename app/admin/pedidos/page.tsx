@@ -33,7 +33,13 @@ export default function AdminOrdersPage() {
 
     const fetch = async () => {
       const q = supabase.from("orders").select("*").order("created_at", { ascending: false });
-      const { data } = filter === "all" ? await q : await q.eq("status", filter);
+      let data;
+      if (filter === "all") {
+        // Default: hide delivered and cancelled — show only active orders
+        ({ data } = await q.not("status", "in", '("delivered","cancelled")'));
+      } else {
+        ({ data } = await q.eq("status", filter));
+      }
       setOrders(data ?? []);
       setLoading(false);
     };
@@ -51,6 +57,11 @@ export default function AdminOrdersPage() {
   const updateStatus = async (orderId: string, status: OrderStatus) => {
     const supabase = createClient();
     await supabase.from("orders").update({ status, updated_at: new Date().toISOString() }).eq("id", orderId);
+    // Remove from list immediately when delivered or cancelled
+    if (status === "delivered" || status === "cancelled") {
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setExpanded(null);
+    }
   };
 
   return (
@@ -63,7 +74,7 @@ export default function AdminOrdersPage() {
           onClick={() => setFilter("all")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${filter === "all" ? "bg-[#D4A017] text-[#111217] border-[#D4A017]" : "border-[#2E3038] text-[#CCCCCC] hover:border-[#D4A017]"}`}
         >
-          Todos
+          Activos
         </button>
         {STATUS_OPTIONS.map((s) => (
           <button
