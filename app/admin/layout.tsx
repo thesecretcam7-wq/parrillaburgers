@@ -7,83 +7,68 @@ import { useState } from "react";
 import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft } from "lucide-react";
 
 const navLinks = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
-  { href: "/admin/menu", label: "Menú", icon: UtensilsCrossed },
-  { href: "/admin/clientes", label: "Clientes", icon: Users },
-  { href: "/admin/banners", label: "Banners", icon: Image },
+  { href: "/admin",          label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/pedidos",  label: "Pedidos",   icon: ShoppingBag },
+  { href: "/admin/menu",     label: "Menú",      icon: UtensilsCrossed },
+  { href: "/admin/clientes", label: "Clientes",  icon: Users },
+  { href: "/admin/banners",  label: "Banners",   icon: Image },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const SidebarContent = () => (
-    <>
-      {/* Logo */}
-      <div className="p-5 border-b border-[#2E3038] flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[#111217] flex items-center justify-center shrink-0">
-            <NextImage src="/logo.svg" alt="ParillaBurgers" width={26} height={26} />
-          </div>
-          <div>
-            <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>
-            <p className="text-[#888899] text-xs">Panel Admin</p>
-          </div>
-        </div>
-        {/* Close button — only visible on mobile */}
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="lg:hidden text-[#888899] hover:text-[#F5F0E8] p-1"
-        >
-          <X size={20} />
-        </button>
-      </div>
-
-      {/* Nav links */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {navLinks.map(({ href, label, icon: Icon }) => {
-          const isActive = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                isActive
-                  ? "bg-[#D4A017]/15 text-[#D4A017] font-semibold"
-                  : "text-[#CCCCCC] hover:text-[#D4A017] hover:bg-[#D4A017]/10"
-              }`}
-            >
-              <Icon size={18} className={isActive ? "text-[#D4A017]" : "text-[#888899]"} />
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-[#2E3038]">
-        <Link
-          href="/"
-          onClick={() => setSidebarOpen(false)}
-          className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors"
-        >
-          <ArrowLeft size={14} /> Ver sitio
-        </Link>
-      </div>
-    </>
+  const NavItems = ({ onClose }: { onClose?: () => void }) => (
+    <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+      {navLinks.map(({ href, label, icon: Icon }) => {
+        const isActive = href === "/admin"
+          ? pathname === "/admin"
+          : pathname.startsWith(href);
+        return (
+          <Link
+            key={href}
+            href={href}
+            onClick={onClose}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+              isActive
+                ? "bg-[#D4A017]/15 text-[#D4A017] font-semibold"
+                : "text-[#CCCCCC] hover:text-[#D4A017] hover:bg-[#D4A017]/10"
+            }`}
+          >
+            <Icon size={18} className={isActive ? "text-[#D4A017]" : "text-[#888899]"} />
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
   );
 
   return (
     <div className="min-h-screen bg-[#111217] flex">
 
-      {/* ── DESKTOP sidebar (always visible ≥ lg) ── */}
-      <aside className="hidden lg:flex w-60 bg-[#1A1B21] border-r border-[#2E3038] flex-col fixed h-full top-0 left-0 z-40">
-        <SidebarContent />
+      {/* ── DESKTOP sidebar — sticky, in-flow (no fixed) ── */}
+      <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-[#1A1B21] border-r border-[#2E3038] sticky top-0 h-screen self-start">
+        {/* Logo */}
+        <div className="p-5 border-b border-[#2E3038]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#111217] flex items-center justify-center shrink-0">
+              <NextImage src="/logo.svg" alt="ParillaBurgers" width={26} height={26} />
+            </div>
+            <div>
+              <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>
+              <p className="text-[#888899] text-xs">Panel Admin</p>
+            </div>
+          </div>
+        </div>
+        <NavItems />
+        <div className="p-4 border-t border-[#2E3038]">
+          <Link href="/" className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors">
+            <ArrowLeft size={14} /> Ver sitio
+          </Link>
+        </div>
       </aside>
 
-      {/* ── MOBILE drawer overlay ── */}
+      {/* ── MOBILE overlay ── */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 lg:hidden"
@@ -91,16 +76,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
 
-      {/* ── MOBILE drawer panel ── */}
+      {/* ── MOBILE drawer ── */}
       <aside className={`fixed top-0 left-0 h-full w-64 bg-[#1A1B21] border-r border-[#2E3038] flex flex-col z-50 transition-transform duration-300 lg:hidden ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}>
-        <SidebarContent />
+        <div className="p-5 border-b border-[#2E3038] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#111217] flex items-center justify-center shrink-0">
+              <NextImage src="/logo.svg" alt="ParillaBurgers" width={26} height={26} />
+            </div>
+            <div>
+              <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>
+              <p className="text-[#888899] text-xs">Panel Admin</p>
+            </div>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="text-[#888899] hover:text-[#F5F0E8] p-1">
+            <X size={20} />
+          </button>
+        </div>
+        <NavItems onClose={() => setSidebarOpen(false)} />
+        <div className="p-4 border-t border-[#2E3038]">
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors">
+            <ArrowLeft size={14} /> Ver sitio
+          </Link>
+        </div>
       </aside>
 
       {/* ── Main content ── */}
-      <div className="flex-1 lg:ml-60 min-w-0">
-
+      <div className="flex-1 min-w-0">
         {/* Mobile top bar */}
         <div className="lg:hidden flex items-center gap-3 px-4 h-14 bg-[#1A1B21] border-b border-[#2E3038] sticky top-0 z-30">
           <button
@@ -114,7 +117,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </p>
         </div>
 
-        <div className="p-4 lg:p-8">{children}</div>
+        <div className="p-4 lg:p-8 overflow-x-auto">
+          {children}
+        </div>
       </div>
     </div>
   );
