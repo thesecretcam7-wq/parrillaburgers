@@ -56,11 +56,14 @@ export default function AdminOrdersPage() {
 
   const updateStatus = async (orderId: string, status: OrderStatus) => {
     const supabase = createClient();
-    await supabase.from("orders").update({ status, updated_at: new Date().toISOString() }).eq("id", orderId);
-    // Remove from list immediately when delivered or cancelled
+    const { error } = await supabase.from("orders").update({ status, updated_at: new Date().toISOString() }).eq("id", orderId);
+    if (error) { console.error("Error updating order:", error); return; }
+    // Update local state immediately (don't wait for Realtime)
     if (status === "delivered" || status === "cancelled") {
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
       setExpanded(null);
+    } else {
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status } : o));
     }
   };
 
