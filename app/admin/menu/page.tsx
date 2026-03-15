@@ -112,8 +112,9 @@ export default function AdminMenuPage() {
       }
       setModalOpen(false);
       fetchData();
-    } catch (e) {
-      toast.error("Error al guardar");
+    } catch (e: any) {
+      const msg = e?.message ?? JSON.stringify(e);
+      toast.error(`Error: ${msg}`, { duration: 6000 });
       console.error(e);
     } finally {
       setSaving(false);
@@ -140,7 +141,7 @@ export default function AdminMenuPage() {
       name: catName.trim(),
       sort_order: categories.length + 1,
     });
-    if (error) { toast.error("Error"); } else { toast.success("Categoría creada"); fetchData(); }
+    if (error) { toast.error(`Error: ${error.message}`, { duration: 6000 }); } else { toast.success("Categoría creada"); fetchData(); }
     setCatName("");
     setCatModal(false);
     setSavingCat(false);
