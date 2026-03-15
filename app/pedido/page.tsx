@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCartStore } from "@/lib/store/cart";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User } from "lucide-react";
+import { User, CheckCircle } from "lucide-react";
+
+const STORAGE_KEY = "pb-customer";
 
 type FormData = {
   name: string;
@@ -20,6 +22,7 @@ export default function OrderPage() {
   const router = useRouter();
   const { items, total, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
+  const [returning, setReturning] = useState(false); // true when data was pre-filled
   const [form, setForm] = useState<FormData>({
     name: "",
     email: "",
@@ -27,6 +30,26 @@ export default function OrderPage() {
     address: "",
     notes: "",
   });
+
+  // Pre-fill form with saved customer data on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved) as Partial<FormData>;
+        setForm((prev) => ({
+          ...prev,
+          name: data.name ?? "",
+          email: data.email ?? "",
+          phone: data.phone ?? "",
+          address: data.address ?? "",
+        }));
+        setReturning(true);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, []);
 
   const subtotal = total();
   const delivery = 3000;
@@ -97,6 +120,12 @@ export default function OrderPage() {
 
       if (error) throw error;
 
+      // Persist customer data for future orders
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address })
+      );
+
       const wompiKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
       if (wompiKey && !wompiKey.includes("PEGAR") && order) {
         const amountInCents = grandTotal * 100;
@@ -151,10 +180,35 @@ export default function OrderPage() {
 
         {/* Form card */}
         <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
-          <h2 className="text-white font-bold mb-4 flex items-center gap-2">
-            <User size={18} className="text-[#D4A017]" />
-            Tus datos
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white font-bold flex items-center gap-2">
+              <User size={18} className="text-[#D4A017]" />
+              Tus datos
+            </h2>
+            {returning && (
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem(STORAGE_KEY);
+                  setForm({ name: "", email: "", phone: "", address: "", notes: "" });
+                  setReturning(false);
+                }}
+                className="text-[#6B7280] text-xs hover:text-[#9CA3AF] transition-colors"
+              >
+                Cambiar datos
+              </button>
+            )}
+          </div>
+
+          {/* Returning customer banner */}
+          {returning && (
+            <div className="mb-4 bg-[#1E2A1A] border border-green-800/30 rounded-xl px-4 py-2.5 flex items-center gap-2">
+              <CheckCircle size={14} className="text-green-400 shrink-0" />
+              <p className="text-green-400 text-xs font-medium">
+                ¡Bienvenido de vuelta, <strong>{form.name.split(" ")[0]}</strong>! Tus datos están listos.
+              </p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
