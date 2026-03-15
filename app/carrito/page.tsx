@@ -35,7 +35,7 @@ export default function CartPage() {
 
         {/* Items */}
         <div className="space-y-2">
-          {items.map(({ item, quantity }) => (
+          {items.map(({ item, quantity, barra_libre_selected }) => (
             <div
               key={item.id}
               className="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm"
@@ -51,9 +51,9 @@ export default function CartPage() {
               <div className="flex-1 min-w-0">
                 <h3 className="text-[#111217] font-semibold text-sm truncate">{item.name}</h3>
                 <p className="text-[#D4A017] font-bold text-sm">${item.price.toLocaleString("es-CO")}</p>
-                {cartItem.barra_libre_selected && cartItem.barra_libre_selected.length > 0 && (
+                {barra_libre_selected && barra_libre_selected.length > 0 && (
                   <p className="text-[#9CA3AF] text-[10px] mt-0.5 truncate">
-                    🥗 {cartItem.barra_libre_selected.join(" · ")}
+                    🥗 {barra_libre_selected.join(" · ")}
                   </p>
                 )}
               </div>
