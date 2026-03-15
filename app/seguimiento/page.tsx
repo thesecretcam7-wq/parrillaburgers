@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
 import { CheckCircle, Clock, ChefHat, Bike, Package } from "lucide-react";
 import { Suspense } from "react";
+import toast from "react-hot-toast";
 
 const STATUS_STEPS: { key: OrderStatus; label: string; icon: React.ReactNode; desc: string }[] = [
   { key: "confirmed", label: "Confirmado", icon: <CheckCircle size={20} />, desc: "Tu pedido fue recibido y confirmado" },
@@ -19,10 +20,42 @@ const STATUS_ORDER: OrderStatus[] = ["pending", "confirmed", "preparing", "on_th
 function TrackingContent() {
   const params = useSearchParams();
   const orderNumber = params.get("order");
+  const wompiTransactionId = params.get("id");          // Wompi appends this on redirect
+  const wompiStatus = params.get("status");             // APPROVED | DECLINED | PENDING | ERROR
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState(orderNumber ?? "");
   const [searchValue, setSearchValue] = useState(orderNumber ?? "");
+  const verifiedRef = useRef(false);
+
+  // Handle Wompi redirect: verify transaction and update order payment_status
+  useEffect(() => {
+    if (!wompiTransactionId || !orderNumber || verifiedRef.current) return;
+    verifiedRef.current = true;
+
+    const verify = async () => {
+      try {
+        const res = await fetch("/api/wompi/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transactionId: wompiTransactionId, orderNumber }),
+        });
+        const data = await res.json();
+
+        if (data.status === "APPROVED") {
+          toast.success("¡Pago aprobado! Tu pedido está en camino 🎉");
+        } else if (data.status === "PENDING") {
+          toast("Pago en proceso, te notificaremos pronto", { icon: "⏳" });
+        } else {
+          toast.error("El pago no fue aprobado. Contacta soporte si ya fue cobrado.");
+        }
+      } catch {
+        // Silently fail — order tracking still works
+      }
+    };
+
+    verify();
+  }, [wompiTransactionId, orderNumber]);
 
   useEffect(() => {
     if (!searchValue) { setLoading(false); return; }
@@ -102,6 +135,22 @@ function TrackingContent() {
               <div className="flex justify-between items-center">
                 <p className="text-[#D4A017] font-bold">{order.order_number}</p>
                 <p className="text-white font-bold">${order.total?.toLocaleString("es-CO")}</p>
+              </div>
+              {/* Payment status badge */}
+              <div className="mt-3 pt-3 border-t border-[#2E3038]">
+                {(order as any).payment_status === "paid" ? (
+                  <span className="inline-flex items-center gap-1.5 bg-green-900/30 text-green-400 text-xs font-semibold px-3 py-1 rounded-full border border-green-800/40">
+                    <CheckCircle size={12} /> Pago aprobado
+                  </span>
+                ) : (order as any).payment_status === "failed" ? (
+                  <span className="inline-flex items-center gap-1.5 bg-red-900/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full border border-red-800/40">
+                    ✕ Pago rechazado
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 bg-[#22242C] text-[#9CA3AF] text-xs font-medium px-3 py-1 rounded-full border border-[#2E3038]">
+                    <Clock size={11} /> Pago pendiente
+                  </span>
+                )}
               </div>
             </div>
 

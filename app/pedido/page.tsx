@@ -99,14 +99,33 @@ export default function OrderPage() {
 
       const wompiKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
       if (wompiKey && !wompiKey.includes("PEGAR") && order) {
+        const amountInCents = grandTotal * 100;
+
+        // Generate integrity signature server-side (keeps WOMPI_INTEGRITY_KEY secret)
+        const sigRes = await fetch("/api/wompi/signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reference: order.order_number,
+            amountInCents,
+            currency: "COP",
+          }),
+        });
+        const { signature } = await sigRes.json();
+
+        const appUrl =
+          process.env.NEXT_PUBLIC_APP_URL ||
+          `${window.location.protocol}//${window.location.host}`;
+
         const wompiUrl = new URL("https://checkout.wompi.co/p/");
         wompiUrl.searchParams.set("public-key", wompiKey);
         wompiUrl.searchParams.set("currency", "COP");
-        wompiUrl.searchParams.set("amount-in-cents", String(grandTotal * 100));
+        wompiUrl.searchParams.set("amount-in-cents", String(amountInCents));
         wompiUrl.searchParams.set("reference", order.order_number);
+        wompiUrl.searchParams.set("signature:integrity", signature);
         wompiUrl.searchParams.set(
           "redirect-url",
-          `${process.env.NEXT_PUBLIC_APP_URL}/seguimiento?order=${order.order_number}`
+          `${appUrl}/seguimiento?order=${order.order_number}`
         );
         clearCart();
         window.location.href = wompiUrl.toString();
