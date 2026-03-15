@@ -71,6 +71,7 @@ export default function OrderPage() {
         quantity: ci.quantity,
         unit_price: ci.item.price,
         subtotal: ci.item.price * ci.quantity,
+        barra_libre_selected: ci.barra_libre_selected ?? [],
       }));
 
       const { data: order, error } = await supabase

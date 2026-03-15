@@ -8,6 +8,13 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import ImageUpload from "@/components/admin/ImageUpload";
 
+// Sugerencias predefinidas de barra libre
+const BARRA_LIBRE_SUGERENCIAS = [
+  "Lechuga", "Tomate", "Cebolla", "Pepinillos", "Jalapeños",
+  "Maíz", "Zanahoria", "Aguacate", "Champiñones", "Pimentón",
+  "Ketchup", "Mostaza", "Mayonesa", "Salsa BBQ", "Salsa picante",
+];
+
 type FormState = {
   name: string;
   description: string;
@@ -15,6 +22,7 @@ type FormState = {
   category_id: string;
   available: boolean;
   image_url: string;
+  barra_libre_items: string[];
 };
 
 const EMPTY_FORM: FormState = {
@@ -24,6 +32,7 @@ const EMPTY_FORM: FormState = {
   category_id: "",
   available: true,
   image_url: "",
+  barra_libre_items: [],
 };
 
 export default function AdminMenuPage() {
@@ -70,6 +79,7 @@ export default function AdminMenuPage() {
       category_id: item.category_id,
       available: item.available,
       image_url: item.image_url ?? "",
+      barra_libre_items: item.barra_libre_items ?? [],
     });
     setModalOpen(true);
   };
@@ -88,6 +98,7 @@ export default function AdminMenuPage() {
         category_id: form.category_id,
         available: form.available,
         image_url: form.image_url || null,
+        barra_libre_items: form.barra_libre_items.length > 0 ? form.barra_libre_items : null,
       };
 
       if (editingId) {
@@ -140,6 +151,33 @@ export default function AdminMenuPage() {
     : items.filter((i) => i.category_id === activeCategory);
 
   const inputCls = "w-full bg-[#111217] border border-[#2E3038] rounded-lg px-3 py-2.5 text-[#F5F0E8] placeholder-[#555566] focus:outline-none focus:border-[#D4A017] text-sm transition-colors";
+
+  function BarraLibreCustomInput({ items, onChange }: { items: string[]; onChange: (i: string[]) => void }) {
+    const [input, setInput] = useState("");
+    const add = () => {
+      const val = input.trim();
+      if (val && !items.includes(val)) { onChange([...items, val]); }
+      setInput("");
+    };
+    return (
+      <div className="flex gap-2 mt-1">
+        <input
+          className="flex-1 bg-[#111217] border border-[#2E3038] rounded-lg px-3 py-1.5 text-[#F5F0E8] placeholder-[#555566] focus:outline-none focus:border-[#D4A017] text-xs transition-colors"
+          placeholder="Otro ingrediente personalizado..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+        />
+        <button
+          type="button"
+          onClick={add}
+          className="px-3 py-1.5 bg-[#D4A017]/20 text-[#D4A017] text-xs rounded-lg hover:bg-[#D4A017]/30 transition-colors font-semibold"
+        >
+          + Agregar
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -324,6 +362,54 @@ export default function AdminMenuPage() {
                 value={form.image_url}
                 onChange={(url) => setForm({ ...form, image_url: url })}
               />
+
+              {/* Barra libre */}
+              <div>
+                <label className="text-[#CCCCCC] text-xs mb-2 block">
+                  🥗 Opciones de barra libre <span className="text-[#555566]">(opcional)</span>
+                </label>
+
+                {/* Sugerencias */}
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {BARRA_LIBRE_SUGERENCIAS.map((sug) => {
+                    const active = form.barra_libre_items.includes(sug);
+                    return (
+                      <button
+                        key={sug}
+                        type="button"
+                        onClick={() =>
+                          setForm({
+                            ...form,
+                            barra_libre_items: active
+                              ? form.barra_libre_items.filter((i) => i !== sug)
+                              : [...form.barra_libre_items, sug],
+                          })
+                        }
+                        className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                          active
+                            ? "bg-[#D4A017] border-[#D4A017] text-[#111217] font-semibold"
+                            : "border-[#2E3038] text-[#888899] hover:border-[#D4A017]/50"
+                        }`}
+                      >
+                        {active && "✓ "}{sug}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Input para agregar ingrediente personalizado */}
+                <BarraLibreCustomInput
+                  items={form.barra_libre_items}
+                  onChange={(items) => setForm({ ...form, barra_libre_items: items })}
+                />
+
+                {form.barra_libre_items.length > 0 && (
+                  <p className="text-[#888899] text-[10px] mt-1.5">
+                    {form.barra_libre_items.length} opción{form.barra_libre_items.length > 1 ? "es" : ""} configurada{form.barra_libre_items.length > 1 ? "s" : ""}
+                  </p>
+                )}
+              </div>
+
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"

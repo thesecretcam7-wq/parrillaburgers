@@ -17,11 +17,15 @@ export type MenuItem = {
   sort_order: number;
   created_at: string;
   category?: Category;
+  // Opciones de barra libre disponibles para este producto
+  barra_libre_items: string[] | null;
 };
 
 export type CartItem = {
   item: MenuItem;
   quantity: number;
+  // Selecciones de barra libre que eligió el cliente
+  barra_libre_selected?: string[];
 };
 
 export type OrderStatus =
@@ -61,6 +65,7 @@ export type OrderItem = {
   quantity: number;
   unit_price: number;
   subtotal: number;
+  barra_libre_selected?: string[];
 };
 
 export type Customer = {
