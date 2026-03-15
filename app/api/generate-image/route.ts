@@ -6,34 +6,21 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Receives a Pollinations URL that the browser already loaded (so it's cached).
+// Downloads it server-side (no CORS restriction) and uploads to Supabase Storage.
+// This is fast (<5s) because the image is already cached by Pollinations.
 export async function POST(req: NextRequest) {
   try {
-    const { prompt } = await req.json();
+    const { url } = await req.json();
 
-    if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
-      return NextResponse.json({ error: "El prompt no puede estar vacío." }, { status: 400 });
+    if (!url || typeof url !== "string" || !url.startsWith("https://image.pollinations.ai/")) {
+      return NextResponse.json({ error: "URL inválida." }, { status: 400 });
     }
 
-    if (prompt.length > 500) {
-      return NextResponse.json({ error: "El prompt no puede superar los 500 caracteres." }, { status: 400 });
-    }
-
-    // Call Pollinations.ai — free, no API key needed
-    const encodedPrompt = encodeURIComponent(prompt.trim());
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&model=flux&seed=${Date.now()}`;
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
-
-    let imageRes: Response;
-    try {
-      imageRes = await fetch(pollinationsUrl, { signal: controller.signal });
-    } finally {
-      clearTimeout(timeout);
-    }
+    const imageRes = await fetch(url);
 
     if (!imageRes.ok) {
-      return NextResponse.json({ error: "Error al generar la imagen. Intenta de nuevo." }, { status: 502 });
+      return NextResponse.json({ error: "No se pudo descargar la imagen generada." }, { status: 502 });
     }
 
     const arrayBuffer = await imageRes.arrayBuffer();
@@ -56,10 +43,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: data.publicUrl });
   } catch (err: any) {
-    if (err?.name === "AbortError") {
-      return NextResponse.json({ error: "La generación tardó demasiado. Intenta con un prompt más sencillo." }, { status: 504 });
-    }
     console.error("Generate image error:", err);
-    return NextResponse.json({ error: err.message ?? "Error al generar imagen" }, { status: 500 });
+    return NextResponse.json({ error: err.message ?? "Error al guardar imagen" }, { status: 500 });
   }
 }

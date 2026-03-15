@@ -88,15 +88,15 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
     if (!pollinationsUrl) return;
     setAiUploading(true);
     try {
-      const imgRes = await fetch(pollinationsUrl);
-      if (!imgRes.ok) throw new Error("No se pudo descargar la imagen generada");
-      const blob = await imgRes.blob();
-      const file = new File([blob], `ai-${Date.now()}.jpg`, { type: "image/jpeg" });
-      const formData = new FormData();
-      formData.append("file", file);
-      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-      const json = await uploadRes.json();
-      if (!uploadRes.ok) throw new Error(json.error ?? "Error al subir");
+      // Send the already-loaded Pollinations URL to our server.
+      // The server downloads it (cached, fast) and uploads to Supabase.
+      const res = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: pollinationsUrl }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Error al guardar");
       onChange(json.url);
       setShowAI(false);
       setPollinationsUrl(null);
@@ -231,7 +231,6 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
                       className={`w-full h-full object-cover transition-opacity duration-300 ${aiImgLoading ? "opacity-0" : "opacity-100"}`}
                       onLoad={() => { setAiImgLoading(false); setRetryCount(0); }}
                       onError={handleImgError}
-                      crossOrigin="anonymous"
                     />
                   </>
                 )}
