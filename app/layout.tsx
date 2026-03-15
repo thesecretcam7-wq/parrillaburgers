@@ -35,9 +35,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js'))}` }} />
       </head>
-      <body className={`${geist.variable} antialiased bg-[#0F1117] text-white`}>
+      <body className={`${geist.variable} antialiased bg-[#0F1117] lg:bg-[#07080C] text-white`}>
         <Navbar />
-        <div className="pt-14 pb-20 lg:pb-6">{children}</div>
+        <div className="pt-14 pb-20 lg:max-w-[430px] lg:mx-auto lg:border-x lg:border-[#2E3038] lg:bg-[#0F1117] lg:min-h-[calc(100vh-56px-64px)]">
+          {children}
+        </div>
         <BottomNav />
         <Toaster
           position="top-center"

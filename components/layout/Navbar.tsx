@@ -39,7 +39,7 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 bg-[#1A1B21] border-b border-[#2E3038] h-14"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
-      <div className="flex items-center h-full px-4 max-w-5xl mx-auto gap-3 relative">
+      <div className="flex items-center h-full px-4 max-w-[430px] mx-auto gap-3 relative">
         {/* Back button o Logo */}
         {backHref && title ? (
           <Link href={backHref} className="w-9 h-9 flex items-center justify-center rounded-full bg-[#22242C] shrink-0">
@@ -73,31 +73,6 @@ export default function Navbar() {
           </span>
         )}
 
-        {/* Nav links desktop */}
-        <nav className="hidden lg:flex items-center gap-1 ml-auto">
-          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                  isActive
-                    ? "text-[#D4A017] bg-[#2A2414]"
-                    : "text-[#9CA3AF] hover:text-white hover:bg-[#22242C]"
-                }`}
-              >
-                <Icon size={16} strokeWidth={isActive ? 2.5 : 1.8} />
-                {label}
-                {href === "/carrito" && itemCount > 0 && (
-                  <span className="bg-[#D4A017] text-[#0F1117] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
-                    {itemCount > 9 ? "9+" : itemCount}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
       </div>
     </header>
   );

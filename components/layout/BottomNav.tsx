@@ -20,10 +20,10 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[#1A1B21] border-t border-[#2E3038] safe-area-bottom lg:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[#1A1B21] border-t border-[#2E3038] safe-area-bottom"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+      <div className="flex items-center justify-around h-16 max-w-[430px] mx-auto px-2">
         {tabs.map(({ href, label, icon: Icon }) => {
           const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
