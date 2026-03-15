@@ -13,13 +13,14 @@ const TITLES: Record<string, string> = {
 };
 
 const BACK: Record<string, string> = {
-  "/carrito": "/",
+  "/carrito": "/menu",
   "/pedido": "/carrito",
   "/seguimiento": "/",
 };
 
 const NAV_LINKS = [
-  { href: "/", label: "Menú", icon: UtensilsCrossed },
+  { href: "/", label: "Inicio", icon: Home },
+  { href: "/menu", label: "Menú", icon: UtensilsCrossed },
   { href: "/carrito", label: "Carrito", icon: ShoppingCart },
   { href: "/seguimiento", label: "Mi Pedido", icon: PackageSearch },
 ];
@@ -75,7 +76,7 @@ export default function Navbar() {
         {/* Nav links desktop */}
         <nav className="hidden lg:flex items-center gap-1 ml-auto">
           {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-            const isActive = href === "/" ? (pathname === "/" || pathname === "/menu") : pathname.startsWith(href);
+            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
               <Link
                 key={href}
