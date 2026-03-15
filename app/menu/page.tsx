@@ -110,7 +110,7 @@ function StaticMenu() {
             {section.items.map((item) => (
               <MenuItemCard
                 key={item.id}
-                item={{ ...item, category_id: "", image_url: null, available: true, sort_order: 0, created_at: "" }}
+                item={{ ...item, category_id: "", image_url: null, available: true, sort_order: 0, created_at: "", barra_libre_items: null }}
               />
             ))}
           </div>
