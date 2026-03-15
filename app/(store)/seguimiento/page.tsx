@@ -79,6 +79,13 @@ function TrackingContent() {
     return () => { supabase.removeChannel(channel); clearInterval(interval); };
   }, [orderNumber]);
 
+  // When order is delivered or cancelled → clear localStorage so next visit starts fresh
+  useEffect(() => {
+    if (order?.status === "delivered" || order?.status === "cancelled") {
+      localStorage.removeItem("pb-last-order");
+    }
+  }, [order?.status]);
+
   const currentStep  = order ? STATUS_ORDER.indexOf(order.status) : -1;
 
   // ── No order ──────────────────────────────────────────────────────────────
@@ -117,6 +124,45 @@ function TrackingContent() {
         <p className="text-[#9CA3AF] text-sm mb-6">{orderNumber}</p>
         <Link href="/menu" className="bg-[#D4A017] text-[#0F1117] font-bold px-6 py-3 rounded-xl text-sm">
           Ver Menú
+        </Link>
+      </main>
+    );
+  }
+
+  // ── Delivered ─────────────────────────────────────────────────────────────
+  if (order.status === "delivered") {
+    return (
+      <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4 pb-24">
+        <div className="text-6xl mb-4">🎉</div>
+        <p className="text-white font-black text-2xl mb-1 text-center">¡Pedido entregado!</p>
+        <p className="text-[#9CA3AF] text-sm mb-2 text-center">
+          Esperamos que lo hayas disfrutado 🍔
+        </p>
+        <p className="text-[#6B7280] text-xs mb-8">{order.order_number}</p>
+        <Link
+          href="/menu"
+          className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base"
+        >
+          Hacer otro pedido
+        </Link>
+      </main>
+    );
+  }
+
+  // ── Cancelled ─────────────────────────────────────────────────────────────
+  if (order.status === "cancelled") {
+    return (
+      <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4 pb-24">
+        <div className="text-5xl mb-4">😞</div>
+        <p className="text-white font-bold text-xl mb-1">Pedido cancelado</p>
+        <p className="text-[#9CA3AF] text-sm mb-8 text-center">
+          Si tienes dudas contáctanos.
+        </p>
+        <Link
+          href="/menu"
+          className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base"
+        >
+          Hacer nuevo pedido
         </Link>
       </main>
     );
@@ -188,11 +234,6 @@ function TrackingContent() {
               );
             })}
           </div>
-          {order.status === "cancelled" && (
-            <div className="mt-3 bg-red-900/20 border border-red-800/40 rounded-xl p-3 text-center">
-              <p className="text-red-400 text-sm font-medium">Pedido cancelado</p>
-            </div>
-          )}
         </div>
 
         {/* Items */}
