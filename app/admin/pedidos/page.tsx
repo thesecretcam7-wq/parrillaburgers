@@ -51,7 +51,10 @@ export default function AdminOrdersPage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetch)
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Polling fallback: re-fetch every 8s in case Realtime is not enabled on the table
+    const interval = setInterval(fetch, 8_000);
+
+    return () => { supabase.removeChannel(channel); clearInterval(interval); };
   }, [filter]);
 
   const updateStatus = async (orderId: string, status: OrderStatus) => {

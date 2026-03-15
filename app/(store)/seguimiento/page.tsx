@@ -70,7 +70,13 @@ function TrackingContent() {
       }, (payload) => setOrder(payload.new as Order))
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Polling fallback: re-fetch every 5s so status updates even if Realtime is not enabled
+    const poll = () =>
+      supabase.from("orders").select("*").eq("order_number", orderNumber).single()
+        .then(({ data }) => { if (data) setOrder(data); });
+    const interval = setInterval(poll, 5_000);
+
+    return () => { supabase.removeChannel(channel); clearInterval(interval); };
   }, [orderNumber]);
 
   const currentStep  = order ? STATUS_ORDER.indexOf(order.status) : -1;
