@@ -33,14 +33,7 @@ export default function AdminCategoriasPage() {
     if (!form.name.trim()) { toast.error("El nombre es obligatorio"); return; }
     setSaving(true);
     try {
-      // Use the name as the id (slug) so it matches category_id in menu_items
-      const id = form.name.toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "");
-
       const { error } = await supabase.from("categories").insert({
-        id,
         name: form.name.trim(),
         description: form.description.trim() || null,
         sort_order: categories.length + 1,
@@ -133,7 +126,7 @@ export default function AdminCategoriasPage() {
       {/* Hint */}
       <div className="mt-4 bg-[#1A1B21] border border-[#2E3038] rounded-xl px-4 py-3">
         <p className="text-[#888899] text-xs leading-relaxed">
-          💡 El <strong className="text-[#CCCCCC]">ID</strong> de cada categoría se genera automáticamente del nombre y debe coincidir con el campo <code className="text-[#D4A017]">Categoría</code> de los productos del menú.
+          💡 Las categorías creadas aquí aparecen en el selector al crear o editar productos en <strong className="text-[#CCCCCC]">Menú</strong>.
         </p>
       </div>
 
@@ -158,11 +151,6 @@ export default function AdminCategoriasPage() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   autoFocus
                 />
-                {form.name && (
-                  <p className="text-[#555566] text-xs mt-1 font-mono">
-                    ID: {form.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"")}
-                  </p>
-                )}
               </div>
 
               <div>
