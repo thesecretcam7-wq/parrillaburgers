@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Plus, Minus, ShoppingCart } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { MenuItem } from "@/lib/types";
 import { useCartStore } from "@/lib/store/cart";
 
@@ -11,38 +11,35 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
   const qty = cartItem?.quantity ?? 0;
 
   return (
-    <div className="bg-[#22232B] border border-[#2E3038] rounded-xl overflow-hidden hover:border-[#D4A017]/40 transition-all group">
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#F0F0F0] flex flex-col">
       {/* Image */}
-      <div className="relative h-44 bg-[#1A1B21]">
+      <div className="relative h-36 bg-[#F8F8F8]">
         {item.image_url ? (
-          <Image
-            src={item.image_url}
-            alt={item.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          <Image src={item.image_url} alt={item.name} fill className="object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-4xl">🍔</span>
+            <span className="text-5xl">🍔</span>
           </div>
         )}
         {!item.available && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-            <span className="text-[#CCCCCC] text-sm font-medium">No disponible</span>
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+            <span className="text-[#9CA3AF] text-xs font-semibold bg-white px-3 py-1 rounded-full border border-[#E4E4E7]">
+              No disponible
+            </span>
           </div>
         )}
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <h3 className="text-[#F5F0E8] font-semibold text-base mb-1">{item.name}</h3>
+      <div className="p-3 flex flex-col flex-1">
+        <h3 className="text-[#111217] font-bold text-sm leading-tight">{item.name}</h3>
         {item.description && (
-          <p className="text-[#888899] text-xs mb-3 line-clamp-2">{item.description}</p>
+          <p className="text-[#9CA3AF] text-[11px] mt-0.5 line-clamp-2 flex-1">{item.description}</p>
         )}
 
-        <div className="flex items-center justify-between">
-          <span className="text-[#D4A017] font-bold text-lg">
-            ${item.price.toLocaleString("es-CO")}
+        <div className="flex items-center justify-between mt-2.5">
+          <span className="text-[#D4A017] font-black text-base">
+            ${Number(item.price).toLocaleString("es-CO")}
           </span>
 
           {item.available && (
@@ -50,25 +47,24 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
               {qty === 0 ? (
                 <button
                   onClick={() => addItem(item)}
-                  className="flex items-center gap-1 bg-[#D4A017] hover:bg-[#E8B830] text-[#111217] font-semibold text-sm px-3 py-1.5 rounded-lg transition-colors"
+                  className="w-7 h-7 bg-[#D4A017] rounded-full flex items-center justify-center active:scale-90 transition-transform shadow-sm"
                 >
-                  <ShoppingCart size={14} />
-                  Agregar
+                  <Plus size={16} className="text-white" strokeWidth={2.5} />
                 </button>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => updateQuantity(item.id, qty - 1)}
-                    className="w-7 h-7 rounded-full border border-[#D4A017] text-[#D4A017] flex items-center justify-center hover:bg-[#D4A017] hover:text-[#111217] transition-colors"
+                    className="w-6 h-6 rounded-full border-2 border-[#D4A017] flex items-center justify-center"
                   >
-                    <Minus size={14} />
+                    <Minus size={11} className="text-[#D4A017]" strokeWidth={2.5} />
                   </button>
-                  <span className="text-[#F5F0E8] font-semibold w-5 text-center">{qty}</span>
+                  <span className="text-[#111217] font-bold text-sm w-4 text-center">{qty}</span>
                   <button
                     onClick={() => addItem(item)}
-                    className="w-7 h-7 rounded-full bg-[#D4A017] text-[#111217] flex items-center justify-center hover:bg-[#E8B830] transition-colors"
+                    className="w-6 h-6 rounded-full bg-[#D4A017] flex items-center justify-center"
                   >
-                    <Plus size={14} />
+                    <Plus size={11} className="text-white" strokeWidth={2.5} />
                   </button>
                 </div>
               )}

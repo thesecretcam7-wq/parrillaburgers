@@ -1,133 +1,161 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Star, Clock, MapPin, Flame } from "lucide-react";
+import { ArrowRight, Clock, Star, MapPin, Flame, ChevronRight } from "lucide-react";
+
+const FEATURED = [
+  { name: "Clásica", desc: "Carne artesanal · tocineta · queso", price: 9200, tag: "⭐ Popular", emoji: "🍔" },
+  { name: "Argentina", desc: "Clásica + chimichurri artesanal", price: 10200, tag: "🔥 Top", emoji: "🥩" },
+  { name: "Mexicana", desc: "Clásica + jalapeños", price: 10200, tag: "🌶️ Picante", emoji: "🌶️" },
+  { name: "Doble", desc: "2 carnes · doble queso", price: 13500, tag: "💪 Grande", emoji: "🍔" },
+];
+
+const CATEGORIES = [
+  { label: "Hamburguesas", emoji: "🍔", href: "/menu" },
+  { label: "Combos", emoji: "🍟", href: "/menu" },
+  { label: "Acompañamientos", emoji: "🌽", href: "/menu" },
+  { label: "Otros", emoji: "🌭", href: "/menu" },
+];
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#111217]">
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#111217] via-[#1A1B21] to-[#111217]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#D4A01715_0%,_transparent_70%)]" />
+    <main className="min-h-screen bg-[#F4F4F5] max-w-lg mx-auto">
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="w-32 h-32 drop-shadow-[0_0_30px_rgba(212,160,23,0.4)]">
-              <Image src="/logo.svg" alt="ParillaBurgers Logo" width={128} height={128} priority />
-            </div>
-          </div>
-
-          <p className="text-[#D4A017] text-sm font-semibold uppercase tracking-[0.3em] mb-4">
-            El mejor sabor a la parrilla
-          </p>
-          <h1 className="text-5xl md:text-7xl font-black text-[#F5F0E8] mb-6 leading-tight">
-            Parrilla<br />
-            <span className="text-[#D4A017]">Burgers</span>
-          </h1>
-          <p className="text-[#CCCCCC] text-lg md:text-xl mb-10 max-w-xl mx-auto">
-            Hamburguesas artesanales a la parrilla. Ingredientes frescos, sabor inigualable.
-            Pide online y recíbelo en tu puerta.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      {/* Hero Banner */}
+      <section className="mx-3 mt-3 rounded-3xl overflow-hidden bg-[#111217] relative"
+        style={{ minHeight: 200 }}>
+        {/* Gold glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,_#D4A01730_0%,_transparent_60%)]" />
+        <div className="relative z-10 p-6 flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <p className="text-[#D4A017] text-xs font-bold uppercase tracking-widest mb-2">
+              🔥 El mejor sabor a la parrilla
+            </p>
+            <h1 className="text-white font-black text-2xl leading-tight mb-1">
+              Hamburguesas<br />
+              <span className="text-[#D4A017]">Artesanales</span>
+            </h1>
+            <p className="text-[#9CA3AF] text-xs mb-4">
+              Ingredientes frescos · Barra de ensalada libre
+            </p>
             <Link
               href="/menu"
-              className="inline-flex items-center gap-2 bg-[#D4A017] hover:bg-[#E8B830] text-[#111217] font-bold px-8 py-4 rounded-xl transition-all hover:shadow-[0_0_20px_#D4A01760] text-base"
+              className="inline-flex items-center gap-1.5 bg-[#D4A017] text-[#111217] font-bold text-sm px-5 py-2.5 rounded-2xl"
             >
-              Ver Menú
-              <ArrowRight size={18} />
-            </Link>
-            <Link
-              href="/seguimiento"
-              className="inline-flex items-center gap-2 border border-[#2E3038] hover:border-[#D4A017] text-[#CCCCCC] hover:text-[#D4A017] font-semibold px-8 py-4 rounded-xl transition-all text-base"
-            >
-              Seguir Pedido
+              Pedir ahora <ArrowRight size={14} />
             </Link>
           </div>
+          <div className="w-24 h-24 shrink-0 drop-shadow-[0_0_20px_rgba(212,160,23,0.5)]">
+            <Image src="/logo.svg" alt="ParillaBurgers" width={96} height={96} priority />
+          </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-[#888899] text-xs">
-          <span>Descubre más</span>
-          <div className="w-0.5 h-8 bg-gradient-to-b from-[#888899] to-transparent" />
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-20 px-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Info row */}
+        <div className="relative z-10 border-t border-white/10 flex divide-x divide-white/10">
           {[
-            {
-              icon: <Flame className="text-[#D4A017]" size={28} />,
-              title: "Parrilla Artesanal",
-              desc: "Carne 100% artesanal cocida a la parrilla con técnica argentina.",
-            },
-            {
-              icon: <Clock className="text-[#D4A017]" size={28} />,
-              title: "Delivery en Tiempo Real",
-              desc: "Sigue tu pedido en vivo: recibido → preparando → en camino.",
-            },
-            {
-              icon: <Star className="text-[#D4A017]" size={28} />,
-              title: "Puntos por Compra",
-              desc: "Acumula puntos con cada pedido y canjéalos por descuentos.",
-            },
-          ].map((f, i) => (
-            <div key={i} className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 hover:border-[#D4A017]/40 transition-colors">
-              <div className="mb-4">{f.icon}</div>
-              <h3 className="text-[#F5F0E8] font-bold text-lg mb-2">{f.title}</h3>
-              <p className="text-[#888899] text-sm">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Menu preview */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-[#D4A017] text-sm uppercase tracking-widest mb-2">Nuestros productos</p>
-          <h2 className="text-4xl font-black text-[#F5F0E8]">Menú Destacado</h2>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[
-            { name: "Clásica", price: "9.200", emoji: "🍔" },
-            { name: "Argentina", price: "10.200", emoji: "🥩" },
-            { name: "Mexicana", price: "10.200", emoji: "🌶️" },
-            { name: "Doble", price: "13.500", emoji: "🍔" },
+            { icon: <Clock size={12} />, text: "30 min" },
+            { icon: <Star size={12} />, text: "4.8 ★" },
+            { icon: <MapPin size={12} />, text: "Belén, Medellín" },
           ].map((item, i) => (
-            <div key={i} className="bg-[#22232B] border border-[#2E3038] rounded-xl p-5 text-center hover:border-[#D4A017]/40 transition-colors">
-              <div className="text-4xl mb-3">{item.emoji}</div>
-              <h4 className="text-[#F5F0E8] font-semibold mb-1">{item.name}</h4>
-              <p className="text-[#D4A017] font-bold">${item.price}</p>
+            <div key={i} className="flex-1 flex items-center justify-center gap-1 py-2.5 text-[#9CA3AF] text-[11px]">
+              <span className="text-[#D4A017]">{item.icon}</span>
+              {item.text}
             </div>
           ))}
         </div>
+      </section>
 
-        <div className="text-center">
-          <Link
-            href="/menu"
-            className="inline-flex items-center gap-2 bg-[#D4A017] hover:bg-[#E8B830] text-[#111217] font-bold px-8 py-3 rounded-xl transition-colors"
-          >
-            Ver menú completo
-            <ArrowRight size={16} />
+      {/* Promo strip */}
+      <section className="mx-3 mt-3">
+        <div className="bg-gradient-to-r from-[#D4A017] to-[#E8B830] rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-[#111217] font-black text-sm">🎯 Acumula puntos</p>
+            <p className="text-[#111217]/70 text-xs">1 punto por cada $1.000 gastado</p>
+          </div>
+          <Link href="/seguimiento" className="bg-[#111217] text-white text-xs font-bold px-3 py-1.5 rounded-xl">
+            Ver mis puntos
           </Link>
         </div>
       </section>
 
-      {/* Address */}
-      <section className="py-16 px-4">
-        <div className="max-w-2xl mx-auto bg-[#22232B] border border-[#2E3038] rounded-2xl p-8 text-center">
-          <MapPin className="text-[#D4A017] mx-auto mb-4" size={32} />
-          <h3 className="text-[#F5F0E8] font-bold text-xl mb-2">Encuéntranos</h3>
-          <p className="text-[#CCCCCC]">Calle 9 #83AA-22, Medellín, Belén</p>
-          <p className="text-[#888899] text-sm mt-2">
-            Servicio a domicilio: WhatsApp 300 7784365
-          </p>
+      {/* Categories */}
+      <section className="mt-5 px-3">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-black text-[#111217] text-base">Categorías</h2>
+          <Link href="/menu" className="text-[#D4A017] text-xs font-semibold flex items-center gap-0.5">
+            Ver todo <ChevronRight size={12} />
+          </Link>
+        </div>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.label}
+              href={cat.href}
+              className="flex flex-col items-center gap-1.5 bg-white rounded-2xl px-4 py-3 shrink-0 shadow-sm border border-[#F0F0F0] min-w-[72px]"
+            >
+              <span className="text-2xl">{cat.emoji}</span>
+              <span className="text-[10px] font-semibold text-[#374151] text-center leading-tight">{cat.label}</span>
+            </Link>
+          ))}
         </div>
       </section>
+
+      {/* Featured items */}
+      <section className="mt-5 px-3">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-black text-[#111217] text-base">⭐ Más Pedidos</h2>
+          <Link href="/menu" className="text-[#D4A017] text-xs font-semibold flex items-center gap-0.5">
+            Ver menú <ChevronRight size={12} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {FEATURED.map((item, i) => (
+            <Link key={i} href="/menu" className="bg-white rounded-2xl p-4 shadow-sm border border-[#F0F0F0] block active:scale-95 transition-transform">
+              <div className="text-4xl mb-2 text-center">{item.emoji}</div>
+              <span className="inline-block bg-[#FDF3D7] text-[#B8860B] text-[9px] font-bold px-2 py-0.5 rounded-full mb-1.5">
+                {item.tag}
+              </span>
+              <h3 className="font-bold text-[#111217] text-sm">{item.name}</h3>
+              <p className="text-[#9CA3AF] text-[10px] mt-0.5 line-clamp-1">{item.desc}</p>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[#D4A017] font-black text-sm">${item.price.toLocaleString("es-CO")}</span>
+                <div className="w-6 h-6 bg-[#D4A017] rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-black">+</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Features strip */}
+      <section className="mt-5 px-3">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { icon: <Flame size={18} className="text-[#D4A017]" />, label: "Parrilla\nArtesanal" },
+            { icon: <Clock size={18} className="text-[#D4A017]" />, label: "Tracking\nen vivo" },
+            { icon: <Star size={18} className="text-[#D4A017]" />, label: "Puntos\npor compra" },
+          ].map((f, i) => (
+            <div key={i} className="bg-white rounded-2xl p-3 text-center shadow-sm border border-[#F0F0F0]">
+              <div className="flex justify-center mb-1.5">{f.icon}</div>
+              <p className="text-[10px] font-semibold text-[#374151] leading-tight whitespace-pre-line">{f.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Address card */}
+      <section className="mt-4 mx-3 mb-4">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#F0F0F0] flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#FDF3D7] rounded-xl flex items-center justify-center shrink-0">
+            <MapPin size={18} className="text-[#D4A017]" />
+          </div>
+          <div>
+            <p className="text-[#111217] font-semibold text-sm">Calle 9 #83AA-22, Belén</p>
+            <p className="text-[#9CA3AF] text-xs">WhatsApp · (4) 5771856</p>
+          </div>
+          <ChevronRight size={16} className="text-[#D4D4D8] ml-auto" />
+        </div>
+      </section>
+
     </main>
   );
 }

@@ -24,39 +24,26 @@ export default async function MenuPage() {
   }));
 
   return (
-    <main className="min-h-screen bg-[#111217] px-4 py-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <p className="text-[#D4A017] text-sm uppercase tracking-widest mb-2">
-            Lo que tenemos para ti
-          </p>
-          <h1 className="text-4xl md:text-5xl font-black text-[#F5F0E8]">
-            Nuestro Menú
-          </h1>
-          <p className="text-[#888899] mt-3">
-            Barra de ensalada libre con cada hamburguesa
-          </p>
-        </div>
+    <main className="min-h-screen bg-[#F4F4F5] max-w-lg mx-auto">
+      {/* Ensalada libre banner */}
+      <div className="mx-3 mt-3 bg-[#D4A017] rounded-2xl px-4 py-3 flex items-center gap-2">
+        <span className="text-xl">🥗</span>
+        <span className="text-[#111217] font-semibold text-xs">
+          Barra de ensalada libre con cada hamburguesa
+        </span>
+      </div>
 
-        {/* Barra de ensalada libre badge */}
-        <div className="bg-[#D4A017]/10 border border-[#D4A017]/30 rounded-xl px-6 py-3 mb-10 text-center">
-          <span className="text-[#D4A017] font-semibold text-sm">
-            🥗 Barra de ensalada libre: Cebolla caramelizada · Guacamole · Pepinillos · Tomate · Lechuga
-          </span>
-        </div>
-
+      <div className="px-3 mt-4">
         {grouped.length === 0 ? (
-          // Fallback con menú estático si no hay Supabase configurado
           <StaticMenu />
         ) : (
           grouped.map(({ category, items: catItems }) => (
-            <section key={category.id} className="mb-14">
-              <h2 className="text-2xl font-bold text-[#F5F0E8] mb-6 flex items-center gap-3">
-                <span className="w-1 h-7 bg-[#D4A017] rounded-full inline-block" />
+            <section key={category.id} className="mb-6">
+              <h2 className="text-base font-black text-[#111217] mb-3 flex items-center gap-2">
+                <span className="w-1 h-5 bg-[#D4A017] rounded-full inline-block" />
                 {category.name}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {catItems.map((item: MenuItem) => (
                   <MenuItemCard key={item.id} item={item} />
                 ))}
@@ -114,23 +101,16 @@ function StaticMenu() {
   return (
     <>
       {sections.map((section) => (
-        <section key={section.name} className="mb-14">
-          <h2 className="text-2xl font-bold text-[#F5F0E8] mb-6 flex items-center gap-3">
-            <span className="w-1 h-7 bg-[#D4A017] rounded-full inline-block" />
+        <section key={section.name} className="mb-6">
+          <h2 className="text-base font-black text-[#111217] mb-3 flex items-center gap-2">
+            <span className="w-1 h-5 bg-[#D4A017] rounded-full inline-block" />
             {section.name}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {section.items.map((item) => (
               <MenuItemCard
                 key={item.id}
-                item={{
-                  ...item,
-                  category_id: "",
-                  image_url: null,
-                  available: true,
-                  sort_order: 0,
-                  created_at: "",
-                }}
+                item={{ ...item, category_id: "", image_url: null, available: true, sort_order: 0, created_at: "" }}
               />
             ))}
           </div>
