@@ -1,19 +1,33 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
+import { Upload, X, ImageIcon, Loader2, Sparkles, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
+  aiHint?: string;
 }
 
-export default function ImageUpload({ value, onChange }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+
+  // AI panel state
+  const [showAI, setShowAI] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiPreview, setAiPreview] = useState<string | null>(null);
+
+  // Pre-fill prompt when aiHint changes and panel is opened
+  useEffect(() => {
+    if (showAI && aiHint && !aiPrompt) {
+      setAiPrompt(aiHint);
+    }
+  }, [showAI, aiHint]);
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -48,6 +62,46 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
     setDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) handleFile(file);
+  };
+
+  const handleGenerate = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Escribe una descripción primero");
+      return;
+    }
+    setAiLoading(true);
+    setAiPreview(null);
+    try {
+      const res = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: aiPrompt }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Error al generar");
+      setAiPreview(json.url);
+    } catch (err: any) {
+      toast.error(err.message ?? "Error al generar la imagen");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleUseAI = () => {
+    if (!aiPreview) return;
+    onChange(aiPreview);
+    setShowAI(false);
+    setAiPreview(null);
+    toast.success("Imagen aplicada ✓");
+  };
+
+  const toggleAI = () => {
+    setShowAI((s) => {
+      const next = !s;
+      if (next && aiHint && !aiPrompt) setAiPrompt(aiHint);
+      return next;
+    });
+    setAiPreview(null);
   };
 
   return (
@@ -115,7 +169,6 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
       )}
 
       {/* Hidden file input */}
-      {/* Sin capture= para que en móvil muestre: Cámara / Galería / Archivos */}
       <input
         ref={inputRef}
         type="file"
@@ -127,6 +180,93 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
           e.target.value = "";
         }}
       />
+
+      {/* AI Generator toggle button */}
+      <button
+        type="button"
+        onClick={toggleAI}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#22242C] border border-[#D4A017]/25 text-[#D4A017] text-xs font-semibold hover:bg-[#2A2414] hover:border-[#D4A017]/50 transition-all"
+      >
+        <span className="flex items-center gap-1.5">
+          <Sparkles size={13} />
+          Generar con IA · gratis
+        </span>
+        {showAI ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      </button>
+
+      {/* AI Generator panel */}
+      {showAI && (
+        <div className="rounded-xl border border-[#2E3038] bg-[#16181F] p-3 space-y-3">
+          <p className="text-[#9CA3AF] text-[10px]">
+            Describe la imagen que quieres generar. Sé específico para mejores resultados.
+          </p>
+
+          <textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="Ej: hamburguesa jugosa con queso derretido, lechuga fresca y tomate, fondo oscuro elegante..."
+            rows={3}
+            maxLength={500}
+            className="w-full bg-[#22242C] border border-[#2E3038] rounded-lg px-3 py-2 text-white text-xs placeholder-[#4B5563] resize-none focus:outline-none focus:border-[#D4A017]/50 leading-relaxed"
+          />
+
+          <div className="flex items-center justify-between">
+            <span className="text-[#4B5563] text-[10px]">{aiPrompt.length}/500</span>
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={aiLoading || !aiPrompt.trim()}
+              className="flex items-center gap-1.5 bg-[#D4A017] text-[#0F1117] text-xs font-bold px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E8B830] transition-colors"
+            >
+              {aiLoading ? (
+                <>
+                  <Loader2 size={13} className="animate-spin" />
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={13} />
+                  Generar imagen
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Preview & use button */}
+          {aiPreview && (
+            <div className="space-y-2 pt-1 border-t border-[#2E3038]">
+              <p className="text-[#9CA3AF] text-[10px]">Vista previa:</p>
+              <div className="relative w-full h-32 rounded-lg overflow-hidden border border-[#2E3038]">
+                <Image
+                  src={aiPreview}
+                  alt="Imagen generada"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleUseAI}
+                  className="flex-1 bg-[#D4A017] text-[#0F1117] text-xs font-bold px-3 py-2 rounded-lg hover:bg-[#E8B830] transition-colors"
+                >
+                  Usar esta imagen
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={aiLoading}
+                  title="Regenerar"
+                  className="bg-[#22242C] border border-[#2E3038] text-[#9CA3AF] px-3 py-2 rounded-lg hover:text-white hover:border-[#D4A017]/30 transition-colors"
+                >
+                  <RefreshCw size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
