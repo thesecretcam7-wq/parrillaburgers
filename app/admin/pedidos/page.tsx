@@ -142,9 +142,20 @@ export default function AdminOrdersPage() {
                   <div>
                     <p className="text-[#888899] text-xs mb-2">Productos</p>
                     {(order.items as any[])?.map((item, i) => (
-                      <div key={i} className="flex justify-between text-sm text-[#CCCCCC] mb-1">
-                        <span>{item.menu_item_name} x{item.quantity}</span>
-                        <span>${item.subtotal?.toLocaleString("es-CO")}</span>
+                      <div key={i} className="mb-2">
+                        <div className="flex justify-between text-sm text-[#CCCCCC]">
+                          <span>{item.menu_item_name} x{item.quantity}</span>
+                          <span>${item.subtotal?.toLocaleString("es-CO")}</span>
+                        </div>
+                        {item.barra_libre_selected?.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {item.barra_libre_selected.map((opt: string, j: number) => (
+                              <span key={j} className="px-2 py-0.5 rounded-full text-xs bg-[#D4A017]/15 text-[#D4A017] border border-[#D4A017]/25">
+                                {opt}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
