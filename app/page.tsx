@@ -6,10 +6,10 @@ export const revalidate = 60;
 
 // Menú estático de fallback si Supabase no tiene datos
 const STATIC_CATEGORIES: Category[] = [
-  { id: "hamburguesas", name: "Hamburguesas", sort_order: 1 },
-  { id: "otros", name: "Otros", sort_order: 2 },
-  { id: "acompañamientos", name: "Acompañamientos", sort_order: 3 },
-  { id: "combos", name: "Combos", sort_order: 4 },
+  { id: "hamburguesas", name: "Hamburguesas", description: null, sort_order: 1, created_at: "" },
+  { id: "otros", name: "Otros", description: null, sort_order: 2, created_at: "" },
+  { id: "acompañamientos", name: "Acompañamientos", description: null, sort_order: 3, created_at: "" },
+  { id: "combos", name: "Combos", description: null, sort_order: 4, created_at: "" },
 ];
 
 const STATIC_ITEMS: MenuItem[] = [
