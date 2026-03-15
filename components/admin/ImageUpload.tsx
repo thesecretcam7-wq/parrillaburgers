@@ -11,15 +11,6 @@ interface ImageUploadProps {
   aiHint?: string;
 }
 
-const MAX_RETRIES = 3;
-
-function buildPollinationsUrl(prompt: string) {
-  const seed = Math.floor(Math.random() * 999999);
-  const encoded = encodeURIComponent(prompt.trim());
-  // No model= param → Pollinations picks the most available model automatically
-  return `https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${seed}`;
-}
-
 export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -28,11 +19,9 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
   // AI panel state
   const [showAI, setShowAI] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
-  const [pollinationsUrl, setPollinationsUrl] = useState<string | null>(null);
-  const [aiImgLoading, setAiImgLoading] = useState(false);
-  const [aiImgError, setAiImgError] = useState(false);
-  const [aiUploading, setAiUploading] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiStatus, setAiStatus] = useState(""); // status message while generating
+  const [aiPreview, setAiPreview] = useState<string | null>(null); // Supabase URL after generation
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Solo se permiten imágenes"); return; }
@@ -60,64 +49,63 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
     if (file) handleFile(file);
   };
 
-  const startGeneration = (prompt: string, retry = 0) => {
-    const url = buildPollinationsUrl(prompt);
-    setPollinationsUrl(url);
-    setAiImgLoading(true);
-    setAiImgError(false);
-    setRetryCount(retry);
-  };
-
-  const handleGenerate = () => {
+  // Generate via Hugging Face (server-side) — reliable, ~5-10s
+  const handleGenerate = async (retryCount = 0) => {
     if (!aiPrompt.trim()) { toast.error("Escribe una descripción primero"); return; }
-    startGeneration(aiPrompt);
-  };
+    setAiLoading(true);
+    setAiPreview(null);
+    setAiStatus(retryCount > 0 ? "El modelo está iniciando, reintentando..." : "Generando imagen...");
 
-  // Auto-retry on error, up to MAX_RETRIES, then show error state
-  const handleImgError = () => {
-    if (retryCount < MAX_RETRIES) {
-      // Retry silently with a new seed
-      setTimeout(() => startGeneration(aiPrompt, retryCount + 1), 800);
-    } else {
-      setAiImgLoading(false);
-      setAiImgError(true);
-    }
-  };
-
-  const handleUseAI = async () => {
-    if (!pollinationsUrl) return;
-    setAiUploading(true);
     try {
-      // Send the already-loaded Pollinations URL to our server.
-      // The server downloads it (cached, fast) and uploads to Supabase.
       const res = await fetch("/api/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: pollinationsUrl }),
+        body: JSON.stringify({ prompt: aiPrompt.trim() }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Error al guardar");
-      onChange(json.url);
-      setShowAI(false);
-      setPollinationsUrl(null);
-      toast.success("Imagen aplicada ✓");
+
+      // Model cold start (503 with retry flag) — wait 20s and retry once
+      if (!res.ok && json.retry && retryCount < 2) {
+        setAiStatus("El modelo está iniciando (~20s)...");
+        setTimeout(() => handleGenerate(retryCount + 1), 20000);
+        return;
+      }
+
+      if (!res.ok) throw new Error(json.error ?? "Error al generar");
+
+      setAiPreview(json.url);
     } catch (err: any) {
-      toast.error(err.message ?? "Error al aplicar la imagen");
+      toast.error(err.message ?? "Error al generar la imagen");
+      setAiLoading(false);
+      setAiStatus("");
     } finally {
-      setAiUploading(false);
+      if (aiPreview !== null || !aiLoading) {
+        setAiLoading(false);
+        setAiStatus("");
+      }
     }
+  };
+
+  // When generation succeeds, stop loading
+  const onGenerateDone = (url: string) => {
+    setAiPreview(url);
+    setAiLoading(false);
+    setAiStatus("");
+  };
+
+  const handleUseAI = () => {
+    if (!aiPreview) return;
+    onChange(aiPreview);
+    setShowAI(false);
+    setAiPreview(null);
+    toast.success("Imagen aplicada ✓");
   };
 
   const toggleAI = () => {
     const next = !showAI;
     setShowAI(next);
     if (next && aiHint && !aiPrompt) setAiPrompt(aiHint);
-    if (!next) { setPollinationsUrl(null); setAiImgError(false); }
-  };
-
-  const handleRegenerate = () => {
-    if (!aiPrompt.trim()) return;
-    startGeneration(aiPrompt);
+    if (!next) { setAiPreview(null); setAiLoading(false); setAiStatus(""); }
   };
 
   return (
@@ -186,69 +174,35 @@ export default function ImageUpload({ value, onChange, aiHint }: ImageUploadProp
             placeholder="Ej: juicy burger with melted cheese, fresh lettuce and tomato, dark elegant background..."
             rows={3}
             maxLength={500}
-            className="w-full bg-[#22242C] border border-[#2E3038] rounded-lg px-3 py-2 text-white text-xs placeholder-[#4B5563] resize-none focus:outline-none focus:border-[#D4A017]/50 leading-relaxed"
+            disabled={aiLoading}
+            className="w-full bg-[#22242C] border border-[#2E3038] rounded-lg px-3 py-2 text-white text-xs placeholder-[#4B5563] resize-none focus:outline-none focus:border-[#D4A017]/50 leading-relaxed disabled:opacity-60"
           />
 
           <div className="flex items-center justify-between">
             <span className="text-[#4B5563] text-[10px]">{aiPrompt.length}/500</span>
-            <button type="button" onClick={handleGenerate} disabled={aiImgLoading || !aiPrompt.trim()}
+            <button type="button" onClick={() => handleGenerate()} disabled={aiLoading || !aiPrompt.trim()}
               className="flex items-center gap-1.5 bg-[#D4A017] text-[#0F1117] text-xs font-bold px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#E8B830] transition-colors">
-              {aiImgLoading
-                ? <><Loader2 size={13} className="animate-spin" />Generando...</>
+              {aiLoading
+                ? <><Loader2 size={13} className="animate-spin" />{aiStatus || "Generando..."}</>
                 : <><Sparkles size={13} />Generar imagen</>}
             </button>
           </div>
 
           {/* Preview */}
-          {pollinationsUrl && (
+          {aiPreview && (
             <div className="space-y-2 pt-1 border-t border-[#2E3038]">
-              <div className="flex items-center justify-between">
-                <p className="text-[#9CA3AF] text-[10px]">Vista previa:</p>
-                {aiImgLoading && retryCount > 0 && (
-                  <p className="text-[#6B7280] text-[10px]">Reintento {retryCount}/{MAX_RETRIES}...</p>
-                )}
+              <p className="text-[#9CA3AF] text-[10px]">Vista previa:</p>
+              <div className="relative w-full h-32 rounded-lg overflow-hidden border border-[#2E3038]">
+                <Image src={aiPreview} alt="Imagen generada" fill className="object-cover" unoptimized />
               </div>
-
-              <div className="relative w-full h-32 rounded-lg overflow-hidden border border-[#2E3038] bg-[#22242C] flex items-center justify-center">
-                {aiImgError ? (
-                  /* No <img> in DOM when error → prevents infinite onError loop */
-                  <div className="flex flex-col items-center gap-2 px-4 text-center">
-                    <p className="text-red-400 text-xs">No se pudo generar la imagen.</p>
-                    <p className="text-[#6B7280] text-[10px]">El servicio está ocupado. Pulsa 🔄 para intentar de nuevo.</p>
-                  </div>
-                ) : (
-                  <>
-                    {aiImgLoading && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10 bg-[#22242C]">
-                        <Loader2 size={24} className="text-[#D4A017] animate-spin" />
-                        <p className="text-[#6B7280] text-[10px]">Generando imagen (~15-25s)...</p>
-                      </div>
-                    )}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={pollinationsUrl}
-                      alt="Imagen generada por IA"
-                      className={`w-full h-full object-cover transition-opacity duration-300 ${aiImgLoading ? "opacity-0" : "opacity-100"}`}
-                      onLoad={() => { setAiImgLoading(false); setRetryCount(0); }}
-                      onError={handleImgError}
-                    />
-                  </>
-                )}
-              </div>
-
               <div className="flex gap-2">
-                {!aiImgLoading && !aiImgError && (
-                  <button type="button" onClick={handleUseAI} disabled={aiUploading}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-[#D4A017] text-[#0F1117] text-xs font-bold px-3 py-2 rounded-lg hover:bg-[#E8B830] transition-colors disabled:opacity-60">
-                    {aiUploading
-                      ? <><Loader2 size={12} className="animate-spin" />Guardando...</>
-                      : "Usar esta imagen"}
-                  </button>
-                )}
-                <button type="button" onClick={handleRegenerate} disabled={aiUploading || aiImgLoading} title="Reintentar"
-                  className="flex items-center gap-1.5 bg-[#22242C] border border-[#2E3038] text-[#9CA3AF] px-3 py-2 rounded-lg hover:text-white hover:border-[#D4A017]/30 transition-colors disabled:opacity-50 text-xs">
+                <button type="button" onClick={handleUseAI}
+                  className="flex-1 bg-[#D4A017] text-[#0F1117] text-xs font-bold px-3 py-2 rounded-lg hover:bg-[#E8B830] transition-colors">
+                  Usar esta imagen
+                </button>
+                <button type="button" onClick={() => handleGenerate()} disabled={aiLoading} title="Regenerar"
+                  className="bg-[#22242C] border border-[#2E3038] text-[#9CA3AF] px-3 py-2 rounded-lg hover:text-white hover:border-[#D4A017]/30 transition-colors disabled:opacity-50">
                   <RefreshCw size={13} />
-                  {aiImgError ? "Reintentar" : ""}
                 </button>
               </div>
             </div>
