@@ -36,7 +36,7 @@ export default function AdminOrdersPage() {
       let data;
       if (filter === "all") {
         // Default: hide delivered and cancelled — show only active orders
-        ({ data } = await q.not("status", "in", '("delivered","cancelled")'));
+        ({ data } = await q.neq("status", "delivered").neq("status", "cancelled"));
       } else {
         ({ data } = await q.eq("status", filter));
       }
