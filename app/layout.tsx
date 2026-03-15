@@ -37,7 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={`${geist.variable} antialiased bg-[#F4F4F5] text-[#111217]`}>
         <Navbar />
-        <div className="pt-14 pb-20">{children}</div>
+        <div className="pt-14 pb-20 lg:pb-6">{children}</div>
         <BottomNav />
         <Toaster
           position="top-center"

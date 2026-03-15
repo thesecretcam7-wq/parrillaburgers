@@ -20,7 +20,7 @@ export default function BottomNav() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#E4E4E7] safe-area-bottom"
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#E4E4E7] safe-area-bottom lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
