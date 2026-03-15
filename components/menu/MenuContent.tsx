@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronRight, ArrowLeft } from "lucide-react";
 import { Category, MenuItem } from "@/lib/types";
 import MenuItemCard from "./MenuItemCard";
 
@@ -9,62 +10,103 @@ interface MenuContentProps {
   items: MenuItem[];
 }
 
+const CATEGORY_EMOJI: Record<string, string> = {
+  hamburguesas: "🍔",
+  bebidas: "🥤",
+  perros: "🌭",
+  otros: "🌭",
+  acompañamientos: "🍟",
+  combos: "🎁",
+  postres: "🍰",
+  entradas: "🥗",
+};
+
+function getCategoryEmoji(id: string, name: string): string {
+  const key = id.toLowerCase();
+  if (CATEGORY_EMOJI[key]) return CATEGORY_EMOJI[key];
+  const nameKey = name.toLowerCase();
+  for (const [k, emoji] of Object.entries(CATEGORY_EMOJI)) {
+    if (nameKey.includes(k)) return emoji;
+  }
+  return "🍽️";
+}
+
 export default function MenuContent({ categories, items }: MenuContentProps) {
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  const filteredItems =
-    activeCategory === "all"
-      ? items
-      : items.filter((i) => i.category_id === activeCategory);
+  const activeItems = activeCategory
+    ? items.filter((i) => i.category_id === activeCategory)
+    : [];
 
+  const activeCategoryName = categories.find((c) => c.id === activeCategory)?.name ?? "";
+
+  // ── Category selection screen ──────────────────────────────────────────────
+  if (!activeCategory) {
+    return (
+      <div className="max-w-5xl mx-auto px-3 pb-24">
+        {/* Banner barra libre */}
+        <div className="mt-3 bg-[#D4A017] rounded-2xl px-4 py-3 flex items-center gap-2 mb-5">
+          <span className="text-xl">🥗</span>
+          <span className="text-[#111217] font-semibold text-xs">
+            Barra de ensalada libre con cada hamburguesa
+          </span>
+        </div>
+
+        <h2 className="text-white font-bold text-base mb-3 px-1">¿Qué quieres comer?</h2>
+
+        <div className="flex flex-col gap-3">
+          {categories.map((cat) => {
+            const count = items.filter((i) => i.category_id === cat.id).length;
+            const emoji = getCategoryEmoji(cat.id, cat.name);
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-2xl px-5 py-4 flex items-center gap-4 hover:border-[#D4A017]/50 active:scale-[0.98] transition-all text-left"
+              >
+                <span className="text-4xl leading-none">{emoji}</span>
+                <div className="flex-1">
+                  <p className="text-white font-bold text-base">{cat.name}</p>
+                  <p className="text-[#6B7280] text-xs mt-0.5">
+                    {count} {count === 1 ? "producto" : "productos"}
+                  </p>
+                </div>
+                <ChevronRight size={20} className="text-[#D4A017] shrink-0" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Items screen ───────────────────────────────────────────────────────────
   return (
-    <div className="max-w-5xl mx-auto px-3 pb-4">
-      {/* Banner barra libre */}
-      <div className="mt-3 bg-[#D4A017] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
-        <span className="text-xl">🥗</span>
-        <span className="text-[#111217] font-semibold text-xs">
-          Barra de ensalada libre con cada hamburguesa
-        </span>
+    <div className="max-w-5xl mx-auto px-3 pb-24">
+      {/* Header with back button */}
+      <div className="flex items-center gap-3 mt-3 mb-4">
+        <button
+          onClick={() => setActiveCategory(null)}
+          className="w-9 h-9 bg-[#22242C] rounded-full flex items-center justify-center shrink-0 hover:bg-[#2E3038] transition-colors"
+        >
+          <ArrowLeft size={18} className="text-white" />
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl leading-none">
+            {getCategoryEmoji(activeCategory, activeCategoryName)}
+          </span>
+          <h2 className="text-white font-bold text-base">{activeCategoryName}</h2>
+        </div>
       </div>
 
-      {/* Category tabs */}
-      {categories.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3">
-          <button
-            onClick={() => setActiveCategory("all")}
-            className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
-              activeCategory === "all"
-                ? "bg-[#D4A017] text-[#0F1117]"
-                : "bg-[#22242C] text-[#9CA3AF] hover:text-white"
-            }`}
-          >
-            Todos
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
-                activeCategory === cat.id
-                  ? "bg-[#D4A017] text-[#0F1117]"
-                  : "bg-[#22242C] text-[#9CA3AF] hover:text-white"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Product grid */}
-      {filteredItems.length === 0 ? (
+      {activeItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-[#6B7280]">
           <span className="text-5xl mb-3">🍔</span>
           <p className="text-sm">No hay productos en esta categoría</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {filteredItems.map((item) => (
+          {activeItems.map((item) => (
             <MenuItemCard key={item.id} item={item} />
           ))}
         </div>
