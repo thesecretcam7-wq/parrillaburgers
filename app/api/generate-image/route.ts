@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Edge Runtime: 25s timeout on Hobby (vs 10s for Serverless)
+export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     // FLUX.1-schnell via Hugging Face Inference API
-    // Free with a HF account — fast (~5s), reliable
+    // Free with a HF account — fast (~5-10s), reliable
     const hfRes = await fetch(
       "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell",
       {
@@ -57,13 +55,20 @@ export async function POST(req: NextRequest) {
     }
 
     const arrayBuffer = await hfRes.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // Use Uint8Array instead of Buffer (Edge Runtime compatible)
+    const uint8Array = new Uint8Array(arrayBuffer);
 
     const filename = `ai-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
 
+    // Create Supabase client inside handler (Edge compatible)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const { error: uploadError } = await supabaseAdmin.storage
       .from("menu-images")
-      .upload(filename, buffer, {
+      .upload(filename, uint8Array, {
         contentType: "image/jpeg",
         upsert: false,
       });
@@ -75,8 +80,9 @@ export async function POST(req: NextRequest) {
       .getPublicUrl(filename);
 
     return NextResponse.json({ url: data.publicUrl });
-  } catch (err: any) {
-    console.error("Generate image error:", err);
-    return NextResponse.json({ error: err.message ?? "Error al generar imagen" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Error al generar imagen";
+    console.error("Generate image error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
