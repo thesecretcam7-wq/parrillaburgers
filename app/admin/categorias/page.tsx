@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Category } from "@/lib/types";
-import { Plus, Trash2, X, GripVertical } from "lucide-react";
+import { Plus, Trash2, X, GripVertical, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 
 const EMOJIS = [
@@ -24,6 +24,7 @@ export default function AdminCategoriasPage() {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -34,24 +35,48 @@ export default function AdminCategoriasPage() {
 
   useEffect(() => { fetchCategories(); }, []);
 
+  const openCreate = () => { setEditingId(null); setForm(EMPTY); setModalOpen(true); };
+  const openEdit = (cat: Category) => {
+    setEditingId(cat.id);
+    setForm({ name: cat.name, description: cat.description ?? "", emoji: cat.emoji ?? "🍽️" });
+    setModalOpen(true);
+  };
+
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error("El nombre es obligatorio"); return; }
     setSaving(true);
     try {
-      const { error } = await supabase.from("categories").insert({
-        name: form.name.trim(),
-        description: form.description.trim() || null,
-        emoji: form.emoji,
-        sort_order: categories.length + 1,
-      });
-      if (error) {
-        if (error.code === "23505") toast.error("Ya existe una categoría con ese nombre");
-        else throw error;
-        return;
+      if (editingId) {
+        // UPDATE
+        const { error } = await supabase.from("categories").update({
+          name: form.name.trim(),
+          description: form.description.trim() || null,
+          emoji: form.emoji,
+        }).eq("id", editingId);
+        if (error) {
+          if (error.code === "23505") toast.error("Ya existe una categoría con ese nombre");
+          else throw error;
+          return;
+        }
+        toast.success("Categoría actualizada");
+      } else {
+        // INSERT
+        const { error } = await supabase.from("categories").insert({
+          name: form.name.trim(),
+          description: form.description.trim() || null,
+          emoji: form.emoji,
+          sort_order: categories.length + 1,
+        });
+        if (error) {
+          if (error.code === "23505") toast.error("Ya existe una categoría con ese nombre");
+          else throw error;
+          return;
+        }
+        toast.success("Categoría creada");
       }
-      toast.success("Categoría creada");
       setModalOpen(false);
       setForm(EMPTY);
+      setEditingId(null);
       fetchCategories();
     } catch (err) {
       console.error(err);
@@ -87,7 +112,7 @@ export default function AdminCategoriasPage() {
           <p className="text-[#888899] text-sm mt-0.5">Administra las categorías del menú</p>
         </div>
         <button
-          onClick={() => { setForm(EMPTY); setModalOpen(true); }}
+          onClick={openCreate}
           className="flex items-center gap-2 bg-[#D4A017] text-[#111217] font-semibold px-4 py-2 rounded-xl text-sm hover:bg-[#E8B830] transition-colors"
         >
           <Plus size={16} /> Nueva categoría
@@ -121,6 +146,12 @@ export default function AdminCategoriasPage() {
                 )}
               </div>
               <button
+                onClick={() => openEdit(cat)}
+                className="p-2 text-[#555566] hover:text-[#D4A017] transition-colors"
+              >
+                <Pencil size={16} />
+              </button>
+              <button
                 onClick={() => handleDelete(cat.id)}
                 disabled={deletingId === cat.id}
                 className="p-2 text-[#555566] hover:text-red-400 transition-colors disabled:opacity-40"
@@ -144,7 +175,7 @@ export default function AdminCategoriasPage() {
         <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center p-4">
           <div className="bg-[#1A1B21] border border-[#2E3038] rounded-2xl w-full max-w-md p-5">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-[#F5F0E8] font-bold">Nueva categoría</h3>
+              <h3 className="text-[#F5F0E8] font-bold">{editingId ? "Editar categoría" : "Nueva categoría"}</h3>
               <button onClick={() => setModalOpen(false)} className="text-[#888899] hover:text-[#F5F0E8] p-1">
                 <X size={20} />
               </button>
@@ -206,7 +237,7 @@ export default function AdminCategoriasPage() {
                 disabled={saving || !form.name.trim()}
                 className="flex-1 py-2.5 rounded-xl bg-[#D4A017] text-[#111217] font-semibold text-sm hover:bg-[#E8B830] transition-colors disabled:opacity-50"
               >
-                {saving ? "Guardando..." : "Crear categoría"}
+                {saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear categoría"}
               </button>
             </div>
           </div>
