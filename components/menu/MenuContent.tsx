@@ -10,22 +10,16 @@ interface MenuContentProps {
   items: MenuItem[];
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  hamburguesas: "🍔",
-  bebidas: "🥤",
-  perros: "🌭",
-  otros: "🌭",
-  acompañamientos: "🍟",
-  combos: "🎁",
-  postres: "🍰",
-  entradas: "🥗",
+// Fallback map for categories that were created before the emoji column existed
+const FALLBACK_EMOJI: Record<string, string> = {
+  hamburguesas: "🍔", bebidas: "🥤", perros: "🌭", otros: "🌭",
+  acompañamientos: "🍟", combos: "🎁", postres: "🍰", entradas: "🥗",
 };
 
-function getCategoryEmoji(id: string, name: string): string {
-  const key = id.toLowerCase();
-  if (CATEGORY_EMOJI[key]) return CATEGORY_EMOJI[key];
-  const nameKey = name.toLowerCase();
-  for (const [k, emoji] of Object.entries(CATEGORY_EMOJI)) {
+function getCategoryEmoji(cat: Category): string {
+  if (cat.emoji) return cat.emoji;
+  const nameKey = cat.name.toLowerCase();
+  for (const [k, emoji] of Object.entries(FALLBACK_EMOJI)) {
     if (nameKey.includes(k)) return emoji;
   }
   return "🍽️";
@@ -57,7 +51,7 @@ export default function MenuContent({ categories, items }: MenuContentProps) {
         <div className="flex flex-col gap-3">
           {categories.map((cat) => {
             const count = items.filter((i) => i.category_id === cat.id).length;
-            const emoji = getCategoryEmoji(cat.id, cat.name);
+            const emoji = getCategoryEmoji(cat);
             return (
               <button
                 key={cat.id}
@@ -93,7 +87,7 @@ export default function MenuContent({ categories, items }: MenuContentProps) {
         </button>
         <div className="flex items-center gap-2">
           <span className="text-2xl leading-none">
-            {getCategoryEmoji(activeCategory, activeCategoryName)}
+            {getCategoryEmoji(categories.find(c => c.id === activeCategory)!)}
           </span>
           <h2 className="text-white font-bold text-base">{activeCategoryName}</h2>
         </div>

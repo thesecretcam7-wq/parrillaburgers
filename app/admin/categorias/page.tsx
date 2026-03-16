@@ -6,7 +6,12 @@ import { Category } from "@/lib/types";
 import { Plus, Trash2, X, GripVertical } from "lucide-react";
 import toast from "react-hot-toast";
 
-const EMOJIS = ["🍔","🌭","🍟","🥤","🍕","🌮","🥗","🍰","🎁","🥩","🍗","🥪","🍱","🍜","🍣","🍦","☕","🥐"];
+const EMOJIS = [
+  "🍔","🌭","🍟","🥤","🍕","🌮","🥗","🍰","🎁","🥩","🍗","🥪",
+  "🍱","🍜","🍣","🍦","☕","🥐","🧆","🫔","🥙","🌯","🫕","🥘",
+  "🍲","🥗","🍤","🧇","🥞","🧈","🥚","🍳","🧀","🥓","🌽","🥨",
+  "🍩","🍪","🎂","🍫","🍬","🧃","🍺","🥛","🧋","🫖","🍵","🥂",
+];
 
 type FormState = { name: string; description: string; emoji: string };
 const EMPTY: FormState = { name: "", description: "", emoji: "🍽️" };
@@ -36,6 +41,7 @@ export default function AdminCategoriasPage() {
       const { error } = await supabase.from("categories").insert({
         name: form.name.trim(),
         description: form.description.trim() || null,
+        emoji: form.emoji,
         sort_order: categories.length + 1,
       });
       if (error) {
@@ -104,6 +110,9 @@ export default function AdminCategoriasPage() {
               className="bg-[#1A1B21] border border-[#2E3038] rounded-2xl px-4 py-3.5 flex items-center gap-3"
             >
               <GripVertical size={16} className="text-[#444455] shrink-0" />
+              {cat.emoji && (
+                <span className="text-2xl leading-none shrink-0">{cat.emoji}</span>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-[#F5F0E8] font-semibold text-sm">{cat.name}</p>
                 <p className="text-[#555566] text-xs font-mono mt-0.5">id: {cat.id}</p>
