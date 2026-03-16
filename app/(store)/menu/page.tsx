@@ -5,10 +5,10 @@ import { MenuItem, Category } from "@/lib/types";
 export const revalidate = 60;
 
 const STATIC_CATEGORIES: Category[] = [
-  { id: "hamburguesas", name: "Hamburguesas", description: null, sort_order: 1, created_at: "" },
-  { id: "otros", name: "Otros", description: null, sort_order: 2, created_at: "" },
-  { id: "acompañamientos", name: "Acompañamientos", description: null, sort_order: 3, created_at: "" },
-  { id: "combos", name: "Combos", description: null, sort_order: 4, created_at: "" },
+  { id: "hamburguesas", name: "Hamburguesas", description: null, emoji: "🍔", sort_order: 1, created_at: "" },
+  { id: "otros", name: "Otros", description: null, emoji: "🌭", sort_order: 2, created_at: "" },
+  { id: "acompañamientos", name: "Acompañamientos", description: null, emoji: "🍟", sort_order: 3, created_at: "" },
+  { id: "combos", name: "Combos", description: null, emoji: "🎁", sort_order: 4, created_at: "" },
 ];
 
 const STATIC_ITEMS: MenuItem[] = [
