@@ -38,6 +38,7 @@ export default function OrderPage() {
   const [delivery, setDelivery] = useState(3000);
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null);
+  const [pedidosPausados, setPedidosPausados] = useState(false);
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", address: "", notes: "",
   });
@@ -48,6 +49,8 @@ export default function OrderPage() {
       .then(({ data }) => { if (data) setDelivery(Number(data.value)); });
     client.from("delivery_zones").select("id, name, price").eq("active", true).order("name")
       .then(({ data }) => { if (data && data.length > 0) setZones(data as DeliveryZone[]); });
+    client.from("settings").select("value").eq("key", "pedidos_pausados").single()
+      .then(({ data }) => { if (data?.value === "true") setPedidosPausados(true); });
   }, []);
 
   // Pre-fill form with saved customer data
@@ -123,6 +126,21 @@ export default function OrderPage() {
       <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4">
         <p className="text-[#9CA3AF] mb-4 text-sm">No tienes productos en tu carrito</p>
         <Link href="/" className="text-[#D4A017] font-semibold hover:underline">Ver Menú</Link>
+      </main>
+    );
+  }
+
+  if (pedidosPausados) {
+    return (
+      <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4 text-center">
+        <div className="text-6xl mb-4">⏸️</div>
+        <p className="text-white font-black text-xl mb-2">Pedidos pausados</p>
+        <p className="text-[#9CA3AF] text-sm mb-6 max-w-xs">
+          En este momento no estamos recibiendo pedidos. Vuelve en unos minutos.
+        </p>
+        <Link href="/menu" className="bg-[#D4A017] text-[#0F1117] font-bold px-6 py-3 rounded-xl text-sm">
+          Ver Menú
+        </Link>
       </main>
     );
   }

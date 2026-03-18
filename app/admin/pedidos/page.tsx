@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
 import toast from "react-hot-toast";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, PauseCircle, PlayCircle } from "lucide-react";
 
 const WA_MESSAGES: Partial<Record<OrderStatus, string>> = {
   confirmed:  "✅ Tu pedido {number} fue *confirmado*. ¡Lo estamos preparando! 🍔",
@@ -62,6 +62,8 @@ export default function AdminOrdersPage() {
   const [filter, setFilter]   = useState<string>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [whatsappAdmin, setWhatsappAdmin] = useState("");
+  const [pausado, setPausado] = useState(false);
+  const [pausadoLoading, setPausadoLoading] = useState(false);
 
   // IDs conocidos — ref para no re-ejecutar el efecto
   const knownIds  = useRef<Set<string>>(new Set());
@@ -69,18 +71,24 @@ export default function AdminOrdersPage() {
   const whatsappRef = useRef("");
 
   useEffect(() => {
-    createClient()
-      .from("settings")
-      .select("value")
-      .eq("key", "whatsapp_admin")
-      .single()
+    const client = createClient();
+    client.from("settings").select("value").eq("key", "whatsapp_admin").single()
       .then(({ data }) => {
-        if (data?.value) {
-          setWhatsappAdmin(data.value);
-          whatsappRef.current = data.value;
-        }
+        if (data?.value) { setWhatsappAdmin(data.value); whatsappRef.current = data.value; }
       });
+    client.from("settings").select("value").eq("key", "pedidos_pausados").single()
+      .then(({ data }) => { if (data) setPausado(data.value === "true"); });
   }, []);
+
+  const togglePausado = async () => {
+    setPausadoLoading(true);
+    const newVal = !pausado;
+    const client = createClient();
+    await client.from("settings").upsert({ key: "pedidos_pausados", value: String(newVal) }, { onConflict: "key" });
+    setPausado(newVal);
+    setPausadoLoading(false);
+    toast.success(newVal ? "Pedidos pausados — no se aceptarán nuevos pedidos" : "Pedidos reactivados ✅");
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -209,7 +217,30 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-black text-[#F5F0E8] mb-8">Pedidos</h1>
+      <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
+        <h1 className="text-3xl font-black text-[#F5F0E8]">Pedidos</h1>
+        <button
+          onClick={togglePausado}
+          disabled={pausadoLoading}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+            pausado
+              ? "bg-red-500/15 border-red-500/40 text-red-400 hover:bg-red-500/25"
+              : "bg-[#1A1B21] border-[#2E3038] text-[#CCCCCC] hover:border-[#D4A017] hover:text-[#D4A017]"
+          }`}
+        >
+          {pausado
+            ? <><PlayCircle size={16} /> Reactivar pedidos</>
+            : <><PauseCircle size={16} /> Pausar pedidos</>
+          }
+        </button>
+      </div>
+
+      {pausado && (
+        <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 flex items-center gap-3">
+          <PauseCircle size={18} className="text-red-400 shrink-0" />
+          <p className="text-red-300 text-sm font-medium">Los pedidos están pausados. Los clientes no pueden hacer nuevos pedidos ahora.</p>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap mb-6">
