@@ -34,23 +34,30 @@ const STATIC_ITEMS: MenuItem[] = [
 export default async function MenuPage() {
   const supabase = await createClient();
 
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("*")
-    .order("sort_order");
-
-  const { data: items } = await supabase
-    .from("menu_items")
-    .select("*")
-    .eq("available", true)
-    .order("sort_order");
+  const [{ data: categories }, { data: items }, { data: settings }] = await Promise.all([
+    supabase.from("categories").select("*").order("sort_order"),
+    supabase.from("menu_items").select("*").eq("available", true).order("sort_order"),
+    supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji"]),
+  ]);
 
   const finalCategories = (categories && categories.length > 0) ? categories as Category[] : STATIC_CATEGORIES;
   const finalItems = (items && items.length > 0) ? items as MenuItem[] : STATIC_ITEMS;
 
+  const settingsMap: Record<string, string> = {};
+  (settings ?? []).forEach((s: { key: string; value: string }) => { settingsMap[s.key] = s.value; });
+  const barraActiva = settingsMap["barra_libre_activa"] !== "false";
+  const barraTexto = settingsMap["barra_libre_texto"] ?? "Barra de ensalada libre con cada hamburguesa";
+  const barraEmoji = settingsMap["barra_libre_emoji"] ?? "🥗";
+
   return (
     <main className="min-h-screen bg-[#0F1117]">
-      <MenuContent categories={finalCategories} items={finalItems} />
+      <MenuContent
+        categories={finalCategories}
+        items={finalItems}
+        barraActiva={barraActiva}
+        barraTexto={barraTexto}
+        barraEmoji={barraEmoji}
+      />
     </main>
   );
 }

@@ -31,6 +31,12 @@ export default function OrderPage() {
     notes: "",
   });
 
+  useEffect(() => {
+    createClient()
+      .from("settings").select("value").eq("key", "delivery_fee").single()
+      .then(({ data }) => { if (data) setDelivery(Number(data.value)); });
+  }, []);
+
   // Pre-fill form with saved customer data on mount
   useEffect(() => {
     try {
@@ -51,8 +57,8 @@ export default function OrderPage() {
     }
   }, []);
 
+  const [delivery, setDelivery] = useState(3000);
   const subtotal = total();
-  const delivery = 3000;
   const grandTotal = subtotal + delivery;
 
   if (items.length === 0) {

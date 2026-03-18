@@ -1,15 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useCartStore } from "@/lib/store/cart";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/client";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, total, clearCart } = useCartStore();
+  const [delivery, setDelivery] = useState(3000);
   const subtotal = total();
-  const delivery = 3000;
   const grandTotal = subtotal + delivery;
+
+  useEffect(() => {
+    createClient()
+      .from("settings").select("value").eq("key", "delivery_fee").single()
+      .then(({ data }) => { if (data) setDelivery(Number(data.value)); });
+  }, []);
 
   if (items.length === 0) {
     return (

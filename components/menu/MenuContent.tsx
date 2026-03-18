@@ -8,6 +8,9 @@ import MenuItemCard from "./MenuItemCard";
 interface MenuContentProps {
   categories: Category[];
   items: MenuItem[];
+  barraActiva?: boolean;
+  barraTexto?: string;
+  barraEmoji?: string;
 }
 
 // Fallback map for categories that were created before the emoji column existed
@@ -25,7 +28,7 @@ function getCategoryEmoji(cat: Category): string {
   return "🍽️";
 }
 
-export default function MenuContent({ categories, items }: MenuContentProps) {
+export default function MenuContent({ categories, items, barraActiva = true, barraTexto = "Barra de ensalada libre con cada hamburguesa", barraEmoji = "🥗" }: MenuContentProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const activeItems = activeCategory
@@ -39,12 +42,12 @@ export default function MenuContent({ categories, items }: MenuContentProps) {
     return (
       <div className="max-w-5xl mx-auto px-3 pb-24">
         {/* Banner barra libre */}
-        <div className="mt-3 bg-[#D4A017] rounded-2xl px-4 py-3 flex items-center gap-2 mb-5">
-          <span className="text-xl">🥗</span>
-          <span className="text-[#111217] font-semibold text-xs">
-            Barra de ensalada libre con cada hamburguesa
-          </span>
-        </div>
+        {barraActiva && (
+          <div className="mt-3 bg-[#D4A017] rounded-2xl px-4 py-3 flex items-center gap-2 mb-5">
+            <span className="text-xl">{barraEmoji}</span>
+            <span className="text-[#111217] font-semibold text-xs">{barraTexto}</span>
+          </div>
+        )}
 
         <h2 className="text-white font-bold text-base mb-3 px-1">¿Qué quieres comer?</h2>
 
