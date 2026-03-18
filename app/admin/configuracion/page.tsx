@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
-import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X } from "lucide-react";
+import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X, Clock } from "lucide-react";
 
 const EMOJIS = ["🥗","🥬","🥦","🥕","🍅","🫑","🧅","🧄","🫒","🌽","🥒","🥑","🍋","🍓","🍇","🍉","🍎"];
 
@@ -22,6 +22,7 @@ export default function ConfiguracionPage() {
   const [localAbierto, setLocalAbierto] = useState(true);
   const [mensajeCerrado, setMensajeCerrado] = useState("Estamos cerrados por el momento. Vuelve pronto 🕐");
   const [whatsappAdmin, setWhatsappAdmin] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("30-45");
   const [ingredientes, setIngredientes] = useState<string[]>(DEFAULT_INGREDIENTES);
   const [newIng, setNewIng] = useState("");
   const ingInputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +36,7 @@ export default function ConfiguracionPage() {
       .in("key", [
         "barra_libre_activa","barra_libre_texto","barra_libre_emoji",
         "delivery_fee","local_abierto","mensaje_cerrado","whatsapp_admin",
-        "barra_libre_ingredientes",
+        "barra_libre_ingredientes","delivery_time",
       ])
       .then(({ data }) => {
         if (!data) return;
@@ -47,6 +48,7 @@ export default function ConfiguracionPage() {
           if (row.key === "local_abierto") setLocalAbierto(row.value !== "false");
           if (row.key === "mensaje_cerrado") setMensajeCerrado(row.value);
           if (row.key === "whatsapp_admin") setWhatsappAdmin(row.value);
+          if (row.key === "delivery_time") setDeliveryTime(row.value);
           if (row.key === "barra_libre_ingredientes") {
             try { setIngredientes(JSON.parse(row.value)); } catch { /* keep default */ }
           }
@@ -90,6 +92,7 @@ export default function ConfiguracionPage() {
       { key: "local_abierto", value: localAbierto ? "true" : "false" },
       { key: "mensaje_cerrado", value: mensajeCerrado },
       { key: "whatsapp_admin", value: whatsappAdmin },
+      { key: "delivery_time", value: deliveryTime },
       { key: "barra_libre_ingredientes", value: JSON.stringify(ingredientes) },
     ];
     const { error } = await supabase.from("settings").upsert(updates, { onConflict: "key" });
@@ -195,6 +198,28 @@ export default function ConfiguracionPage() {
           </div>
           <p className="text-[#888899] text-xs mt-1">
             Se mostrará como <strong className="text-[#CCCCCC]">${Number(deliveryFee || 0).toLocaleString("es-CO")}</strong> en el carrito
+          </p>
+        </div>
+      </div>
+
+      {/* Tiempo estimado de entrega */}
+      <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Clock size={18} className="text-[#D4A017]" />
+          <h2 className="text-[#F5F0E8] font-bold text-lg">Tiempo estimado de entrega</h2>
+        </div>
+        <div>
+          <label className="block text-[#F5F0E8] text-sm font-medium mb-2">Tiempo (minutos)</label>
+          <input
+            type="text"
+            value={deliveryTime}
+            onChange={(e) => setDeliveryTime(e.target.value)}
+            maxLength={20}
+            className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2.5 text-[#F5F0E8] text-sm focus:outline-none focus:border-[#D4A017] transition-colors"
+            placeholder="30-45"
+          />
+          <p className="text-[#888899] text-xs mt-1">
+            Se mostrará como <strong className="text-[#CCCCCC]">~{deliveryTime} min</strong> en el seguimiento del pedido
           </p>
         </div>
       </div>

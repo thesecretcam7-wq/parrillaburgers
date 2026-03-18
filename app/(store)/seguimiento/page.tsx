@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
-import { CheckCircle, Clock, ChefHat, Bike, Package, ShoppingBag } from "lucide-react";
+import { CheckCircle, Clock, ChefHat, Bike, Package, ShoppingBag, Timer } from "lucide-react";
 import { Suspense } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -25,6 +25,7 @@ function TrackingContent() {
   const [order, setOrder]   = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [deliveryTime, setDeliveryTime] = useState<string | null>(null);
   const verifiedRef = useRef(false);
 
   // Resolve order number: URL param → localStorage fallback
@@ -33,6 +34,13 @@ function TrackingContent() {
     setOrderNumber(resolved);
     if (!resolved) setLoading(false);
   }, [urlOrder]);
+
+  // Fetch delivery time setting
+  useEffect(() => {
+    createClient()
+      .from("settings").select("value").eq("key", "delivery_time").single()
+      .then(({ data }) => { if (data?.value) setDeliveryTime(data.value); });
+  }, []);
 
   // Verify Wompi payment when redirected from Wompi
   useEffect(() => {
@@ -203,6 +211,17 @@ function TrackingContent() {
             )}
           </div>
         </div>
+
+        {/* Tiempo estimado — solo en pedidos activos */}
+        {deliveryTime && order.status !== "delivered" && order.status !== "cancelled" && (
+          <div className="bg-[#2A2414] border border-[#D4A017]/20 rounded-2xl px-5 py-3 flex items-center gap-3">
+            <Timer size={18} className="text-[#D4A017] shrink-0" />
+            <div>
+              <p className="text-[#E8B830] text-sm font-semibold">Tiempo estimado de entrega</p>
+              <p className="text-[#D4A017]/70 text-xs">~{deliveryTime} minutos desde la confirmación</p>
+            </div>
+          </div>
+        )}
 
         {/* Status steps */}
         <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
