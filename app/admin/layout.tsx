@@ -4,7 +4,7 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag, Settings, LogOut, BarChart2, Ticket } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag, Settings, LogOut, BarChart2, Ticket, Star } from "lucide-react";
 
 const navLinks = [
   { href: "/admin",                label: "Dashboard",      icon: LayoutDashboard },
@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/admin/categorias",     label: "Categorías",     icon: Tag },
   { href: "/admin/clientes",       label: "Clientes",       icon: Users },
   { href: "/admin/cupones",        label: "Cupones",        icon: Ticket },
+  { href: "/admin/resenas",        label: "Reseñas",        icon: Star },
   { href: "/admin/banners",        label: "Banners",        icon: Image },
   { href: "/admin/configuracion",  label: "Configuración",  icon: Settings },
 ];
