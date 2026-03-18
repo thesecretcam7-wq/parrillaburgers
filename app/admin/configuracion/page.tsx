@@ -7,6 +7,23 @@ import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X, Clock } from "l
 
 const EMOJIS = ["🥗","🥬","🥦","🥕","🍅","🫑","🧅","🧄","🫒","🌽","🥒","🥑","🍋","🍓","🍇","🍉","🍎"];
 
+const DIAS = [
+  { key: "1", label: "Lunes" },
+  { key: "2", label: "Martes" },
+  { key: "3", label: "Miércoles" },
+  { key: "4", label: "Jueves" },
+  { key: "5", label: "Viernes" },
+  { key: "6", label: "Sábado" },
+  { key: "0", label: "Domingo" },
+];
+
+type HorarioDia = { active: boolean; open: string; close: string };
+type Horarios = Record<string, HorarioDia>;
+
+const DEFAULT_HORARIOS: Horarios = Object.fromEntries(
+  ["0","1","2","3","4","5","6"].map((d) => [d, { active: d !== "0", open: "11:00", close: "22:00" }])
+);
+
 const DEFAULT_INGREDIENTES = [
   "Lechuga","Tomate","Cebolla","Pepinillos","Jalapeños",
   "Maíz","Zanahoria","Aguacate","Champiñones","Pimentón",
@@ -23,6 +40,7 @@ export default function ConfiguracionPage() {
   const [mensajeCerrado, setMensajeCerrado] = useState("Estamos cerrados por el momento. Vuelve pronto 🕐");
   const [whatsappAdmin, setWhatsappAdmin] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("30-45");
+  const [horarios, setHorarios] = useState<Horarios>(DEFAULT_HORARIOS);
   const [ingredientes, setIngredientes] = useState<string[]>(DEFAULT_INGREDIENTES);
   const [newIng, setNewIng] = useState("");
   const ingInputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +54,7 @@ export default function ConfiguracionPage() {
       .in("key", [
         "barra_libre_activa","barra_libre_texto","barra_libre_emoji",
         "delivery_fee","local_abierto","mensaje_cerrado","whatsapp_admin",
-        "barra_libre_ingredientes","delivery_time",
+        "barra_libre_ingredientes","delivery_time","horarios",
       ])
       .then(({ data }) => {
         if (!data) return;
@@ -49,6 +67,9 @@ export default function ConfiguracionPage() {
           if (row.key === "mensaje_cerrado") setMensajeCerrado(row.value);
           if (row.key === "whatsapp_admin") setWhatsappAdmin(row.value);
           if (row.key === "delivery_time") setDeliveryTime(row.value);
+          if (row.key === "horarios") {
+            try { setHorarios(JSON.parse(row.value)); } catch { /* keep default */ }
+          }
           if (row.key === "barra_libre_ingredientes") {
             try { setIngredientes(JSON.parse(row.value)); } catch { /* keep default */ }
           }
@@ -93,6 +114,7 @@ export default function ConfiguracionPage() {
       { key: "mensaje_cerrado", value: mensajeCerrado },
       { key: "whatsapp_admin", value: whatsappAdmin },
       { key: "delivery_time", value: deliveryTime },
+      { key: "horarios", value: JSON.stringify(horarios) },
       { key: "barra_libre_ingredientes", value: JSON.stringify(ingredientes) },
     ];
     const { error } = await supabase.from("settings").upsert(updates, { onConflict: "key" });
@@ -221,6 +243,52 @@ export default function ConfiguracionPage() {
           <p className="text-[#888899] text-xs mt-1">
             Se mostrará como <strong className="text-[#CCCCCC]">~{deliveryTime} min</strong> en el seguimiento del pedido
           </p>
+        </div>
+      </div>
+
+      {/* Horarios */}
+      <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Clock size={18} className="text-[#D4A017]" />
+          <h2 className="text-[#F5F0E8] font-bold text-lg">Horarios de atención</h2>
+        </div>
+        <p className="text-[#888899] text-xs">
+          Si el local está marcado como <strong className="text-[#CCCCCC]">Abierto</strong>, el sistema revisará estos horarios automáticamente.
+        </p>
+        <div className="space-y-2">
+          {DIAS.map(({ key, label }) => {
+            const dia = horarios[key] ?? { active: false, open: "11:00", close: "22:00" };
+            return (
+              <div key={key} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${dia.active ? "border-[#2E3038] bg-[#1A1B21]" : "border-[#1A1B21] bg-[#111217] opacity-60"}`}>
+                <button
+                  onClick={() => setHorarios({ ...horarios, [key]: { ...dia, active: !dia.active } })}
+                  className={`w-10 h-6 rounded-full transition-colors shrink-0 relative ${dia.active ? "bg-[#D4A017]" : "bg-[#2E3038]"}`}
+                >
+                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${dia.active ? "left-5" : "left-1"}`} />
+                </button>
+                <span className="text-[#CCCCCC] text-sm w-24 shrink-0">{label}</span>
+                {dia.active ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="time"
+                      value={dia.open}
+                      onChange={(e) => setHorarios({ ...horarios, [key]: { ...dia, open: e.target.value } })}
+                      className="bg-[#111217] border border-[#2E3038] rounded-lg px-2 py-1.5 text-[#F5F0E8] text-xs focus:outline-none focus:border-[#D4A017] transition-colors"
+                    />
+                    <span className="text-[#555566] text-xs">→</span>
+                    <input
+                      type="time"
+                      value={dia.close}
+                      onChange={(e) => setHorarios({ ...horarios, [key]: { ...dia, close: e.target.value } })}
+                      className="bg-[#111217] border border-[#2E3038] rounded-lg px-2 py-1.5 text-[#F5F0E8] text-xs focus:outline-none focus:border-[#D4A017] transition-colors"
+                    />
+                  </div>
+                ) : (
+                  <span className="text-[#555566] text-xs">Cerrado</span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

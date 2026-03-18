@@ -37,7 +37,7 @@ export default async function MenuPage() {
   const [{ data: categories }, { data: items }, { data: settings }] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order"),
     supabase.from("menu_items").select("*").eq("available", true).order("sort_order"),
-    supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji", "local_abierto", "mensaje_cerrado"]),
+    supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji", "local_abierto", "mensaje_cerrado", "horarios"]),
   ]);
 
   const finalCategories = (categories && categories.length > 0) ? categories as Category[] : STATIC_CATEGORIES;
@@ -48,8 +48,31 @@ export default async function MenuPage() {
   const barraActiva = settingsMap["barra_libre_activa"] !== "false";
   const barraTexto = settingsMap["barra_libre_texto"] ?? "Barra de ensalada libre con cada hamburguesa";
   const barraEmoji = settingsMap["barra_libre_emoji"] ?? "🥗";
-  const localAbierto = settingsMap["local_abierto"] !== "false";
+  const manualAbierto = settingsMap["local_abierto"] !== "false";
   const mensajeCerrado = settingsMap["mensaje_cerrado"] ?? "Estamos cerrados por el momento. Vuelve pronto 🕐";
+
+  // Verificar horario automático (zona horaria Colombia UTC-5)
+  let localAbierto = manualAbierto;
+  if (manualAbierto && settingsMap["horarios"]) {
+    try {
+      const horarios = JSON.parse(settingsMap["horarios"]);
+      const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Bogota" }));
+      const dayKey = String(now.getDay());
+      const dia = horarios[dayKey];
+      if (dia) {
+        if (!dia.active) {
+          localAbierto = false;
+        } else {
+          const [openH, openM] = dia.open.split(":").map(Number);
+          const [closeH, closeM] = dia.close.split(":").map(Number);
+          const currentMin = now.getHours() * 60 + now.getMinutes();
+          const openMin = openH * 60 + openM;
+          const closeMin = closeH * 60 + closeM;
+          localAbierto = currentMin >= openMin && currentMin < closeMin;
+        }
+      }
+    } catch { /* keep manual value */ }
+  }
 
   return (
     <main className="min-h-screen bg-[#0F1117]">
