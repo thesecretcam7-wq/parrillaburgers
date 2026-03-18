@@ -26,6 +26,7 @@ function TrackingContent() {
   const [loading, setLoading] = useState(true);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [deliveryTime, setDeliveryTime] = useState<string | null>(null);
+  const prevStatusRef = useRef<string | null>(null);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSent, setReviewSent] = useState(false);
@@ -65,6 +66,29 @@ function TrackingContent() {
     })();
   }, [wompiTxId, urlOrder]);
 
+  // Request notification permission once
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const NOTIFY_MESSAGES: Partial<Record<OrderStatus, { title: string; body: string }>> = {
+    confirmed:  { title: "✅ Pedido confirmado",    body: "Tu pedido fue recibido y confirmado." },
+    preparing:  { title: "👨‍🍳 Preparando tu pedido", body: "El equipo está cocinando tu pedido." },
+    on_the_way: { title: "🛵 ¡Pedido en camino!",   body: "Tu domicilio ya está en ruta." },
+    delivered:  { title: "🎉 ¡Pedido entregado!",   body: "Esperamos que lo disfrutes. ¡Buen provecho!" },
+    cancelled:  { title: "❌ Pedido cancelado",      body: "Tu pedido fue cancelado. Contáctanos si tienes dudas." },
+  };
+
+  const notifyChange = (newStatus: OrderStatus) => {
+    const msg = NOTIFY_MESSAGES[newStatus];
+    if (!msg || typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      new Notification(msg.title, { body: msg.body, icon: "/logo-real.png" });
+    }
+  };
+
   // Fetch order + realtime subscription
   useEffect(() => {
     if (!orderNumber) return;
@@ -72,20 +96,32 @@ function TrackingContent() {
     setLoading(true);
 
     supabase.from("orders").select("*").eq("order_number", orderNumber).single()
-      .then(({ data }) => { setOrder(data); setLoading(false); });
+      .then(({ data }) => {
+        if (data) prevStatusRef.current = data.status;
+        setOrder(data);
+        setLoading(false);
+      });
+
+    const handleUpdate = (newOrder: Order) => {
+      if (prevStatusRef.current && newOrder.status !== prevStatusRef.current) {
+        notifyChange(newOrder.status as OrderStatus);
+      }
+      prevStatusRef.current = newOrder.status;
+      setOrder(newOrder);
+    };
 
     const channel = supabase
       .channel(`order-${orderNumber}`)
       .on("postgres_changes", {
         event: "UPDATE", schema: "public", table: "orders",
         filter: `order_number=eq.${orderNumber}`,
-      }, (payload) => setOrder(payload.new as Order))
+      }, (payload) => handleUpdate(payload.new as Order))
       .subscribe();
 
     // Polling fallback: re-fetch every 5s so status updates even if Realtime is not enabled
     const poll = () =>
       supabase.from("orders").select("*").eq("order_number", orderNumber).single()
-        .then(({ data }) => { if (data) setOrder(data); });
+        .then(({ data }) => { if (data) handleUpdate(data); });
     const interval = setInterval(poll, 5_000);
 
     return () => { supabase.removeChannel(channel); clearInterval(interval); };
