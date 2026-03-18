@@ -25,6 +25,7 @@ export default function AdminCategoriasPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -86,6 +87,26 @@ export default function AdminCategoriasPage() {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggingId || draggingId === targetId) return;
+    const from = categories.findIndex((c) => c.id === draggingId);
+    const to = categories.findIndex((c) => c.id === targetId);
+    const reordered = [...categories];
+    reordered.splice(to, 0, reordered.splice(from, 1)[0]);
+    setCategories(reordered);
+  };
+
+  const handleDrop = async () => {
+    setDraggingId(null);
+    await Promise.all(
+      categories.map((cat, i) =>
+        supabase.from("categories").update({ sort_order: i + 1 }).eq("id", cat.id)
+      )
+    );
+    toast.success("Orden guardado");
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("¿Eliminar esta categoría? Los productos en esta categoría quedarán sin categoría.")) return;
     setDeletingId(id);
@@ -132,9 +153,18 @@ export default function AdminCategoriasPage() {
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="bg-[#1A1B21] border border-[#2E3038] rounded-2xl px-4 py-3.5 flex items-center gap-3"
+              draggable
+              onDragStart={() => setDraggingId(cat.id)}
+              onDragOver={(e) => handleDragOver(e, cat.id)}
+              onDrop={handleDrop}
+              onDragEnd={() => setDraggingId(null)}
+              className={`bg-[#1A1B21] border rounded-2xl px-4 py-3.5 flex items-center gap-3 transition-all ${
+                draggingId === cat.id
+                  ? "opacity-40 border-[#D4A017]/50 scale-[0.98]"
+                  : "border-[#2E3038] hover:border-[#2E3038]"
+              }`}
             >
-              <GripVertical size={16} className="text-[#444455] shrink-0" />
+              <GripVertical size={16} className="text-[#444455] shrink-0 cursor-grab active:cursor-grabbing" />
               {cat.emoji && (
                 <span className="text-2xl leading-none shrink-0">{cat.emoji}</span>
               )}

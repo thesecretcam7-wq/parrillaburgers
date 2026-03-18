@@ -46,6 +46,8 @@ export default function AdminMenuPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [barraLibreSugerencias, setBarraLibreSugerencias] = useState<string[]>(DEFAULT_BARRA_LIBRE);
 
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
   // Category form
   const [catModal, setCatModal] = useState(false);
   const [catName, setCatName] = useState("");
@@ -155,6 +157,26 @@ export default function AdminMenuPage() {
     ? items
     : items.filter((i) => i.category_id === activeCategory);
 
+  const handleItemDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggingId || draggingId === targetId) return;
+    const from = items.findIndex((i) => i.id === draggingId);
+    const to = items.findIndex((i) => i.id === targetId);
+    const reordered = [...items];
+    reordered.splice(to, 0, reordered.splice(from, 1)[0]);
+    setItems(reordered);
+  };
+
+  const handleItemDrop = async () => {
+    setDraggingId(null);
+    await Promise.all(
+      items.map((item, idx) =>
+        supabase.from("menu_items").update({ sort_order: idx + 1 }).eq("id", item.id)
+      )
+    );
+    toast.success("Orden guardado");
+  };
+
   const inputCls = "w-full bg-[#111217] border border-[#2E3038] rounded-lg px-3 py-2.5 text-[#F5F0E8] placeholder-[#555566] focus:outline-none focus:border-[#D4A017] text-sm transition-colors";
 
   function BarraLibreCustomInput({ items, onChange }: { items: string[]; onChange: (i: string[]) => void }) {
@@ -252,7 +274,17 @@ export default function AdminMenuPage() {
             </thead>
             <tbody>
               {filteredItems.map((item) => (
-                <tr key={item.id} className="border-b border-[#2E3038] last:border-0 hover:bg-[#22232B] transition-colors">
+                <tr
+                  key={item.id}
+                  draggable
+                  onDragStart={() => setDraggingId(item.id)}
+                  onDragOver={(e) => handleItemDragOver(e, item.id)}
+                  onDrop={handleItemDrop}
+                  onDragEnd={() => setDraggingId(null)}
+                  className={`border-b border-[#2E3038] last:border-0 transition-colors cursor-grab active:cursor-grabbing ${
+                    draggingId === item.id ? "opacity-40 bg-[#D4A017]/5" : "hover:bg-[#22232B]"
+                  }`}
+                >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-[#22232B] flex items-center justify-center shrink-0 overflow-hidden">
