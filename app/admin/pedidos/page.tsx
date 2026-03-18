@@ -1,67 +1,131 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
+import toast from "react-hot-toast";
+import { ShoppingBag } from "lucide-react";
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: "pending", label: "Pendiente" },
-  { value: "confirmed", label: "Confirmado" },
-  { value: "preparing", label: "Preparando" },
+  { value: "pending",    label: "Pendiente" },
+  { value: "confirmed",  label: "Confirmado" },
+  { value: "preparing",  label: "Preparando" },
   { value: "on_the_way", label: "En camino" },
-  { value: "delivered", label: "Entregado" },
-  { value: "cancelled", label: "Cancelado" },
+  { value: "delivered",  label: "Entregado" },
+  { value: "cancelled",  label: "Cancelado" },
 ];
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  confirmed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  preparing: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  pending:    "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  confirmed:  "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  preparing:  "bg-orange-500/20 text-orange-400 border-orange-500/30",
   on_the_way: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  delivered: "bg-green-500/20 text-green-400 border-green-500/30",
-  cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
+  delivered:  "bg-green-500/20 text-green-400 border-green-500/30",
+  cancelled:  "bg-red-500/20 text-red-400 border-red-500/30",
 };
 
+/** Genera un sonido de notificación con Web Audio API (sin archivos externos) */
+function playNotificationSound() {
+  try {
+    const ctx = new AudioContext();
+    const notes = [523.25, 659.25, 783.99]; // Do-Mi-Sol
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const start = ctx.currentTime + i * 0.15;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.4, start + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+      osc.start(start);
+      osc.stop(start + 0.3);
+    });
+  } catch {
+    // Contexto de audio no disponible
+  }
+}
+
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders]   = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter]   = useState<string>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  // IDs conocidos — ref para no re-ejecutar el efecto
+  const knownIds  = useRef<Set<string>>(new Set());
+  const firstLoad = useRef(true);
 
   useEffect(() => {
     const supabase = createClient();
 
-    const fetch = async () => {
+    const fetchOrders = async () => {
       const q = supabase.from("orders").select("*").order("created_at", { ascending: false });
-      let data;
-      if (filter === "all") {
-        // Default: hide delivered and cancelled — show only active orders
-        ({ data } = await q.neq("status", "delivered").neq("status", "cancelled"));
-      } else {
-        ({ data } = await q.eq("status", filter));
+      const { data } = filter === "all"
+        ? await q.neq("status", "delivered").neq("status", "cancelled")
+        : await q.eq("status", filter);
+
+      const incoming: Order[] = data ?? [];
+
+      // Detectar pedidos nuevos (solo después de la primera carga)
+      if (!firstLoad.current) {
+        const newOrders = incoming.filter((o) => !knownIds.current.has(o.id));
+        newOrders.forEach((o) => {
+          playNotificationSound();
+          toast.custom(
+            (t) => (
+              <div
+                className={`flex items-center gap-3 bg-[#1A1B21] border border-[#D4A017] rounded-2xl px-4 py-3 shadow-lg cursor-pointer ${
+                  t.visible ? "animate-enter" : "animate-leave"
+                }`}
+                onClick={() => toast.dismiss(t.id)}
+              >
+                <div className="w-9 h-9 rounded-full bg-[#D4A017]/20 flex items-center justify-center shrink-0">
+                  <ShoppingBag size={18} className="text-[#D4A017]" />
+                </div>
+                <div>
+                  <p className="text-white font-bold text-sm">¡Nuevo pedido!</p>
+                  <p className="text-[#CCCCCC] text-xs">{o.customer_name} · ${o.total?.toLocaleString("es-CO")}</p>
+                </div>
+              </div>
+            ),
+            { duration: 8000, position: "top-right" }
+          );
+        });
       }
-      setOrders(data ?? []);
+
+      // Actualizar IDs conocidos
+      incoming.forEach((o) => knownIds.current.add(o.id));
+      firstLoad.current = false;
+
+      setOrders(incoming);
       setLoading(false);
     };
-    fetch();
 
-    // Realtime
+    fetchOrders();
+
     const channel = supabase
       .channel("admin-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders)
       .subscribe();
 
-    // Polling fallback: re-fetch every 8s in case Realtime is not enabled on the table
-    const interval = setInterval(fetch, 8_000);
+    const interval = setInterval(fetchOrders, 8_000);
 
-    return () => { supabase.removeChannel(channel); clearInterval(interval); };
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, [filter]);
 
   const updateStatus = async (orderId: string, status: OrderStatus) => {
     const supabase = createClient();
-    const { error } = await supabase.from("orders").update({ status, updated_at: new Date().toISOString() }).eq("id", orderId);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", orderId);
     if (error) { console.error("Error updating order:", error); return; }
-    // Update local state immediately (don't wait for Realtime)
     if (status === "delivered" || status === "cancelled") {
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
       setExpanded(null);
@@ -78,7 +142,11 @@ export default function AdminOrdersPage() {
       <div className="flex gap-2 flex-wrap mb-6">
         <button
           onClick={() => setFilter("all")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${filter === "all" ? "bg-[#D4A017] text-[#111217] border-[#D4A017]" : "border-[#2E3038] text-[#CCCCCC] hover:border-[#D4A017]"}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            filter === "all"
+              ? "bg-[#D4A017] text-[#111217] border-[#D4A017]"
+              : "border-[#2E3038] text-[#CCCCCC] hover:border-[#D4A017]"
+          }`}
         >
           Activos
         </button>
@@ -86,7 +154,11 @@ export default function AdminOrdersPage() {
           <button
             key={s.value}
             onClick={() => setFilter(s.value)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${filter === s.value ? "bg-[#D4A017] text-[#111217] border-[#D4A017]" : "border-[#2E3038] text-[#CCCCCC] hover:border-[#D4A017]"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+              filter === s.value
+                ? "bg-[#D4A017] text-[#111217] border-[#D4A017]"
+                : "border-[#2E3038] text-[#CCCCCC] hover:border-[#D4A017]"
+            }`}
           >
             {s.label}
           </button>
