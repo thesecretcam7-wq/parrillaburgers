@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User, CheckCircle, CreditCard, Banknote } from "lucide-react";
+import { User, CheckCircle, CreditCard, Banknote, Star } from "lucide-react";
 
 const STORAGE_KEY = "pb-customer";
+// 100 puntos = $1.000 de descuento
+const POINTS_PER_DISCOUNT = 100;
+const DISCOUNT_PER_BLOCK = 1000;
 
 type FormData = {
   name: string;
@@ -22,14 +25,13 @@ export default function OrderPage() {
   const router = useRouter();
   const { items, total, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
-  const [returning, setReturning] = useState(false); // true when data was pre-filled
+  const [returning, setReturning] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"wompi" | "cash">("wompi");
+  const [customerPoints, setCustomerPoints] = useState(0);
+  const [usePoints, setUsePoints] = useState(false);
+  const [delivery, setDelivery] = useState(3000);
   const [form, setForm] = useState<FormData>({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    notes: "",
+    name: "", email: "", phone: "", address: "", notes: "",
   });
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function OrderPage() {
       .then(({ data }) => { if (data) setDelivery(Number(data.value)); });
   }, []);
 
-  // Pre-fill form with saved customer data on mount
+  // Pre-fill form with saved customer data
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -53,22 +55,33 @@ export default function OrderPage() {
         }));
         setReturning(true);
       }
-    } catch {
-      // Ignore parse errors
-    }
+    } catch { /* ignore */ }
   }, []);
 
-  const [delivery, setDelivery] = useState(3000);
+  // Fetch customer points when email is known
+  useEffect(() => {
+    if (!form.email) { setCustomerPoints(0); return; }
+    createClient()
+      .from("customers").select("points").eq("email", form.email).single()
+      .then(({ data }) => { setCustomerPoints(data?.points ?? 0); });
+  }, [form.email]);
+
   const subtotal = total();
-  const grandTotal = subtotal + delivery;
+  // Discount: floor to nearest 100-point block, capped to subtotal
+  const maxDiscount = Math.min(
+    Math.floor(customerPoints / POINTS_PER_DISCOUNT) * DISCOUNT_PER_BLOCK,
+    subtotal
+  );
+  const pointsDiscount = usePoints ? maxDiscount : 0;
+  const grandTotal = subtotal + delivery - pointsDiscount;
+  const pointsUsed = usePoints ? Math.ceil(pointsDiscount / DISCOUNT_PER_BLOCK) * POINTS_PER_DISCOUNT : 0;
+  const pointsEarned = Math.floor(grandTotal / 1000);
 
   if (items.length === 0) {
     return (
       <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4">
         <p className="text-[#9CA3AF] mb-4 text-sm">No tienes productos en tu carrito</p>
-        <Link href="/" className="text-[#D4A017] font-semibold hover:underline">
-          Ver Menú
-        </Link>
+        <Link href="/" className="text-[#D4A017] font-semibold hover:underline">Ver Menú</Link>
       </main>
     );
   }
@@ -120,7 +133,7 @@ export default function OrderPage() {
           total: grandTotal,
           status: "pending",
           payment_status: "pending",
-          points_earned: Math.floor(grandTotal / 1000),
+          points_earned: pointsEarned,
           wompi_transaction_id: paymentMethod === "cash" ? "CONTRA_ENTREGA" : null,
         })
         .select()
@@ -128,15 +141,15 @@ export default function OrderPage() {
 
       if (error) throw error;
 
-      // Persist customer data for future orders
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address })
-      );
-      // Save last order number so tracking page can show it automatically
+      // Deduct used points and add earned points
+      if (customer?.id) {
+        const newPoints = customerPoints - pointsUsed + pointsEarned;
+        await supabase.from("customers").update({ points: newPoints }).eq("id", customer.id);
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address }));
       localStorage.setItem("pb-last-order", orderNumber);
 
-      // Pago contra entrega: ir directo al seguimiento
       if (paymentMethod === "cash") {
         clearCart();
         toast.success(`¡Pedido ${orderNumber} creado! Pagarás al recibir.`);
@@ -147,34 +160,20 @@ export default function OrderPage() {
       const wompiKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
       if (wompiKey && !wompiKey.includes("PEGAR") && order) {
         const amountInCents = grandTotal * 100;
-
-        // Generate integrity signature server-side (keeps WOMPI_INTEGRITY_KEY secret)
         const sigRes = await fetch("/api/wompi/signature", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            reference: order.order_number,
-            amountInCents,
-            currency: "COP",
-          }),
+          body: JSON.stringify({ reference: order.order_number, amountInCents, currency: "COP" }),
         });
         const { signature } = await sigRes.json();
-
-        const appUrl =
-          process.env.NEXT_PUBLIC_APP_URL ||
-          `${window.location.protocol}//${window.location.host}`;
-
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${window.location.protocol}//${window.location.host}`;
         const wompiUrl = new URL("https://checkout.wompi.co/p/");
         wompiUrl.searchParams.set("public-key", wompiKey);
         wompiUrl.searchParams.set("currency", "COP");
         wompiUrl.searchParams.set("amount-in-cents", String(amountInCents));
         wompiUrl.searchParams.set("reference", order.order_number);
         wompiUrl.searchParams.set("signature:integrity", signature);
-        wompiUrl.searchParams.set(
-          "redirect-url",
-          `${appUrl}/seguimiento?order=${order.order_number}`
-        );
-        // Pre-fill customer data so they don't have to re-enter it
+        wompiUrl.searchParams.set("redirect-url", `${appUrl}/seguimiento?order=${order.order_number}`);
         wompiUrl.searchParams.set("customer-data:email", form.email);
         wompiUrl.searchParams.set("customer-data:full-name", form.name);
         wompiUrl.searchParams.set("customer-data:phone-number", form.phone);
@@ -194,14 +193,11 @@ export default function OrderPage() {
     }
   };
 
-  const inputClass =
-    "w-full bg-[#22242C] border border-[#2E3038] rounded-xl px-4 py-3 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] transition-colors text-sm";
+  const inputClass = "w-full bg-[#22242C] border border-[#2E3038] rounded-xl px-4 py-3 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] transition-colors text-sm";
 
   return (
     <main className="min-h-screen bg-[#0F1117] px-4 py-4 pb-24">
       <div className="max-w-lg mx-auto space-y-3">
-
-        {/* Form card */}
         <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold flex items-center gap-2">
@@ -215,6 +211,8 @@ export default function OrderPage() {
                   localStorage.removeItem(STORAGE_KEY);
                   setForm({ name: "", email: "", phone: "", address: "", notes: "" });
                   setReturning(false);
+                  setCustomerPoints(0);
+                  setUsePoints(false);
                 }}
                 className="text-[#6B7280] text-xs hover:text-[#9CA3AF] transition-colors"
               >
@@ -223,7 +221,6 @@ export default function OrderPage() {
             )}
           </div>
 
-          {/* Returning customer banner */}
           {returning && (
             <div className="mb-4 bg-[#1E2A1A] border border-green-800/30 rounded-xl px-4 py-2.5 flex items-center gap-2">
               <CheckCircle size={14} className="text-green-400 shrink-0" />
@@ -232,64 +229,33 @@ export default function OrderPage() {
               </p>
             </div>
           )}
+
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Nombre completo *</label>
-                <input
-                  className={inputClass}
-                  placeholder="Tu nombre"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
+                <input className={inputClass} placeholder="Tu nombre" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div>
                 <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Email *</label>
-                <input
-                  className={inputClass}
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                />
+                <input className={inputClass} type="email" placeholder="tu@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
               </div>
               <div>
                 <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Teléfono *</label>
-                <input
-                  className={inputClass}
-                  placeholder="300 000 0000"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  required
-                />
+                <input className={inputClass} placeholder="300 000 0000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
               </div>
               <div>
                 <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Dirección de entrega *</label>
-                <input
-                  className={inputClass}
-                  placeholder="Calle, barrio, ciudad"
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  required
-                />
+                <input className={inputClass} placeholder="Calle, barrio, ciudad" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
               </div>
             </div>
             <div>
               <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Notas (opcional)</label>
-              <textarea
-                className={`${inputClass} resize-none h-20`}
-                placeholder="Sin cebolla, extra queso, indicaciones de entrega..."
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              />
+              <textarea className={`${inputClass} resize-none h-20`} placeholder="Sin cebolla, extra queso, indicaciones de entrega..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
-            <p className="text-[#6B7280] text-xs">
-              Al continuar, crearemos una cuenta para acumular puntos y rastrear tus pedidos.
-            </p>
+            <p className="text-[#6B7280] text-xs">Al continuar, crearemos una cuenta para acumular puntos y rastrear tus pedidos.</p>
 
-            {/* Order summary inline */}
+            {/* Order summary */}
             <div className="bg-[#22242C] rounded-xl p-4 space-y-2 text-sm">
               {items.map(({ item, quantity }) => (
                 <div key={item.id} className="flex justify-between">
@@ -301,17 +267,53 @@ export default function OrderPage() {
                 <span>Domicilio</span>
                 <span>${delivery.toLocaleString("es-CO")}</span>
               </div>
-              <div className="flex justify-between font-bold text-base pt-1">
+              {pointsDiscount > 0 && (
+                <div className="flex justify-between text-green-400">
+                  <span>Descuento puntos ({pointsUsed} pts)</span>
+                  <span>-${pointsDiscount.toLocaleString("es-CO")}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-base pt-1 border-t border-[#2E3038]">
                 <span className="text-white">Total</span>
                 <span className="text-[#D4A017]">${grandTotal.toLocaleString("es-CO")}</span>
               </div>
             </div>
 
-            {/* Points strip */}
+            {/* Points redemption — solo si tiene >= 100 puntos */}
+            {customerPoints >= POINTS_PER_DISCOUNT && (
+              <button
+                type="button"
+                onClick={() => setUsePoints(!usePoints)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
+                  usePoints
+                    ? "bg-[#D4A017]/10 border-[#D4A017]"
+                    : "bg-[#22242C] border-[#2E3038] hover:border-[#D4A017]/40"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Star size={16} className={usePoints ? "text-[#D4A017]" : "text-[#6B7280]"} />
+                  <div className="text-left">
+                    <p className={`text-sm font-semibold ${usePoints ? "text-[#D4A017]" : "text-[#9CA3AF]"}`}>
+                      Usar mis puntos
+                    </p>
+                    <p className="text-[#6B7280] text-xs">
+                      {customerPoints} puntos = -${maxDiscount.toLocaleString("es-CO")} de descuento
+                    </p>
+                  </div>
+                </div>
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                  usePoints ? "border-[#D4A017] bg-[#D4A017]" : "border-[#2E3038]"
+                }`}>
+                  {usePoints && <CheckCircle size={12} className="text-[#0F1117]" />}
+                </div>
+              </button>
+            )}
+
+            {/* Points earned strip */}
             <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2">
               <span className="text-lg">🎯</span>
               <p className="text-[#E8B830] text-xs font-medium">
-                Ganarás <strong>{Math.floor(grandTotal / 1000)} puntos</strong> con este pedido
+                Ganarás <strong>{pointsEarned} puntos</strong> con este pedido
               </p>
             </div>
 
@@ -354,12 +356,11 @@ export default function OrderPage() {
               {loading
                 ? "Procesando..."
                 : paymentMethod === "cash"
-                ? `Pedir y pagar al recibir`
+                ? "Pedir y pagar al recibir"
                 : `Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
             </button>
           </form>
         </div>
-
       </div>
     </main>
   );
