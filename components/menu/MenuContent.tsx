@@ -8,6 +8,7 @@ import MenuItemCard from "./MenuItemCard";
 interface MenuContentProps {
   categories: Category[];
   items: MenuItem[];
+  topItems?: MenuItem[];
   barraActiva?: boolean;
   barraTexto?: string;
   barraEmoji?: string;
@@ -32,6 +33,7 @@ function getCategoryEmoji(cat: Category): string {
 export default function MenuContent({
   categories,
   items,
+  topItems = [],
   barraActiva = true,
   barraTexto = "Barra de ensalada libre con cada hamburguesa",
   barraEmoji = "🥗",
@@ -114,6 +116,31 @@ export default function MenuContent({
         <div className="mb-5">
           <SearchBar value={search} onChange={setSearch} />
         </div>
+
+        {/* Lo más pedido */}
+        {topItems.length > 0 && (
+          <div className="mb-5">
+            <h2 className="text-white font-bold text-base mb-3 px-1">🔥 Lo más pedido</h2>
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-3 px-3 scrollbar-none">
+              {topItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveCategory(item.category_id)}
+                  className="flex-none w-36 bg-[#1A1B21] border border-[#2E3038] rounded-2xl p-3 text-left hover:border-[#D4A017]/50 active:scale-[0.97] transition-all"
+                >
+                  <div className="text-2xl mb-2">{
+                    (() => {
+                      const cat = categories.find((c) => c.id === item.category_id);
+                      return cat ? getCategoryEmoji(cat) : "🍔";
+                    })()
+                  }</div>
+                  <p className="text-white font-semibold text-xs leading-tight line-clamp-2">{item.name}</p>
+                  <p className="text-[#D4A017] font-bold text-xs mt-1">${item.price.toLocaleString("es-CO")}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <h2 className="text-white font-bold text-base mb-3 px-1">¿Qué quieres comer?</h2>
 

@@ -34,14 +34,29 @@ const STATIC_ITEMS: MenuItem[] = [
 export default async function MenuPage() {
   const supabase = await createClient();
 
-  const [{ data: categories }, { data: items }, { data: settings }] = await Promise.all([
+  const [{ data: categories }, { data: items }, { data: settings }, { data: recentOrders }] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order"),
     supabase.from("menu_items").select("*").eq("available", true).order("sort_order"),
     supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji", "local_abierto", "mensaje_cerrado", "horarios"]),
+    supabase.from("orders").select("items").neq("status", "cancelled").order("created_at", { ascending: false }).limit(200),
   ]);
 
   const finalCategories = (categories && categories.length > 0) ? categories as Category[] : STATIC_CATEGORIES;
   const finalItems = (items && items.length > 0) ? items as MenuItem[] : STATIC_ITEMS;
+
+  // Compute top sellers from recent orders
+  const countMap: Record<string, number> = {};
+  for (const order of (recentOrders ?? [])) {
+    for (const item of (order.items as any[] ?? [])) {
+      const id = item.menu_item_id ?? item.id;
+      if (id) countMap[id] = (countMap[id] ?? 0) + (item.quantity ?? 1);
+    }
+  }
+  const topItems = Object.entries(countMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([id]) => finalItems.find((i) => i.id === id))
+    .filter(Boolean) as MenuItem[];
 
   const settingsMap: Record<string, string> = {};
   (settings ?? []).forEach((s: { key: string; value: string }) => { settingsMap[s.key] = s.value; });
@@ -79,6 +94,7 @@ export default async function MenuPage() {
       <MenuContent
         categories={finalCategories}
         items={finalItems}
+        topItems={topItems}
         barraActiva={barraActiva}
         barraTexto={barraTexto}
         barraEmoji={barraEmoji}
