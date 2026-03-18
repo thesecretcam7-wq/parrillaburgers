@@ -52,8 +52,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div className="p-5 border-b border-[#2E3038]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-black border border-white/20 flex items-center justify-center shrink-0 overflow-hidden">
-              <NextImage src="/logo.svg" alt="ParillaBurgers" width={36} height={36} />
+            <div className="w-9 h-9 flex items-center justify-center shrink-0">
+              <NextImage src="/logo-real.png" alt="ParillaBurgers" width={44} height={34} className="brightness-0 invert" />
             </div>
             <div>
               <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>
@@ -83,8 +83,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }`}>
         <div className="p-5 border-b border-[#2E3038] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-black border border-white/20 flex items-center justify-center shrink-0 overflow-hidden">
-              <NextImage src="/logo.svg" alt="ParillaBurgers" width={36} height={36} />
+            <div className="w-9 h-9 flex items-center justify-center shrink-0">
+              <NextImage src="/logo-real.png" alt="ParillaBurgers" width={44} height={34} className="brightness-0 invert" />
             </div>
             <div>
               <p className="text-[#F5F0E8] font-bold text-sm">ParillaBurgers</p>

@@ -29,8 +29,18 @@ export default async function Home() {
       )}
 
       {/* Logo */}
-      <div className="mb-8">
-        <Image src="/logo-full.svg" alt="ParillaBurgers" width={200} height={240} priority className="drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]" />
+      <div className="flex flex-col items-center mb-8">
+        <Image
+          src="/logo-real.png"
+          alt="ParillaBurgers"
+          width={240}
+          height={187}
+          priority
+          className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)]"
+        />
+        <p className="text-white italic text-lg mt-3 font-medium tracking-wide">
+          ¡ A la parrilla sabe mejor !
+        </p>
       </div>
 
       {/* Barra libre banner */}

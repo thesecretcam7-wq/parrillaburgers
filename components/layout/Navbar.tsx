@@ -46,10 +46,15 @@ export default function Navbar() {
             <ArrowLeft size={18} className="text-white" />
           </Link>
         ) : (
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-9 h-9 rounded-full bg-black border border-white/20 flex items-center justify-center overflow-hidden">
-              <Image src="/logo.svg" alt="ParillaBurgers" width={36} height={36} priority />
-            </div>
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <Image
+              src="/logo-real.png"
+              alt="ParillaBurgers"
+              width={44}
+              height={34}
+              priority
+              className="brightness-0 invert"
+            />
             <div className="flex flex-col leading-none">
               <span className="font-black text-white text-sm leading-tight">
                 Parrilla<span className="text-[#D4A017]">Burgers</span>
