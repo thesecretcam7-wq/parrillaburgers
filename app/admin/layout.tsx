@@ -4,7 +4,7 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag, Settings } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag, Settings, LogOut } from "lucide-react";
 
 const navLinks = [
   { href: "/admin",                label: "Dashboard",      icon: LayoutDashboard },
@@ -63,10 +63,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
         <NavItems />
-        <div className="p-4 border-t border-[#2E3038]">
-          <Link href="/" className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors">
+        <div className="p-4 border-t border-[#2E3038] space-y-1">
+          <Link href="/" className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors py-1">
             <ArrowLeft size={14} /> Ver sitio
           </Link>
+          <form action="/api/auth/logout" method="POST">
+            <button type="submit" className="flex items-center gap-2 text-[#888899] hover:text-red-400 text-xs transition-colors py-1 w-full">
+              <LogOut size={14} /> Cerrar sesión
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -97,10 +102,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
         <NavItems onClose={() => setSidebarOpen(false)} />
-        <div className="p-4 border-t border-[#2E3038]">
-          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors">
+        <div className="p-4 border-t border-[#2E3038] space-y-1">
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2 text-[#888899] hover:text-[#CCCCCC] text-xs transition-colors py-1">
             <ArrowLeft size={14} /> Ver sitio
           </Link>
+          <form action="/api/auth/logout" method="POST">
+            <button type="submit" className="flex items-center gap-2 text-[#888899] hover:text-red-400 text-xs transition-colors py-1 w-full">
+              <LogOut size={14} /> Cerrar sesión
+            </button>
+          </form>
         </div>
       </aside>
 
