@@ -4,15 +4,16 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag, Settings } from "lucide-react";
 
 const navLinks = [
-  { href: "/admin",              label: "Dashboard",  icon: LayoutDashboard },
-  { href: "/admin/pedidos",      label: "Pedidos",    icon: ShoppingBag },
-  { href: "/admin/menu",         label: "Menú",       icon: UtensilsCrossed },
-  { href: "/admin/categorias",   label: "Categorías", icon: Tag },
-  { href: "/admin/clientes",     label: "Clientes",   icon: Users },
-  { href: "/admin/banners",      label: "Banners",    icon: Image },
+  { href: "/admin",                label: "Dashboard",      icon: LayoutDashboard },
+  { href: "/admin/pedidos",        label: "Pedidos",        icon: ShoppingBag },
+  { href: "/admin/menu",           label: "Menú",           icon: UtensilsCrossed },
+  { href: "/admin/categorias",     label: "Categorías",     icon: Tag },
+  { href: "/admin/clientes",       label: "Clientes",       icon: Users },
+  { href: "/admin/banners",        label: "Banners",        icon: Image },
+  { href: "/admin/configuracion",  label: "Configuración",  icon: Settings },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -10,13 +10,18 @@ export const revalidate = 60;
 export default async function Home() {
   const supabase = await createClient();
 
-  const { data: banners } = await supabase
-    .from("banners")
-    .select("*")
-    .eq("active", true)
-    .order("sort_order");
+  const [{ data: banners }, { data: settings }] = await Promise.all([
+    supabase.from("banners").select("*").eq("active", true).order("sort_order"),
+    supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji"]),
+  ]);
 
   const activeBanners: Banner[] = banners ?? [];
+
+  const settingsMap: Record<string, string> = {};
+  (settings ?? []).forEach((s: { key: string; value: string }) => { settingsMap[s.key] = s.value; });
+  const barraActiva = settingsMap["barra_libre_activa"] !== "false";
+  const barraTexto = settingsMap["barra_libre_texto"] ?? "Barra de ensalada libre con cada hamburguesa";
+  const barraEmoji = settingsMap["barra_libre_emoji"] ?? "🥗";
 
   return (
     <main className="min-h-screen bg-[#0F1117] flex flex-col items-center px-6 pt-8 pb-24 text-center">
@@ -44,12 +49,12 @@ export default async function Home() {
       </div>
 
       {/* Barra libre banner */}
-      <div className="w-full max-w-xs bg-[#2A2414] border border-[#D4A017]/30 rounded-2xl px-4 py-3 flex items-center gap-3 mb-6">
-        <span className="text-2xl">🥗</span>
-        <p className="text-[#E8B830] text-xs font-medium text-left">
-          Barra de ensalada libre con cada hamburguesa
-        </p>
-      </div>
+      {barraActiva && (
+        <div className="w-full max-w-xs bg-[#2A2414] border border-[#D4A017]/30 rounded-2xl px-4 py-3 flex items-center gap-3 mb-6">
+          <span className="text-2xl">{barraEmoji}</span>
+          <p className="text-[#E8B830] text-xs font-medium text-left">{barraTexto}</p>
+        </div>
+      )}
 
       {/* Badges de features */}
       <div className="flex gap-2 flex-wrap justify-center mb-8">
