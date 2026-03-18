@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X } from "lucide-react";
+import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X, MapPin } from "lucide-react";
 import { Coupon } from "@/lib/types";
+
+type DeliveryZone = { id: string; name: string; price: number };
 
 const STORAGE_KEY = "pb-customer";
 // 100 puntos = $1.000 de descuento
@@ -34,14 +36,18 @@ export default function OrderPage() {
   const [coupon, setCoupon] = useState<Coupon | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [delivery, setDelivery] = useState(3000);
+  const [zones, setZones] = useState<DeliveryZone[]>([]);
+  const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null);
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", address: "", notes: "",
   });
 
   useEffect(() => {
-    createClient()
-      .from("settings").select("value").eq("key", "delivery_fee").single()
+    const client = createClient();
+    client.from("settings").select("value").eq("key", "delivery_fee").single()
       .then(({ data }) => { if (data) setDelivery(Number(data.value)); });
+    client.from("delivery_zones").select("id, name, price").eq("active", true).order("name")
+      .then(({ data }) => { if (data && data.length > 0) setZones(data as DeliveryZone[]); });
   }, []);
 
   // Pre-fill form with saved customer data
@@ -71,6 +77,7 @@ export default function OrderPage() {
   }, [form.email]);
 
   const subtotal = total();
+  const effectiveDelivery = selectedZone ? selectedZone.price : delivery;
   // Points discount
   const maxDiscount = Math.min(
     Math.floor(customerPoints / POINTS_PER_DISCOUNT) * DISCOUNT_PER_BLOCK,
@@ -84,7 +91,7 @@ export default function OrderPage() {
       ? Math.round((subtotal * coupon.value) / 100)
       : coupon.value
     : 0;
-  const grandTotal = Math.max(subtotal + delivery - pointsDiscount - couponDiscount, delivery);
+  const grandTotal = Math.max(subtotal + effectiveDelivery - pointsDiscount - couponDiscount, effectiveDelivery);
   const pointsEarned = Math.floor(grandTotal / 1000);
 
   const applyCoupon = async () => {
@@ -163,7 +170,7 @@ export default function OrderPage() {
           notes: form.notes || null,
           items: orderItems,
           subtotal,
-          delivery_fee: delivery,
+          delivery_fee: effectiveDelivery,
           total: grandTotal,
           status: "pending",
           payment_status: "pending",
@@ -290,6 +297,33 @@ export default function OrderPage() {
                 <input className={inputClass} placeholder="Calle, barrio, ciudad" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
               </div>
             </div>
+            {/* Selector de zona — solo si hay zonas configuradas */}
+            {zones.length > 0 && (
+              <div>
+                <label className="text-[#9CA3AF] text-xs mb-2 block font-medium flex items-center gap-1">
+                  <MapPin size={12} /> Zona de entrega
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {zones.map((z) => (
+                    <button
+                      key={z.id}
+                      type="button"
+                      onClick={() => setSelectedZone(selectedZone?.id === z.id ? null : z)}
+                      className={`text-left px-3 py-2.5 rounded-xl border text-sm transition-all ${
+                        selectedZone?.id === z.id
+                          ? "bg-[#D4A017]/10 border-[#D4A017] text-[#D4A017]"
+                          : "border-[#2E3038] text-[#9CA3AF] hover:border-[#D4A017]/40"
+                      }`}
+                    >
+                      <p className="font-semibold truncate">{z.name}</p>
+                      <p className="text-xs opacity-70">${z.price.toLocaleString("es-CO")}</p>
+                    </button>
+                  ))}
+                </div>
+                {!selectedZone && <p className="text-[#6B7280] text-xs mt-1">Sin selección se usa el precio estándar.</p>}
+              </div>
+            )}
+
             <div>
               <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Notas (opcional)</label>
               <textarea className={`${inputClass} resize-none h-20`} placeholder="Sin cebolla, extra queso, indicaciones de entrega..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
@@ -305,8 +339,8 @@ export default function OrderPage() {
                 </div>
               ))}
               <div className="flex justify-between text-[#9CA3AF] pt-1 border-t border-[#2E3038]">
-                <span>Domicilio</span>
-                <span>${delivery.toLocaleString("es-CO")}</span>
+                <span>Domicilio{selectedZone ? ` · ${selectedZone.name}` : ""}</span>
+                <span>${effectiveDelivery.toLocaleString("es-CO")}</span>
               </div>
               {pointsDiscount > 0 && (
                 <div className="flex justify-between text-green-400">

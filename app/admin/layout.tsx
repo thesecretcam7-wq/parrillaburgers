@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/admin/menu",           label: "Menú",           icon: UtensilsCrossed },
   { href: "/admin/categorias",     label: "Categorías",     icon: Tag },
   { href: "/admin/clientes",       label: "Clientes",       icon: Users },
+  { href: "/admin/zonas",          label: "Zonas",          icon: Tag },
   { href: "/admin/cupones",        label: "Cupones",        icon: Ticket },
   { href: "/admin/resenas",        label: "Reseñas",        icon: Star },
   { href: "/admin/banners",        label: "Banners",        icon: Image },
