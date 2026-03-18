@@ -237,6 +237,22 @@ export default function AdminOrdersPage() {
                       <p className="text-[#888899] text-xs mb-1">Email</p>
                       <p className="text-[#CCCCCC] break-all">{order.customer_email}</p>
                     </div>
+                    <div>
+                      <p className="text-[#888899] text-xs mb-1">Pago</p>
+                      {order.wompi_transaction_id === "CONTRA_ENTREGA" ? (
+                        <span className="inline-flex items-center gap-1 bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-semibold px-2 py-0.5 rounded-full">
+                          💵 Contra entrega
+                        </span>
+                      ) : order.payment_status === "paid" ? (
+                        <span className="inline-flex items-center gap-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold px-2 py-0.5 rounded-full">
+                          ✓ Pagado en línea
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-semibold px-2 py-0.5 rounded-full">
+                          ⏳ Pago pendiente
+                        </span>
+                      )}
+                    </div>
                     {order.notes && (
                       <div className="col-span-2">
                         <p className="text-[#888899] text-xs mb-1">Notas</p>

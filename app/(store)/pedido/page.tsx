@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User, CheckCircle } from "lucide-react";
+import { User, CheckCircle, CreditCard, Banknote } from "lucide-react";
 
 const STORAGE_KEY = "pb-customer";
 
@@ -23,6 +23,7 @@ export default function OrderPage() {
   const { items, total, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [returning, setReturning] = useState(false); // true when data was pre-filled
+  const [paymentMethod, setPaymentMethod] = useState<"wompi" | "cash">("wompi");
   const [form, setForm] = useState<FormData>({
     name: "",
     email: "",
@@ -120,6 +121,7 @@ export default function OrderPage() {
           status: "pending",
           payment_status: "pending",
           points_earned: Math.floor(grandTotal / 1000),
+          wompi_transaction_id: paymentMethod === "cash" ? "CONTRA_ENTREGA" : null,
         })
         .select()
         .single();
@@ -133,6 +135,14 @@ export default function OrderPage() {
       );
       // Save last order number so tracking page can show it automatically
       localStorage.setItem("pb-last-order", orderNumber);
+
+      // Pago contra entrega: ir directo al seguimiento
+      if (paymentMethod === "cash") {
+        clearCart();
+        toast.success(`¡Pedido ${orderNumber} creado! Pagarás al recibir.`);
+        router.push(`/seguimiento?order=${orderNumber}`);
+        return;
+      }
 
       const wompiKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
       if (wompiKey && !wompiKey.includes("PEGAR") && order) {
@@ -305,12 +315,47 @@ export default function OrderPage() {
               </p>
             </div>
 
+            {/* Método de pago */}
+            <div>
+              <label className="text-[#9CA3AF] text-xs mb-2 block font-medium">Método de pago</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("wompi")}
+                  className={`flex items-center gap-2 px-3 py-3 rounded-xl border text-sm font-semibold transition-all ${
+                    paymentMethod === "wompi"
+                      ? "bg-[#D4A017]/10 border-[#D4A017] text-[#D4A017]"
+                      : "border-[#2E3038] text-[#6B7280] hover:border-[#D4A017]/40"
+                  }`}
+                >
+                  <CreditCard size={16} />
+                  Pagar en línea
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("cash")}
+                  className={`flex items-center gap-2 px-3 py-3 rounded-xl border text-sm font-semibold transition-all ${
+                    paymentMethod === "cash"
+                      ? "bg-[#D4A017]/10 border-[#D4A017] text-[#D4A017]"
+                      : "border-[#2E3038] text-[#6B7280] hover:border-[#D4A017]/40"
+                  }`}
+                >
+                  <Banknote size={16} />
+                  Contra entrega
+                </button>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-[#D4A017] disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1117] font-bold py-4 rounded-xl text-base"
             >
-              {loading ? "Procesando..." : `Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
+              {loading
+                ? "Procesando..."
+                : paymentMethod === "cash"
+                ? `Pedir y pagar al recibir`
+                : `Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
             </button>
           </form>
         </div>

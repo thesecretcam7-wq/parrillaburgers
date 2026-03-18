@@ -184,11 +184,15 @@ function TrackingContent() {
             <p className="text-white font-bold">${order.total?.toLocaleString("es-CO")}</p>
           </div>
           <div className="mt-3 pt-3 border-t border-[#2E3038]">
-            {(order as any).payment_status === "paid" ? (
+            {order.wompi_transaction_id === "CONTRA_ENTREGA" ? (
+              <span className="inline-flex items-center gap-1.5 bg-green-900/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full border border-green-800/30">
+                💵 Pagas al recibir
+              </span>
+            ) : order.payment_status === "paid" ? (
               <span className="inline-flex items-center gap-1.5 bg-green-900/30 text-green-400 text-xs font-semibold px-3 py-1 rounded-full border border-green-800/40">
                 <CheckCircle size={12} /> Pago aprobado
               </span>
-            ) : (order as any).payment_status === "failed" ? (
+            ) : order.payment_status === "failed" ? (
               <span className="inline-flex items-center gap-1.5 bg-red-900/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full border border-red-800/40">
                 ✕ Pago rechazado
               </span>
