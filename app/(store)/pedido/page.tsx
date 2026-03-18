@@ -151,6 +151,10 @@ export default function OrderPage() {
       toast.error("Por favor completa todos los campos obligatorios");
       return;
     }
+    if (zones.length > 0 && !selectedZone) {
+      toast.error("Selecciona tu barrio / zona de entrega");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -315,18 +319,18 @@ export default function OrderPage() {
                 <input className={inputClass} placeholder="Calle, barrio, ciudad" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
               </div>
             </div>
-            {/* Selector de zona — solo si hay zonas configuradas */}
+            {/* Selector de zona — obligatorio si hay zonas configuradas */}
             {zones.length > 0 && (
               <div>
                 <label className="text-[#9CA3AF] text-xs mb-2 block font-medium flex items-center gap-1">
-                  <MapPin size={12} /> Zona de entrega
+                  <MapPin size={12} /> Barrio / Zona de entrega *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {zones.map((z) => (
                     <button
                       key={z.id}
                       type="button"
-                      onClick={() => setSelectedZone(selectedZone?.id === z.id ? null : z)}
+                      onClick={() => setSelectedZone(z)}
                       className={`text-left px-3 py-2.5 rounded-xl border text-sm transition-all ${
                         selectedZone?.id === z.id
                           ? "bg-[#D4A017]/10 border-[#D4A017] text-[#D4A017]"
@@ -338,7 +342,17 @@ export default function OrderPage() {
                     </button>
                   ))}
                 </div>
-                {!selectedZone && <p className="text-[#6B7280] text-xs mt-1">Sin selección se usa el precio estándar.</p>}
+                {!selectedZone && (
+                  <p className="text-red-400/80 text-xs mt-1.5 flex items-center gap-1">
+                    <MapPin size={11} /> Selecciona tu barrio para continuar
+                  </p>
+                )}
+                <div className="mt-3 bg-[#1A1B21] border border-[#2E3038] rounded-xl px-4 py-3">
+                  <p className="text-[#6B7280] text-xs font-medium mb-1">¿No ves tu barrio?</p>
+                  <p className="text-[#555566] text-xs">
+                    Por el momento solo hacemos domicilio a los barrios listados. Contáctanos por WhatsApp si quieres más información.
+                  </p>
+                </div>
               </div>
             )}
 
