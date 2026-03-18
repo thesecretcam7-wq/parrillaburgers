@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User, CheckCircle, CreditCard, Banknote, Star } from "lucide-react";
+import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X } from "lucide-react";
+import { Coupon } from "@/lib/types";
 
 const STORAGE_KEY = "pb-customer";
 // 100 puntos = $1.000 de descuento
@@ -29,6 +30,9 @@ export default function OrderPage() {
   const [paymentMethod, setPaymentMethod] = useState<"wompi" | "cash">("wompi");
   const [customerPoints, setCustomerPoints] = useState(0);
   const [usePoints, setUsePoints] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<Coupon | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
   const [delivery, setDelivery] = useState(3000);
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", address: "", notes: "",
@@ -67,15 +71,45 @@ export default function OrderPage() {
   }, [form.email]);
 
   const subtotal = total();
-  // Discount: floor to nearest 100-point block, capped to subtotal
+  // Points discount
   const maxDiscount = Math.min(
     Math.floor(customerPoints / POINTS_PER_DISCOUNT) * DISCOUNT_PER_BLOCK,
     subtotal
   );
   const pointsDiscount = usePoints ? maxDiscount : 0;
-  const grandTotal = subtotal + delivery - pointsDiscount;
   const pointsUsed = usePoints ? Math.ceil(pointsDiscount / DISCOUNT_PER_BLOCK) * POINTS_PER_DISCOUNT : 0;
+  // Coupon discount
+  const couponDiscount = coupon
+    ? coupon.type === "percent"
+      ? Math.round((subtotal * coupon.value) / 100)
+      : coupon.value
+    : 0;
+  const grandTotal = Math.max(subtotal + delivery - pointsDiscount - couponDiscount, delivery);
   const pointsEarned = Math.floor(grandTotal / 1000);
+
+  const applyCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setCouponLoading(true);
+    try {
+      const { data, error } = await createClient()
+        .from("coupons")
+        .select("*")
+        .eq("code", code)
+        .eq("active", true)
+        .single();
+      if (error || !data) { toast.error("Cupón no válido"); return; }
+      if (data.expires_at && new Date(data.expires_at) < new Date()) { toast.error("El cupón ha expirado"); return; }
+      if (data.max_uses !== null && data.uses_count >= data.max_uses) { toast.error("El cupón ya no tiene usos disponibles"); return; }
+      if (subtotal < data.min_order) { toast.error(`El pedido mínimo para este cupón es $${data.min_order.toLocaleString("es-CO")}`); return; }
+      setCoupon(data as Coupon);
+      toast.success("¡Cupón aplicado!");
+    } catch {
+      toast.error("Error al verificar el cupón");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -135,6 +169,8 @@ export default function OrderPage() {
           payment_status: "pending",
           points_earned: pointsEarned,
           wompi_transaction_id: paymentMethod === "cash" ? "CONTRA_ENTREGA" : null,
+          coupon_code: coupon?.code ?? null,
+          coupon_discount: couponDiscount || null,
         })
         .select()
         .single();
@@ -145,6 +181,11 @@ export default function OrderPage() {
       if (customer?.id) {
         const newPoints = customerPoints - pointsUsed + pointsEarned;
         await supabase.from("customers").update({ points: newPoints }).eq("id", customer.id);
+      }
+
+      // Increment coupon uses_count
+      if (coupon) {
+        await supabase.from("coupons").update({ uses_count: coupon.uses_count + 1 }).eq("id", coupon.id);
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address }));
@@ -273,10 +314,55 @@ export default function OrderPage() {
                   <span>-${pointsDiscount.toLocaleString("es-CO")}</span>
                 </div>
               )}
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-green-400">
+                  <span>Cupón {coupon?.code}</span>
+                  <span>-${couponDiscount.toLocaleString("es-CO")}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-base pt-1 border-t border-[#2E3038]">
                 <span className="text-white">Total</span>
                 <span className="text-[#D4A017]">${grandTotal.toLocaleString("es-CO")}</span>
               </div>
+            </div>
+
+            {/* Cupón de descuento */}
+            <div>
+              <label className="text-[#9CA3AF] text-xs mb-2 block font-medium">Cupón de descuento</label>
+              {coupon ? (
+                <div className="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <Tag size={15} className="text-green-400" />
+                    <div>
+                      <p className="text-green-400 text-sm font-bold">{coupon.code}</p>
+                      <p className="text-green-400/70 text-xs">
+                        {coupon.type === "percent" ? `${coupon.value}% de descuento` : `-$${coupon.value.toLocaleString("es-CO")}`}
+                      </p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => { setCoupon(null); setCouponInput(""); }} className="text-green-400/60 hover:text-red-400 transition-colors">
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    className={`${inputClass} flex-1 uppercase`}
+                    placeholder="CÓDIGO"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyCoupon(); } }}
+                  />
+                  <button
+                    type="button"
+                    onClick={applyCoupon}
+                    disabled={couponLoading || !couponInput.trim()}
+                    className="px-4 py-2 bg-[#22242C] border border-[#2E3038] text-[#9CA3AF] hover:border-[#D4A017] hover:text-[#D4A017] rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
+                  >
+                    {couponLoading ? "..." : "Aplicar"}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Points redemption — solo si tiene >= 100 puntos */}

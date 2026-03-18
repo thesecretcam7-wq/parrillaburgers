@@ -82,6 +82,19 @@ export type Customer = {
   created_at: string;
 };
 
+export type Coupon = {
+  id: string;
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  min_order: number;
+  max_uses: number | null;
+  uses_count: number;
+  active: boolean;
+  expires_at: string | null;
+  created_at: string;
+};
+
 export type Banner = {
   id: string;
   title: string | null;
