@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, UtensilsCrossed, ShoppingCart, PackageSearch } from "lucide-react";
+import { Home, UtensilsCrossed, ShoppingCart, ClipboardList } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 
 const tabs = [
   { href: "/", label: "Inicio", icon: Home },
   { href: "/menu", label: "Menú", icon: UtensilsCrossed },
   { href: "/carrito", label: "Carrito", icon: ShoppingCart },
-  { href: "/seguimiento", label: "Mi Pedido", icon: PackageSearch },
+  { href: "/mis-pedidos",  label: "Mis Pedidos", icon: ClipboardList },
 ];
 
 export default function BottomNav() {
