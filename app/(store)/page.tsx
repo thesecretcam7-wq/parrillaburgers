@@ -29,15 +29,9 @@ export default async function Home() {
       )}
 
       {/* Logo */}
-      <div className="w-24 h-24 rounded-full bg-[#D4A017] flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(212,160,23,0.35)]">
-        <Image src="/logo.svg" alt="ParillaBurgers" width={56} height={56} priority />
+      <div className="mb-8">
+        <Image src="/logo-full.svg" alt="ParillaBurgers" width={200} height={240} priority className="drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]" />
       </div>
-
-      {/* Nombre */}
-      <h1 className="text-4xl font-black text-white leading-none mb-1">
-        Parrilla<span className="text-[#D4A017]">Burgers</span>
-      </h1>
-      <p className="text-[#9CA3AF] text-sm mb-8">El mejor sabor a la parrilla</p>
 
       {/* Barra libre banner */}
       <div className="w-full max-w-xs bg-[#2A2414] border border-[#D4A017]/30 rounded-2xl px-4 py-3 flex items-center gap-3 mb-6">

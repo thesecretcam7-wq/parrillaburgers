@@ -47,8 +47,8 @@ export default function Navbar() {
           </Link>
         ) : (
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-9 h-9 rounded-full bg-[#D4A017] flex items-center justify-center">
-              <Image src="/logo.svg" alt="ParillaBurgers" width={26} height={26} priority />
+            <div className="w-9 h-9 rounded-full bg-black border border-white/20 flex items-center justify-center overflow-hidden">
+              <Image src="/logo.svg" alt="ParillaBurgers" width={36} height={36} priority />
             </div>
             <div className="flex flex-col leading-none">
               <span className="font-black text-white text-sm leading-tight">
