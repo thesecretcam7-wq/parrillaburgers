@@ -142,7 +142,8 @@ export default function ZonasPage() {
       )}
 
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-full p-4">
           <div className="bg-[#1A1B21] border border-[#2E3038] rounded-2xl w-full max-w-sm shadow-2xl">
             <div className="flex items-center justify-between p-6 border-b border-[#2E3038]">
               <h2 className="text-[#F5F0E8] font-bold">{editingId ? "Editar zona" : "Nueva zona"}</h2>
@@ -167,6 +168,7 @@ export default function ZonasPage() {
                 {saving ? "Guardando..." : editingId ? "Actualizar" : "Crear"}
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}
