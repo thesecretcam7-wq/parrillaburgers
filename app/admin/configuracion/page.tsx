@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
-import { Save, Eye, EyeOff, Bike } from "lucide-react";
+import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X } from "lucide-react";
 
 const EMOJIS = ["🥗","🥬","🥦","🥕","🍅","🫑","🧅","🧄","🫒","🌽","🥒","🥑","🍋","🍓","🍇","🍉","🍎"];
+
+const DEFAULT_INGREDIENTES = [
+  "Lechuga","Tomate","Cebolla","Pepinillos","Jalapeños",
+  "Maíz","Zanahoria","Aguacate","Champiñones","Pimentón",
+  "Ketchup","Mostaza","Mayonesa","Salsa BBQ","Salsa picante",
+];
 
 export default function ConfiguracionPage() {
   const supabase = createClient();
@@ -13,6 +19,12 @@ export default function ConfiguracionPage() {
   const [texto, setTexto] = useState("");
   const [emoji, setEmoji] = useState("🥗");
   const [deliveryFee, setDeliveryFee] = useState("3000");
+  const [localAbierto, setLocalAbierto] = useState(true);
+  const [mensajeCerrado, setMensajeCerrado] = useState("Estamos cerrados por el momento. Vuelve pronto 🕐");
+  const [whatsappAdmin, setWhatsappAdmin] = useState("");
+  const [ingredientes, setIngredientes] = useState<string[]>(DEFAULT_INGREDIENTES);
+  const [newIng, setNewIng] = useState("");
+  const ingInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -20,7 +32,11 @@ export default function ConfiguracionPage() {
     supabase
       .from("settings")
       .select("*")
-      .in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji", "delivery_fee"])
+      .in("key", [
+        "barra_libre_activa","barra_libre_texto","barra_libre_emoji",
+        "delivery_fee","local_abierto","mensaje_cerrado","whatsapp_admin",
+        "barra_libre_ingredientes",
+      ])
       .then(({ data }) => {
         if (!data) return;
         data.forEach((row) => {
@@ -28,15 +44,41 @@ export default function ConfiguracionPage() {
           if (row.key === "barra_libre_texto") setTexto(row.value);
           if (row.key === "barra_libre_emoji") setEmoji(row.value);
           if (row.key === "delivery_fee") setDeliveryFee(row.value);
+          if (row.key === "local_abierto") setLocalAbierto(row.value !== "false");
+          if (row.key === "mensaje_cerrado") setMensajeCerrado(row.value);
+          if (row.key === "whatsapp_admin") setWhatsappAdmin(row.value);
+          if (row.key === "barra_libre_ingredientes") {
+            try { setIngredientes(JSON.parse(row.value)); } catch { /* keep default */ }
+          }
         });
         setLoading(false);
       });
   }, []);
 
+  function addIngrediente() {
+    const val = newIng.trim();
+    if (!val) return;
+    if (ingredientes.includes(val)) {
+      toast.error("Ya existe ese ingrediente");
+      return;
+    }
+    setIngredientes([...ingredientes, val]);
+    setNewIng("");
+    ingInputRef.current?.focus();
+  }
+
+  function removeIngrediente(ing: string) {
+    setIngredientes(ingredientes.filter((i) => i !== ing));
+  }
+
   async function save() {
     const fee = Number(deliveryFee);
     if (isNaN(fee) || fee < 0) {
       toast.error("El costo de domicilio no es válido");
+      return;
+    }
+    if (ingredientes.length === 0) {
+      toast.error("Agrega al menos un ingrediente de barra libre");
       return;
     }
     setSaving(true);
@@ -45,6 +87,10 @@ export default function ConfiguracionPage() {
       { key: "barra_libre_texto", value: texto },
       { key: "barra_libre_emoji", value: emoji },
       { key: "delivery_fee", value: String(fee) },
+      { key: "local_abierto", value: localAbierto ? "true" : "false" },
+      { key: "mensaje_cerrado", value: mensajeCerrado },
+      { key: "whatsapp_admin", value: whatsappAdmin },
+      { key: "barra_libre_ingredientes", value: JSON.stringify(ingredientes) },
     ];
     const { error } = await supabase.from("settings").upsert(updates, { onConflict: "key" });
     setSaving(false);
@@ -63,6 +109,69 @@ export default function ConfiguracionPage() {
   return (
     <div className="max-w-xl space-y-6">
       <h1 className="text-3xl font-black text-[#F5F0E8]">Configuración</h1>
+
+      {/* Estado del local */}
+      <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Store size={18} className="text-[#D4A017]" />
+          <h2 className="text-[#F5F0E8] font-bold text-lg">Estado del local</h2>
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[#F5F0E8] text-sm font-medium">Local</p>
+            <p className="text-[#888899] text-xs mt-0.5">
+              {localAbierto ? "Los clientes pueden hacer pedidos" : "Se muestra un mensaje de cerrado en el menú"}
+            </p>
+          </div>
+          <button
+            onClick={() => setLocalAbierto(!localAbierto)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              localAbierto
+                ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                : "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${localAbierto ? "bg-green-400" : "bg-red-400"}`} />
+            {localAbierto ? "Abierto" : "Cerrado"}
+          </button>
+        </div>
+        {!localAbierto && (
+          <div>
+            <label className="block text-[#F5F0E8] text-sm font-medium mb-2">Mensaje para los clientes</label>
+            <input
+              type="text"
+              value={mensajeCerrado}
+              onChange={(e) => setMensajeCerrado(e.target.value)}
+              maxLength={120}
+              className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2.5 text-[#F5F0E8] text-sm focus:outline-none focus:border-[#D4A017] transition-colors"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* WhatsApp */}
+      <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <MessageCircle size={18} className="text-green-400" />
+          <h2 className="text-[#F5F0E8] font-bold text-lg">Notificaciones WhatsApp</h2>
+        </div>
+        <div>
+          <label className="block text-[#F5F0E8] text-sm font-medium mb-2">Número del admin</label>
+          <div className="flex items-center gap-2">
+            <span className="text-[#888899] text-sm font-medium">+</span>
+            <input
+              type="tel"
+              value={whatsappAdmin}
+              onChange={(e) => setWhatsappAdmin(e.target.value.replace(/\D/g, ""))}
+              className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2.5 text-[#F5F0E8] text-sm focus:outline-none focus:border-[#D4A017] transition-colors"
+              placeholder="573001234567"
+            />
+          </div>
+          <p className="text-[#888899] text-xs mt-1">
+            Con código de país, sin +. Ej: <span className="text-[#CCCCCC]">573001234567</span>
+          </p>
+        </div>
+      </div>
 
       {/* Domicilio */}
       <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 space-y-4">
@@ -85,7 +194,7 @@ export default function ConfiguracionPage() {
             />
           </div>
           <p className="text-[#888899] text-xs mt-1">
-            Se mostrará como <strong className="text-[#CCCCCC]">${Number(deliveryFee || 0).toLocaleString("es-CO")}</strong> en el carrito y el pedido
+            Se mostrará como <strong className="text-[#CCCCCC]">${Number(deliveryFee || 0).toLocaleString("es-CO")}</strong> en el carrito
           </p>
         </div>
       </div>
@@ -94,7 +203,7 @@ export default function ConfiguracionPage() {
       <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 space-y-6">
         <h2 className="text-[#F5F0E8] font-bold text-lg">Barra de Ensalada Libre</h2>
 
-        {/* Preview */}
+        {/* Preview banner */}
         <div className={`w-full border rounded-2xl px-4 py-3 flex items-center gap-3 transition-opacity ${
           activa ? "bg-[#2A2414] border-[#D4A017]/30 opacity-100" : "bg-[#1A1B21] border-[#2E3038] opacity-40"
         }`}>
@@ -102,11 +211,11 @@ export default function ConfiguracionPage() {
           <p className="text-[#E8B830] text-xs font-medium text-left">{texto || "Escribe el mensaje..."}</p>
         </div>
 
-        {/* Toggle */}
+        {/* Toggle banner */}
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[#F5F0E8] text-sm font-medium">Mostrar banner</p>
-            <p className="text-[#888899] text-xs mt-0.5">Visible en la página de inicio</p>
+            <p className="text-[#888899] text-xs mt-0.5">Visible en la página del menú</p>
           </div>
           <button
             onClick={() => setActiva(!activa)}
@@ -121,9 +230,9 @@ export default function ConfiguracionPage() {
           </button>
         </div>
 
-        {/* Texto */}
+        {/* Texto del banner */}
         <div>
-          <label className="block text-[#F5F0E8] text-sm font-medium mb-2">Mensaje</label>
+          <label className="block text-[#F5F0E8] text-sm font-medium mb-2">Mensaje del banner</label>
           <input
             type="text"
             value={texto}
@@ -137,7 +246,7 @@ export default function ConfiguracionPage() {
 
         {/* Emoji */}
         <div>
-          <label className="block text-[#F5F0E8] text-sm font-medium mb-2">Emoji</label>
+          <label className="block text-[#F5F0E8] text-sm font-medium mb-2">Emoji del banner</label>
           <div className="flex flex-wrap gap-2">
             {EMOJIS.map((e) => (
               <button
@@ -150,6 +259,63 @@ export default function ConfiguracionPage() {
                 {e}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* ── Ingredientes disponibles ── */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-[#F5F0E8] text-sm font-medium">
+              Ingredientes disponibles
+            </label>
+            <span className="text-[#888899] text-xs">{ingredientes.length} ingrediente{ingredientes.length !== 1 ? "s" : ""}</span>
+          </div>
+          <p className="text-[#888899] text-xs mb-3">
+            Estos son los que aparecen como opciones al editar un producto con barra libre.
+          </p>
+
+          {/* Lista de ingredientes actuales */}
+          <div className="flex flex-wrap gap-2 mb-3 min-h-[40px]">
+            {ingredientes.map((ing) => (
+              <span
+                key={ing}
+                className="flex items-center gap-1.5 bg-[#D4A017]/15 text-[#D4A017] border border-[#D4A017]/30 text-xs px-3 py-1 rounded-full font-medium"
+              >
+                {ing}
+                <button
+                  onClick={() => removeIngrediente(ing)}
+                  className="text-[#D4A017]/60 hover:text-red-400 transition-colors ml-0.5"
+                  title="Eliminar"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+            {ingredientes.length === 0 && (
+              <p className="text-[#555566] text-xs italic">Sin ingredientes</p>
+            )}
+          </div>
+
+          {/* Input para agregar */}
+          <div className="flex gap-2">
+            <input
+              ref={ingInputRef}
+              type="text"
+              value={newIng}
+              onChange={(e) => setNewIng(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addIngrediente(); } }}
+              placeholder="Nuevo ingrediente..."
+              maxLength={40}
+              className="flex-1 bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2.5 text-[#F5F0E8] text-sm focus:outline-none focus:border-[#D4A017] transition-colors"
+            />
+            <button
+              onClick={addIngrediente}
+              disabled={!newIng.trim()}
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-[#D4A017] text-[#111217] font-bold text-sm rounded-lg hover:bg-[#E8B830] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Plus size={15} />
+              Agregar
+            </button>
           </div>
         </div>
       </div>

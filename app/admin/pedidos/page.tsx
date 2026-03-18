@@ -53,10 +53,26 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter]   = useState<string>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [whatsappAdmin, setWhatsappAdmin] = useState("");
 
   // IDs conocidos — ref para no re-ejecutar el efecto
   const knownIds  = useRef<Set<string>>(new Set());
   const firstLoad = useRef(true);
+  const whatsappRef = useRef("");
+
+  useEffect(() => {
+    createClient()
+      .from("settings")
+      .select("value")
+      .eq("key", "whatsapp_admin")
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          setWhatsappAdmin(data.value);
+          whatsappRef.current = data.value;
+        }
+      });
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -74,24 +90,40 @@ export default function AdminOrdersPage() {
         const newOrders = incoming.filter((o) => !knownIds.current.has(o.id));
         newOrders.forEach((o) => {
           playNotificationSound();
+          const waNumber = whatsappRef.current;
+          const waText = encodeURIComponent(
+            `🛎️ Nuevo pedido ${o.order_number}\n👤 ${o.customer_name}\n📍 ${o.delivery_address}\n💰 $${(o.total ?? 0).toLocaleString("es-CO")}`
+          );
           toast.custom(
             (t) => (
               <div
-                className={`flex items-center gap-3 bg-[#1A1B21] border border-[#D4A017] rounded-2xl px-4 py-3 shadow-lg cursor-pointer ${
+                className={`flex items-start gap-3 bg-[#1A1B21] border border-[#D4A017] rounded-2xl px-4 py-3 shadow-lg ${
                   t.visible ? "animate-enter" : "animate-leave"
                 }`}
-                onClick={() => toast.dismiss(t.id)}
               >
-                <div className="w-9 h-9 rounded-full bg-[#D4A017]/20 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-full bg-[#D4A017]/20 flex items-center justify-center shrink-0 mt-0.5">
                   <ShoppingBag size={18} className="text-[#D4A017]" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="text-white font-bold text-sm">¡Nuevo pedido!</p>
-                  <p className="text-[#CCCCCC] text-xs">{o.customer_name} · ${o.total?.toLocaleString("es-CO")}</p>
+                  <p className="text-[#CCCCCC] text-xs mb-2">{o.customer_name} · ${o.total?.toLocaleString("es-CO")}</p>
+                  {waNumber && (
+                    <a
+                      href={`https://wa.me/${waNumber}?text=${waText}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 bg-green-600 hover:bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <svg viewBox="0 0 24 24" className="w-3 h-3 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.122 1.524 5.855L.057 23.882l6.179-1.448A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.372l-.36-.213-3.668.86.875-3.581-.234-.369A9.818 9.818 0 1112 21.818z"/></svg>
+                      WhatsApp
+                    </a>
+                  )}
                 </div>
+                <button onClick={() => toast.dismiss(t.id)} className="text-[#6B7280] hover:text-white text-lg leading-none mt-0.5">×</button>
               </div>
             ),
-            { duration: 8000, position: "top-right" }
+            { duration: 12000, position: "top-right" }
           );
         });
       }
@@ -175,18 +207,20 @@ export default function AdminOrdersPage() {
             <div key={order.id} className="bg-[#22232B] border border-[#2E3038] rounded-xl overflow-hidden">
               {/* Header row */}
               <div
-                className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#1A1B21] transition-colors"
+                className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#1A1B21] transition-colors gap-3"
                 onClick={() => setExpanded(expanded === order.id ? null : order.id)}
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-[#D4A017] font-mono font-bold text-sm">{order.order_number}</span>
-                  <span className="text-[#CCCCCC] text-sm">{order.customer_name}</span>
-                  <span className="text-[#888899] text-xs">{order.customer_phone}</span>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[#D4A017] font-mono font-bold text-xs shrink-0">{order.order_number}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border shrink-0 ${statusColors[order.status]}`}>
+                      {STATUS_OPTIONS.find((s) => s.value === order.status)?.label}
+                    </span>
+                  </div>
+                  <span className="text-[#CCCCCC] text-sm font-medium truncate mt-0.5">{order.customer_name}</span>
+                  <span className="text-[#888899] text-xs truncate">{order.customer_phone}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColors[order.status]}`}>
-                    {STATUS_OPTIONS.find((s) => s.value === order.status)?.label}
-                  </span>
+                <div className="text-right shrink-0">
                   <span className="text-[#F5F0E8] font-bold text-sm">${order.total?.toLocaleString("es-CO")}</span>
                 </div>
               </div>
@@ -194,14 +228,14 @@ export default function AdminOrdersPage() {
               {/* Expanded */}
               {expanded === order.id && (
                 <div className="border-t border-[#2E3038] p-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                     <div>
                       <p className="text-[#888899] text-xs mb-1">Dirección</p>
                       <p className="text-[#CCCCCC]">{order.delivery_address}</p>
                     </div>
                     <div>
                       <p className="text-[#888899] text-xs mb-1">Email</p>
-                      <p className="text-[#CCCCCC]">{order.customer_email}</p>
+                      <p className="text-[#CCCCCC] break-all">{order.customer_email}</p>
                     </div>
                     {order.notes && (
                       <div className="col-span-2">

@@ -130,8 +130,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </p>
         </div>
 
-        <div className="p-4 lg:p-8 overflow-x-auto">
-          {children}
+        <div className="p-4 lg:p-8 min-w-0 w-full">
+          <div className="overflow-x-auto">
+            {children}
+          </div>
         </div>
       </div>
     </div>

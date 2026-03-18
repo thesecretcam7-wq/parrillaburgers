@@ -37,7 +37,7 @@ export default async function MenuPage() {
   const [{ data: categories }, { data: items }, { data: settings }] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order"),
     supabase.from("menu_items").select("*").eq("available", true).order("sort_order"),
-    supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji"]),
+    supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji", "local_abierto", "mensaje_cerrado"]),
   ]);
 
   const finalCategories = (categories && categories.length > 0) ? categories as Category[] : STATIC_CATEGORIES;
@@ -48,6 +48,8 @@ export default async function MenuPage() {
   const barraActiva = settingsMap["barra_libre_activa"] !== "false";
   const barraTexto = settingsMap["barra_libre_texto"] ?? "Barra de ensalada libre con cada hamburguesa";
   const barraEmoji = settingsMap["barra_libre_emoji"] ?? "🥗";
+  const localAbierto = settingsMap["local_abierto"] !== "false";
+  const mensajeCerrado = settingsMap["mensaje_cerrado"] ?? "Estamos cerrados por el momento. Vuelve pronto 🕐";
 
   return (
     <main className="min-h-screen bg-[#0F1117]">
@@ -57,6 +59,8 @@ export default async function MenuPage() {
         barraActiva={barraActiva}
         barraTexto={barraTexto}
         barraEmoji={barraEmoji}
+        localAbierto={localAbierto}
+        mensajeCerrado={mensajeCerrado}
       />
     </main>
   );

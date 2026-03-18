@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
 import Link from "next/link";
-import { ClipboardList, ChevronRight, Clock } from "lucide-react";
+import { ClipboardList, ChevronRight, Clock, RotateCcw } from "lucide-react";
+import { useCartStore } from "@/lib/store/cart";
+import { OrderItem } from "@/lib/types";
+import toast from "react-hot-toast";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
   pending:    "Pendiente",
@@ -144,10 +147,31 @@ export default function MisPedidosPage() {
 
 function OrderCard({ order }: { order: Order }) {
   const isActive = ACTIVE_STATUSES.includes(order.status as OrderStatus);
-  const itemCount = (order.items as any[])?.length ?? 0;
+  const itemCount = (order.items as OrderItem[])?.length ?? 0;
   const date = new Date(order.created_at).toLocaleDateString("es-CO", {
     day: "2-digit", month: "short", year: "numeric",
   });
+  const addItem = useCartStore((s) => s.addItem);
+
+  function repeatOrder(e: React.MouseEvent) {
+    e.preventDefault();
+    const orderItems = order.items as OrderItem[];
+    orderItems.forEach((oi) => {
+      addItem({
+        id: oi.menu_item_id,
+        name: oi.menu_item_name,
+        price: oi.unit_price,
+        category_id: "",
+        description: null,
+        image_url: null,
+        available: true,
+        sort_order: 0,
+        created_at: "",
+        barra_libre_items: null,
+      }, oi.barra_libre_selected);
+    });
+    toast.success("Pedido agregado al carrito");
+  }
 
   return (
     <Link
@@ -177,10 +201,19 @@ function OrderCard({ order }: { order: Order }) {
         <p className="text-[#6B7280] text-xs mt-0.5">{date}</p>
       </div>
 
-      {/* Total + flecha */}
-      <div className="text-right shrink-0">
+      {/* Repetir + Total */}
+      <div className="flex flex-col items-end gap-1.5 shrink-0">
         <p className="text-[#F5F0E8] font-bold text-sm">${order.total?.toLocaleString("es-CO")}</p>
-        <ChevronRight size={16} className="text-[#6B7280] ml-auto mt-1" />
+        {!isActive && (
+          <button
+            onClick={repeatOrder}
+            className="flex items-center gap-1 text-[#D4A017] text-[10px] font-semibold hover:text-[#E8B830] transition-colors"
+          >
+            <RotateCcw size={11} />
+            Repetir
+          </button>
+        )}
+        {isActive && <ChevronRight size={16} className="text-[#6B7280]" />}
       </div>
     </Link>
   );

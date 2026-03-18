@@ -11,6 +11,8 @@ interface MenuContentProps {
   barraActiva?: boolean;
   barraTexto?: string;
   barraEmoji?: string;
+  localAbierto?: boolean;
+  mensajeCerrado?: string;
 }
 
 const FALLBACK_EMOJI: Record<string, string> = {
@@ -33,6 +35,8 @@ export default function MenuContent({
   barraActiva = true,
   barraTexto = "Barra de ensalada libre con cada hamburguesa",
   barraEmoji = "🥗",
+  localAbierto = true,
+  mensajeCerrado = "Estamos cerrados por el momento. Vuelve pronto 🕐",
 }: MenuContentProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -90,8 +94,16 @@ export default function MenuContent({
   if (!activeCategory) {
     return (
       <div className="max-w-5xl mx-auto px-3 pb-24">
+        {/* Banner local cerrado */}
+        {!localAbierto && (
+          <div className="mt-3 bg-red-500/15 border border-red-500/30 rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
+            <span className="text-xl">🔒</span>
+            <span className="text-red-300 font-semibold text-xs">{mensajeCerrado}</span>
+          </div>
+        )}
+
         {/* Banner barra libre */}
-        {barraActiva && (
+        {barraActiva && localAbierto && (
           <div className="mt-3 bg-[#D4A017] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
             <span className="text-xl">{barraEmoji}</span>
             <span className="text-[#111217] font-semibold text-xs">{barraTexto}</span>

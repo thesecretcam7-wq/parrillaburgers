@@ -8,8 +8,7 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import ImageUpload from "@/components/admin/ImageUpload";
 
-// Sugerencias predefinidas de barra libre
-const BARRA_LIBRE_SUGERENCIAS = [
+const DEFAULT_BARRA_LIBRE = [
   "Lechuga", "Tomate", "Cebolla", "Pepinillos", "Jalapeños",
   "Maíz", "Zanahoria", "Aguacate", "Champiñones", "Pimentón",
   "Ketchup", "Mostaza", "Mayonesa", "Salsa BBQ", "Salsa picante",
@@ -45,6 +44,7 @@ export default function AdminMenuPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [barraLibreSugerencias, setBarraLibreSugerencias] = useState<string[]>(DEFAULT_BARRA_LIBRE);
 
   // Category form
   const [catModal, setCatModal] = useState(false);
@@ -53,12 +53,16 @@ export default function AdminMenuPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: cats }, { data: its }] = await Promise.all([
+    const [{ data: cats }, { data: its }, { data: settingRow }] = await Promise.all([
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("menu_items").select("*, category:categories(*)").order("sort_order"),
+      supabase.from("settings").select("value").eq("key", "barra_libre_ingredientes").single(),
     ]);
     setCategories(cats ?? []);
     setItems(its ?? []);
+    if (settingRow?.value) {
+      try { setBarraLibreSugerencias(JSON.parse(settingRow.value)); } catch { /* keep default */ }
+    }
     setLoading(false);
   };
 
@@ -239,42 +243,42 @@ export default function AdminMenuPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#2E3038]">
-                <th className="text-left px-5 py-3.5 text-[#888899] font-semibold">Producto</th>
-                <th className="text-left px-5 py-3.5 text-[#888899] font-semibold">Categoría</th>
-                <th className="text-right px-5 py-3.5 text-[#888899] font-semibold">Precio</th>
-                <th className="text-center px-5 py-3.5 text-[#888899] font-semibold">Disponible</th>
-                <th className="text-right px-5 py-3.5 text-[#888899] font-semibold">Acciones</th>
+                <th className="text-left px-4 py-3.5 text-[#888899] font-semibold">Producto</th>
+                <th className="text-left px-4 py-3.5 text-[#888899] font-semibold hidden sm:table-cell">Categoría</th>
+                <th className="text-right px-4 py-3.5 text-[#888899] font-semibold">Precio</th>
+                <th className="text-center px-4 py-3.5 text-[#888899] font-semibold">Disp.</th>
+                <th className="text-right px-4 py-3.5 text-[#888899] font-semibold">Acc.</th>
               </tr>
             </thead>
             <tbody>
               {filteredItems.map((item) => (
                 <tr key={item.id} className="border-b border-[#2E3038] last:border-0 hover:bg-[#22232B] transition-colors">
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#22232B] flex items-center justify-center shrink-0 overflow-hidden">
+                      <div className="w-9 h-9 rounded-lg bg-[#22232B] flex items-center justify-center shrink-0 overflow-hidden">
                         {item.image_url ? (
-                          <Image src={item.image_url} alt={item.name} width={40} height={40} className="object-cover w-full h-full" unoptimized />
+                          <Image src={item.image_url} alt={item.name} width={36} height={36} className="object-cover w-full h-full" unoptimized />
                         ) : (
-                          <span className="text-lg">🍔</span>
+                          <span className="text-base">🍔</span>
                         )}
                       </div>
-                      <div>
-                        <p className="text-[#F5F0E8] font-semibold">{item.name}</p>
+                      <div className="min-w-0">
+                        <p className="text-[#F5F0E8] font-semibold truncate max-w-[120px] sm:max-w-none">{item.name}</p>
                         {item.description && (
-                          <p className="text-[#888899] text-xs mt-0.5 line-clamp-1">{item.description}</p>
+                          <p className="text-[#888899] text-xs mt-0.5 line-clamp-1 hidden sm:block">{item.description}</p>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3 hidden sm:table-cell">
                     <span className="bg-[#D4A017]/10 text-[#D4A017] text-xs px-2.5 py-1 rounded-full font-medium">
                       {(item.category as Category)?.name ?? "—"}
                     </span>
                   </td>
-                  <td className="px-5 py-4 text-right text-[#F5F0E8] font-mono">
+                  <td className="px-4 py-3 text-right text-[#F5F0E8] font-mono text-sm">
                     ${Number(item.price).toLocaleString("es-CO")}
                   </td>
-                  <td className="px-5 py-4 text-center">
+                  <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => toggleAvailable(item)}
                       className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto transition-colors ${
@@ -286,8 +290,8 @@ export default function AdminMenuPage() {
                       {item.available ? <Check size={14} /> : <X size={14} />}
                     </button>
                   </td>
-                  <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEdit(item)}
                         className="p-2 text-[#888899] hover:text-[#D4A017] hover:bg-[#D4A017]/10 rounded-lg transition-colors"
@@ -373,7 +377,7 @@ export default function AdminMenuPage() {
 
                 {/* Sugerencias */}
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  {BARRA_LIBRE_SUGERENCIAS.map((sug) => {
+                  {barraLibreSugerencias.map((sug) => {
                     const active = form.barra_libre_items.includes(sug);
                     return (
                       <button

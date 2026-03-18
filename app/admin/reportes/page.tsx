@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
-import { TrendingUp, ShoppingBag, Users, CreditCard } from "lucide-react";
+import { TrendingUp, ShoppingBag, Users, CreditCard, Download } from "lucide-react";
 
 type Period = "today" | "week" | "month" | "all";
 
@@ -110,6 +110,31 @@ export default function ReportesPage() {
   const dailyEntries = Object.entries(dailyMap);
   const maxDaily = Math.max(...dailyEntries.map(([, v]) => v), 1);
 
+  function exportCSV() {
+    const rows = [
+      ["Número", "Fecha", "Cliente", "Email", "Teléfono", "Dirección", "Estado", "Pago", "Total"],
+      ...orders.map((o) => [
+        o.order_number,
+        new Date(o.created_at).toLocaleString("es-CO"),
+        o.customer_name,
+        o.customer_email,
+        o.customer_phone,
+        o.delivery_address,
+        o.status,
+        o.payment_status,
+        String(o.total ?? 0),
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pedidos_${PERIOD_LABELS[period].replace(/ /g, "_")}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40">
@@ -121,8 +146,18 @@ export default function ReportesPage() {
   return (
     <div className="space-y-8">
       {/* Header + period selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-black text-[#F5F0E8]">Reportes</h1>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-black text-[#F5F0E8]">Reportes</h1>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-[#2E3038] text-[#CCCCCC] hover:border-[#D4A017] hover:text-[#D4A017] transition-colors"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">Exportar CSV</span>
+            <span className="sm:hidden">CSV</span>
+          </button>
+        </div>
         <div className="flex gap-2 flex-wrap">
           {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
             <button
