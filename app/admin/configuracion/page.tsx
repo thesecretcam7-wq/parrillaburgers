@@ -7,6 +7,44 @@ import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X, Clock } from "l
 
 const EMOJIS = ["🥗","🥬","🥦","🥕","🍅","🫑","🧅","🧄","🫒","🌽","🥒","🥑","🍋","🍓","🍇","🍉","🍎"];
 
+// ── Helpers formato 12h ──────────────────────────────────────────────────────
+function to12h(time24: string): { hour: string; minute: string; period: "AM" | "PM" } {
+  const [h, m] = time24.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 === 0 ? "12" : String(h % 12);
+  return { hour, minute: String(m).padStart(2, "0"), period };
+}
+
+function to24h(hour: string, minute: string, period: "AM" | "PM"): string {
+  let h = Number(hour);
+  if (period === "AM" && h === 12) h = 0;
+  if (period === "PM" && h !== 12) h += 12;
+  return `${String(h).padStart(2, "0")}:${minute}`;
+}
+
+function TimePicker12h({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { hour, minute, period } = to12h(value);
+  const selectCls = "bg-[#111217] border border-[#2E3038] rounded-lg px-2 py-1.5 text-[#F5F0E8] text-xs focus:outline-none focus:border-[#D4A017] transition-colors";
+  const update = (h: string, m: string, p: "AM" | "PM") => onChange(to24h(h, m, p));
+  return (
+    <div className="flex items-center gap-1">
+      <select className={selectCls} value={hour} onChange={(e) => update(e.target.value, minute, period)}>
+        {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => (
+          <option key={h} value={h}>{h}</option>
+        ))}
+      </select>
+      <span className="text-[#555566] text-xs">:</span>
+      <select className={selectCls} value={minute} onChange={(e) => update(hour, e.target.value, period)}>
+        {["00","15","30","45"].map((m) => <option key={m} value={m}>{m}</option>)}
+      </select>
+      <select className={selectCls} value={period} onChange={(e) => update(hour, minute, e.target.value as "AM" | "PM")}>
+        <option value="AM">AM</option>
+        <option value="PM">PM</option>
+      </select>
+    </div>
+  );
+}
+
 const DIAS = [
   { key: "1", label: "Lunes" },
   { key: "2", label: "Martes" },
@@ -268,19 +306,15 @@ export default function ConfiguracionPage() {
                 </button>
                 <span className="text-[#CCCCCC] text-sm w-24 shrink-0">{label}</span>
                 {dia.active ? (
-                  <div className="flex items-center gap-2 flex-1">
-                    <input
-                      type="time"
+                  <div className="flex items-center gap-2 flex-1 flex-wrap">
+                    <TimePicker12h
                       value={dia.open}
-                      onChange={(e) => setHorarios({ ...horarios, [key]: { ...dia, open: e.target.value } })}
-                      className="bg-[#111217] border border-[#2E3038] rounded-lg px-2 py-1.5 text-[#F5F0E8] text-xs focus:outline-none focus:border-[#D4A017] transition-colors"
+                      onChange={(v) => setHorarios({ ...horarios, [key]: { ...dia, open: v } })}
                     />
                     <span className="text-[#555566] text-xs">→</span>
-                    <input
-                      type="time"
+                    <TimePicker12h
                       value={dia.close}
-                      onChange={(e) => setHorarios({ ...horarios, [key]: { ...dia, close: e.target.value } })}
-                      className="bg-[#111217] border border-[#2E3038] rounded-lg px-2 py-1.5 text-[#F5F0E8] text-xs focus:outline-none focus:border-[#D4A017] transition-colors"
+                      onChange={(v) => setHorarios({ ...horarios, [key]: { ...dia, close: v } })}
                     />
                   </div>
                 ) : (
