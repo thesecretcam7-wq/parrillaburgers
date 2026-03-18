@@ -300,7 +300,7 @@ function TrackingContent() {
         </div>
 
         {/* Tiempo estimado — solo en pedidos activos */}
-        {deliveryTime && order.status !== "delivered" && order.status !== "cancelled" && (
+        {deliveryTime && (
           <div className="bg-[#2A2414] border border-[#D4A017]/20 rounded-2xl px-5 py-3 flex items-center gap-3">
             <Timer size={18} className="text-[#D4A017] shrink-0" />
             <div>
