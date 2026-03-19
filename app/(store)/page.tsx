@@ -47,10 +47,7 @@ export default async function Home() {
 
       {/* Barra libre banner */}
       {barraActiva && (
-        <div className="flex items-center gap-2 mb-6">
-          <span className="text-xl">{barraEmoji}</span>
-          <p className="text-white text-sm font-medium">{barraTexto}</p>
-        </div>
+        <p className="text-white text-sm font-medium mb-6">{barraTexto}</p>
       )}
 
       {/* Badges de features */}
