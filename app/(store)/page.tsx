@@ -43,9 +43,6 @@ export default async function Home() {
           priority
           className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)]"
         />
-        <p className="text-white italic text-lg mt-3 font-medium tracking-wide">
-          ¡ A la parrilla sabe mejor !
-        </p>
       </div>
 
       {/* Barra libre banner */}
