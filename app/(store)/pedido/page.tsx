@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X, MapPin } from "lucide-react";
+import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X, MapPin, Clock } from "lucide-react";
 import { Coupon } from "@/lib/types";
+import { useStoreStatus } from "@/lib/hooks/useStoreStatus";
 
 type DeliveryZone = { id: string; name: string; price: number };
 
@@ -40,6 +41,7 @@ export default function OrderPage() {
   const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null);
   const [pedidosPausados, setPedidosPausados] = useState(false);
   const [mesaNum, setMesaNum] = useState<string | null>(null);
+  const { isOpen, mensajeCerrado } = useStoreStatus();
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", address: "", notes: "",
   });
@@ -152,6 +154,10 @@ export default function OrderPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isOpen === false) {
+      toast.error("El local está cerrado, no se pueden hacer pedidos ahora");
+      return;
+    }
     if (!form.name || !form.email || !form.phone || (!mesaNum && !form.address)) {
       toast.error("Por favor completa todos los campos obligatorios");
       return;
@@ -525,17 +531,27 @@ export default function OrderPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#D4A017] disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1117] font-bold py-4 rounded-xl text-base"
-            >
-              {loading
-                ? "Procesando..."
-                : paymentMethod === "cash"
-                ? (mesaNum ? "Pagar en caja" : "Pedir y pagar al recibir")
-                : `Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
-            </button>
+            {isOpen === false ? (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-4 flex items-start gap-3">
+                <Clock size={18} className="text-red-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-red-400 font-bold text-sm">Local cerrado</p>
+                  <p className="text-red-300/70 text-xs mt-0.5">{mensajeCerrado}</p>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="submit"
+                disabled={loading || isOpen === null}
+                className="w-full bg-[#D4A017] disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1117] font-bold py-4 rounded-xl text-base"
+              >
+                {loading
+                  ? "Procesando..."
+                  : paymentMethod === "cash"
+                  ? (mesaNum ? "Pagar en caja" : "Pedir y pagar al recibir")
+                  : `Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
+              </button>
+            )}
           </form>
         </div>
       </div>

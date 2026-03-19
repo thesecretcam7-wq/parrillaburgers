@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/lib/store/cart";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { useStoreStatus } from "@/lib/hooks/useStoreStatus";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, total, clearCart } = useCartStore();
   const [delivery, setDelivery] = useState(3000);
   const [mesaNum, setMesaNum] = useState<string | null>(null);
+  const { isOpen, mensajeCerrado } = useStoreStatus();
   const subtotal = total();
   const grandTotal = mesaNum ? subtotal : subtotal + delivery;
 
@@ -151,13 +153,23 @@ export default function CartPage() {
             </p>
           </div>
 
-          <Link
-            href="/pedido"
-            className="flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold py-3.5 rounded-xl w-full"
-          >
-            Continuar
-            <ArrowRight size={16} />
-          </Link>
+          {isOpen === false ? (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-4 flex items-start gap-3">
+              <Clock size={18} className="text-red-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-red-400 font-bold text-sm">Local cerrado</p>
+                <p className="text-red-300/70 text-xs mt-0.5">{mensajeCerrado}</p>
+              </div>
+            </div>
+          ) : (
+            <Link
+              href="/pedido"
+              className={`flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold py-3.5 rounded-xl w-full transition-opacity ${isOpen === null ? "opacity-50 pointer-events-none" : ""}`}
+            >
+              Continuar
+              <ArrowRight size={16} />
+            </Link>
+          )}
         </div>
 
       </div>
