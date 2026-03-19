@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronRight, ArrowLeft, Search, X } from "lucide-react";
 import { Category, MenuItem } from "@/lib/types";
 import MenuItemCard from "./MenuItemCard";
@@ -42,6 +42,17 @@ export default function MenuContent({
 }: MenuContentProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [highlightItemId, setHighlightItemId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!highlightItemId) return;
+    const t = setTimeout(() => {
+      document.getElementById(`item-${highlightItemId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const t2 = setTimeout(() => setHighlightItemId(null), 1800);
+      return () => clearTimeout(t2);
+    }, 80);
+    return () => clearTimeout(t);
+  }, [highlightItemId]);
 
   const query = search.trim().toLowerCase();
 
@@ -125,7 +136,7 @@ export default function MenuContent({
               {topItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveCategory(item.category_id)}
+                  onClick={() => { setActiveCategory(item.category_id); setHighlightItemId(item.id); }}
                   className="flex-none w-36 bg-[#1A1B21] border border-[#2E3038] rounded-2xl p-3 text-left hover:border-[#D4A017]/50 active:scale-[0.97] transition-all"
                 >
                   <div className="text-2xl mb-2">{
@@ -202,7 +213,13 @@ export default function MenuContent({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {activeItems.map((item) => (
-            <MenuItemCard key={item.id} item={item} />
+            <div
+              key={item.id}
+              id={`item-${item.id}`}
+              className={`rounded-2xl transition-all duration-300 ${highlightItemId === item.id ? "ring-2 ring-[#D4A017] ring-offset-2 ring-offset-[#0F1117]" : ""}`}
+            >
+              <MenuItemCard item={item} />
+            </div>
           ))}
         </div>
       )}
