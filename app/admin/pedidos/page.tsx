@@ -32,27 +32,50 @@ const statusColors: Record<string, string> = {
   cancelled:  "bg-red-500/20 text-red-400 border-red-500/30",
 };
 
-/** Genera un sonido de notificación con Web Audio API (sin archivos externos) */
+/** Genera un sonido de notificación con Web Audio API */
 function playNotificationSound() {
   try {
     const ctx = new AudioContext();
-    const notes = [523.25, 659.25, 783.99]; // Do-Mi-Sol
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      const start = ctx.currentTime + i * 0.15;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(0.4, start + 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
-      osc.start(start);
-      osc.stop(start + 0.3);
+    // Reanudar contexto si estaba suspendido (política de autoplay del navegador)
+    const play = () => {
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // Do-Mi-Sol-Do
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        const start = ctx.currentTime + i * 0.14;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.5, start + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+        osc.start(start);
+        osc.stop(start + 0.35);
+      });
+    };
+    if (ctx.state === "suspended") {
+      ctx.resume().then(play);
+    } else {
+      play();
+    }
+  } catch { /* contexto de audio no disponible */ }
+}
+
+/** Solicita permiso y lanza notificación del sistema operativo */
+async function showOSNotification(title: string, body: string) {
+  if (!("Notification" in window)) return;
+  if (Notification.permission === "default") {
+    await Notification.requestPermission();
+  }
+  if (Notification.permission === "granted") {
+    new Notification(title, {
+      body,
+      icon: "/logo-real.png",
+      badge: "/logo-real.png",
+      tag: "nuevo-pedido",
+      requireInteraction: true, // no desaparece sola
     });
-  } catch {
-    // Contexto de audio no disponible
   }
 }
 
@@ -71,6 +94,10 @@ export default function AdminOrdersPage() {
   const whatsappRef = useRef("");
 
   useEffect(() => {
+    // Pedir permiso de notificaciones OS al cargar la página
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
     const client = createClient();
     client.from("settings").select("value").eq("key", "whatsapp_admin").single()
       .then(({ data }) => {
@@ -106,6 +133,10 @@ export default function AdminOrdersPage() {
         const newOrders = incoming.filter((o) => !knownIds.current.has(o.id));
         newOrders.forEach((o) => {
           playNotificationSound();
+          showOSNotification(
+            `🛎️ Nuevo pedido ${o.order_number}`,
+            `${o.customer_name} · $${(o.total ?? 0).toLocaleString("es-CO")}`
+          );
           const waNumber = whatsappRef.current;
           const waText = encodeURIComponent(
             `🛎️ Nuevo pedido ${o.order_number}\n👤 ${o.customer_name}\n📍 ${o.delivery_address}\n💰 $${(o.total ?? 0).toLocaleString("es-CO")}`
@@ -159,7 +190,7 @@ export default function AdminOrdersPage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchOrders)
       .subscribe();
 
-    const interval = setInterval(fetchOrders, 8_000);
+    const interval = setInterval(fetchOrders, 5_000);
 
     return () => {
       supabase.removeChannel(channel);
