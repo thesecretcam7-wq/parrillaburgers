@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
-import { TrendingUp, ShoppingBag, Users, CreditCard, Download } from "lucide-react";
+import { TrendingUp, ShoppingBag, Users, CreditCard, Download, Banknote, Smartphone, UtensilsCrossed } from "lucide-react";
 
 type Period = "today" | "week" | "month" | "all";
 
@@ -82,6 +82,14 @@ export default function ReportesPage() {
   const revenue      = paid.reduce((s, o) => s + (o.total ?? 0), 0);
   const avgTicket    = paid.length ? revenue / paid.length : 0;
   const uniqueEmails = new Set(orders.map((o) => o.customer_email)).size;
+
+  // Desglose por método de pago
+  const byPayment = {
+    wompi: paid.filter((o) => o.payment_status === "paid"),
+    contraentrega: paid.filter((o) => !o.wompi_transaction_id && o.status === "delivered"),
+    enCaja: paid.filter((o) => o.wompi_transaction_id === "PAGAR_EN_CAJA" && o.status === "delivered"),
+  };
+  const totalPayment = revenue || 1;
 
   // Top productos desde JSONB items
   const productMap: Record<string, { name: string; qty: number; revenue: number }> = {};
@@ -198,6 +206,56 @@ export default function ReportesPage() {
             <p className="text-[#F5F0E8] font-black text-2xl mt-1">{value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Métodos de pago */}
+      <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6">
+        <h2 className="text-[#F5F0E8] font-bold mb-5">Métodos de pago</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            {
+              label: "Wompi (online)",
+              icon: Smartphone,
+              color: "text-blue-400",
+              bar: "bg-blue-500",
+              orders: byPayment.wompi,
+            },
+            {
+              label: "Contraentrega",
+              icon: Banknote,
+              color: "text-green-400",
+              bar: "bg-green-500",
+              orders: byPayment.contraentrega,
+            },
+            {
+              label: "Pagar en caja",
+              icon: UtensilsCrossed,
+              color: "text-orange-400",
+              bar: "bg-orange-500",
+              orders: byPayment.enCaja,
+            },
+          ].map(({ label, icon: Icon, color, bar, orders: group }) => {
+            const subtotal = group.reduce((s, o) => s + (o.total ?? 0), 0);
+            const pct = Math.round((subtotal / totalPayment) * 100);
+            return (
+              <div key={label} className="bg-[#1A1B21] rounded-xl p-4 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-lg bg-[#22232B] flex items-center justify-center ${color}`}>
+                    <Icon size={16} />
+                  </div>
+                  <span className="text-[#CCCCCC] text-sm font-medium">{label}</span>
+                </div>
+                <div>
+                  <p className="text-[#F5F0E8] font-black text-xl">${subtotal.toLocaleString("es-CO")}</p>
+                  <p className="text-[#888899] text-xs mt-0.5">{group.length} pedido{group.length !== 1 ? "s" : ""} · {pct}%</p>
+                </div>
+                <div className="w-full bg-[#2E3038] rounded-full h-1.5">
+                  <div className={`${bar} h-1.5 rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
