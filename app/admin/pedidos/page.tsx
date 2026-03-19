@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
 import toast from "react-hot-toast";
-import { ShoppingBag, PauseCircle, PlayCircle } from "lucide-react";
+import { ShoppingBag, PauseCircle, PlayCircle, Bell, BellOff } from "lucide-react";
 
 const WA_MESSAGES: Partial<Record<OrderStatus, string>> = {
   confirmed:  "✅ Tu pedido {number} fue *confirmado*. ¡Lo estamos preparando! 🍔",
@@ -87,6 +87,7 @@ export default function AdminOrdersPage() {
   const [whatsappAdmin, setWhatsappAdmin] = useState("");
   const [pausado, setPausado] = useState(false);
   const [pausadoLoading, setPausadoLoading] = useState(false);
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>("default");
 
   // IDs conocidos — ref para no re-ejecutar el efecto
   const knownIds  = useRef<Set<string>>(new Set());
@@ -94,10 +95,7 @@ export default function AdminOrdersPage() {
   const whatsappRef = useRef("");
 
   useEffect(() => {
-    // Pedir permiso de notificaciones OS al cargar la página
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
+    if ("Notification" in window) setNotifPermission(Notification.permission);
     const client = createClient();
     client.from("settings").select("value").eq("key", "whatsapp_admin").single()
       .then(({ data }) => {
@@ -106,6 +104,16 @@ export default function AdminOrdersPage() {
     client.from("settings").select("value").eq("key", "pedidos_pausados").single()
       .then(({ data }) => { if (data) setPausado(data.value === "true"); });
   }, []);
+
+  const enableNotifications = async () => {
+    if (!("Notification" in window)) return;
+    const result = await Notification.requestPermission();
+    setNotifPermission(result);
+    if (result === "granted") {
+      playNotificationSound();
+      new Notification("✅ Notificaciones activadas", { body: "Recibirás alertas de nuevos pedidos.", icon: "/logo-real.png" });
+    }
+  };
 
   const togglePausado = async () => {
     setPausadoLoading(true);
@@ -265,6 +273,34 @@ export default function AdminOrdersPage() {
           }
         </button>
       </div>
+
+      {/* Banner activar notificaciones */}
+      {notifPermission !== "granted" && (
+        <div className={`mb-4 rounded-xl px-4 py-3 flex items-center gap-3 border ${
+          notifPermission === "denied"
+            ? "bg-red-500/10 border-red-500/30"
+            : "bg-[#D4A017]/10 border-[#D4A017]/30"
+        }`}>
+          {notifPermission === "denied" ? (
+            <BellOff size={18} className="text-red-400 shrink-0" />
+          ) : (
+            <Bell size={18} className="text-[#D4A017] shrink-0" />
+          )}
+          <p className={`text-sm flex-1 ${notifPermission === "denied" ? "text-red-300" : "text-[#D4A017]"}`}>
+            {notifPermission === "denied"
+              ? "Notificaciones bloqueadas. Actívalas en la configuración del navegador (🔒 junto a la URL)."
+              : "Activa las notificaciones para recibir alertas de nuevos pedidos aunque estés en otra pestaña."}
+          </p>
+          {notifPermission !== "denied" && (
+            <button
+              onClick={enableNotifications}
+              className="shrink-0 bg-[#D4A017] hover:bg-[#E8B830] text-[#111217] font-bold text-xs px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Activar
+            </button>
+          )}
+        </div>
+      )}
 
       {pausado && (
         <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 flex items-center gap-3">
