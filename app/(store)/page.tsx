@@ -25,33 +25,36 @@ export default async function Home() {
   const barraEmoji = settingsMap["barra_libre_emoji"] ?? "🥗";
 
   return (
-    <main className="h-[calc(100dvh-56px-80px)] bg-[#0F1117] flex flex-col items-center justify-between px-6 py-6 text-center overflow-hidden">
+    <main
+      className="bg-[#0F1117] flex flex-col items-center px-6 pt-3 pb-4 text-center overflow-hidden"
+      style={{ height: "calc(100dvh - 56px - 64px - env(safe-area-inset-bottom))" }}
+    >
       <LockScroll />
 
       {/* Logo */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center min-h-0">
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
           width={260}
           height={222}
           priority
-          className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)] w-auto max-h-[30dvh]"
+          className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)] w-auto max-h-[25dvh]"
         />
       </div>
 
       {/* Carrusel de banners */}
       {activeBanners.length > 0 && (
-        <div className="w-full max-w-xs shrink-0">
+        <div className="w-full max-w-xs shrink-0" style={{ height: "clamp(120px, 36vw, 170px)" }}>
           <BannerCarousel banners={activeBanners} />
         </div>
       )}
 
       {/* Barra libre + badges + CTA */}
-      <div className="w-full max-w-xs flex flex-col items-center gap-4 shrink-0 mt-4">
+      <div className="w-full max-w-xs flex flex-col items-center gap-3 shrink-0 mt-3">
 
         {barraActiva && (
-          <p className="text-white text-sm font-medium">{barraTexto}</p>
+          <p className="text-white text-xs font-medium">{barraTexto}</p>
         )}
 
         {/* Badges de features */}
@@ -73,7 +76,7 @@ export default async function Home() {
         {/* CTA */}
         <Link
           href="/menu"
-          className="flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold text-base px-8 py-4 rounded-2xl w-full shadow-[0_4px_20px_rgba(212,160,23,0.3)] hover:shadow-[0_6px_32px_rgba(212,160,23,0.55)] hover:scale-[1.03] active:scale-95 transition-all duration-200"
+          className="flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold text-base px-8 py-3.5 rounded-2xl w-full shadow-[0_4px_20px_rgba(212,160,23,0.3)] hover:shadow-[0_6px_32px_rgba(212,160,23,0.55)] hover:scale-[1.03] active:scale-95 transition-all duration-200"
         >
           Ver Menú
           <ArrowRight size={18} />
