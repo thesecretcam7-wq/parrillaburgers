@@ -3,64 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
-import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X, Clock } from "lucide-react";
-
-const EMOJIS = ["🥗","🥬","🥦","🥕","🍅","🫑","🧅","🧄","🫒","🌽","🥒","🥑","🍋","🍓","🍇","🍉","🍎"];
-
-// ── Helpers formato 12h ──────────────────────────────────────────────────────
-function to12h(time24: string): { hour: string; minute: string; period: "AM" | "PM" } {
-  const [h, m] = time24.split(":").map(Number);
-  const period = h >= 12 ? "PM" : "AM";
-  const hour = h % 12 === 0 ? "12" : String(h % 12);
-  return { hour, minute: String(m).padStart(2, "0"), period };
-}
-
-function to24h(hour: string, minute: string, period: "AM" | "PM"): string {
-  let h = Number(hour);
-  if (period === "AM" && h === 12) h = 0;
-  if (period === "PM" && h !== 12) h += 12;
-  return `${String(h).padStart(2, "0")}:${minute}`;
-}
-
-function TimePicker12h({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const { hour, minute, period } = to12h(value);
-  const selectCls = "bg-[#111217] border border-[#2E3038] rounded-lg px-2 py-1.5 text-[#F5F0E8] text-xs focus:outline-none focus:border-[#D4A017] transition-colors";
-  const update = (h: string, m: string, p: "AM" | "PM") => onChange(to24h(h, m, p));
-  return (
-    <div className="flex items-center gap-1">
-      <select className={selectCls} value={hour} onChange={(e) => update(e.target.value, minute, period)}>
-        {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => (
-          <option key={h} value={h}>{h}</option>
-        ))}
-      </select>
-      <span className="text-[#555566] text-xs">:</span>
-      <select className={selectCls} value={minute} onChange={(e) => update(hour, e.target.value, period)}>
-        {["00","15","30","45"].map((m) => <option key={m} value={m}>{m}</option>)}
-      </select>
-      <select className={selectCls} value={period} onChange={(e) => update(hour, minute, e.target.value as "AM" | "PM")}>
-        <option value="AM">AM</option>
-        <option value="PM">PM</option>
-      </select>
-    </div>
-  );
-}
-
-const DIAS = [
-  { key: "1", label: "Lunes" },
-  { key: "2", label: "Martes" },
-  { key: "3", label: "Miércoles" },
-  { key: "4", label: "Jueves" },
-  { key: "5", label: "Viernes" },
-  { key: "6", label: "Sábado" },
-  { key: "0", label: "Domingo" },
-];
-
-type HorarioDia = { active: boolean; open: string; close: string };
-type Horarios = Record<string, HorarioDia>;
-
-const DEFAULT_HORARIOS: Horarios = Object.fromEntries(
-  ["0","1","2","3","4","5","6"].map((d) => [d, { active: d !== "0", open: "11:00", close: "22:00" }])
-);
+import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X } from "lucide-react";
 
 const DEFAULT_INGREDIENTES = [
   "Lechuga","Tomate","Cebolla","Pepinillos","Jalapeños",
@@ -78,7 +21,6 @@ export default function ConfiguracionPage() {
   const [mensajeCerrado, setMensajeCerrado] = useState("Estamos cerrados por el momento. Vuelve pronto 🕐");
   const [whatsappAdmin, setWhatsappAdmin] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("30-45");
-  const [horarios, setHorarios] = useState<Horarios>(DEFAULT_HORARIOS);
   const [ingredientes, setIngredientes] = useState<string[]>(DEFAULT_INGREDIENTES);
   const [newIng, setNewIng] = useState("");
   const ingInputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +34,7 @@ export default function ConfiguracionPage() {
       .in("key", [
         "barra_libre_activa","barra_libre_texto","barra_libre_emoji",
         "delivery_fee","local_abierto","mensaje_cerrado","whatsapp_admin",
-        "barra_libre_ingredientes","delivery_time","horarios",
+        "barra_libre_ingredientes","delivery_time",
       ])
       .then(({ data }) => {
         if (!data) return;
@@ -105,9 +47,6 @@ export default function ConfiguracionPage() {
           if (row.key === "mensaje_cerrado") setMensajeCerrado(row.value);
           if (row.key === "whatsapp_admin") setWhatsappAdmin(row.value);
           if (row.key === "delivery_time") setDeliveryTime(row.value);
-          if (row.key === "horarios") {
-            try { setHorarios(JSON.parse(row.value)); } catch { /* keep default */ }
-          }
           if (row.key === "barra_libre_ingredientes") {
             try { setIngredientes(JSON.parse(row.value)); } catch { /* keep default */ }
           }
@@ -152,7 +91,6 @@ export default function ConfiguracionPage() {
       { key: "mensaje_cerrado", value: mensajeCerrado },
       { key: "whatsapp_admin", value: whatsappAdmin },
       { key: "delivery_time", value: deliveryTime },
-      { key: "horarios", value: JSON.stringify(horarios) },
       { key: "barra_libre_ingredientes", value: JSON.stringify(ingredientes) },
     ];
     const { error } = await supabase.from("settings").upsert(updates, { onConflict: "key" });
@@ -281,48 +219,6 @@ export default function ConfiguracionPage() {
           <p className="text-[#888899] text-xs mt-1">
             Se mostrará como <strong className="text-[#CCCCCC]">~{deliveryTime} min</strong> en el seguimiento del pedido
           </p>
-        </div>
-      </div>
-
-      {/* Horarios */}
-      <div className="bg-[#22232B] border border-[#2E3038] rounded-xl p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <Clock size={18} className="text-[#D4A017]" />
-          <h2 className="text-[#F5F0E8] font-bold text-lg">Horarios de atención</h2>
-        </div>
-        <p className="text-[#888899] text-xs">
-          Si el local está marcado como <strong className="text-[#CCCCCC]">Abierto</strong>, el sistema revisará estos horarios automáticamente.
-        </p>
-        <div className="space-y-2">
-          {DIAS.map(({ key, label }) => {
-            const dia = horarios[key] ?? { active: false, open: "11:00", close: "22:00" };
-            return (
-              <div key={key} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${dia.active ? "border-[#2E3038] bg-[#1A1B21]" : "border-[#1A1B21] bg-[#111217] opacity-60"}`}>
-                <button
-                  onClick={() => setHorarios({ ...horarios, [key]: { ...dia, active: !dia.active } })}
-                  className={`w-10 h-6 rounded-full transition-colors shrink-0 relative ${dia.active ? "bg-[#D4A017]" : "bg-[#2E3038]"}`}
-                >
-                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${dia.active ? "left-5" : "left-1"}`} />
-                </button>
-                <span className="text-[#CCCCCC] text-sm w-24 shrink-0">{label}</span>
-                {dia.active ? (
-                  <div className="flex items-center gap-2 flex-1 flex-wrap">
-                    <TimePicker12h
-                      value={dia.open}
-                      onChange={(v) => setHorarios({ ...horarios, [key]: { ...dia, open: v } })}
-                    />
-                    <span className="text-[#555566] text-xs">→</span>
-                    <TimePicker12h
-                      value={dia.close}
-                      onChange={(v) => setHorarios({ ...horarios, [key]: { ...dia, close: v } })}
-                    />
-                  </div>
-                ) : (
-                  <span className="text-[#555566] text-xs">Cerrado</span>
-                )}
-              </div>
-            );
-          })}
         </div>
       </div>
 
