@@ -38,8 +38,8 @@ export default async function Home() {
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
-          width={240}
-          height={187}
+          width={300}
+          height={450}
           priority
           className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)]"
         />
