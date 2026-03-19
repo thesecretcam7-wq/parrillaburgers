@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import BannerCarousel from "@/components/home/BannerCarousel";
+import LockScroll from "@/components/home/LockScroll";
 import { Banner } from "@/lib/types";
 
 export const revalidate = 60;
@@ -25,6 +26,7 @@ export default async function Home() {
 
   return (
     <main className="h-[100dvh] bg-[#0F1117] flex flex-col items-center justify-between px-6 py-8 text-center overflow-hidden">
+      <LockScroll />
 
       {/* Logo */}
       <div className="flex-1 flex items-center justify-center">
