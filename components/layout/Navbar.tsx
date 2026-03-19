@@ -53,7 +53,7 @@ export default function Navbar() {
               src="/logo-real.png"
               alt="ParillaBurgers"
               width={44}
-              height={34}
+              height={38}
               priority
               className="brightness-0 invert"
             />
@@ -61,7 +61,6 @@ export default function Navbar() {
               <span className="font-black text-white text-sm leading-tight">
                 Parrilla<span className="text-[#D4A017]">Burgers</span>
               </span>
-              <span className="text-[9px] text-[#6B7280] font-medium">El mejor sabor a la parrilla</span>
             </div>
           </Link>
         )}
