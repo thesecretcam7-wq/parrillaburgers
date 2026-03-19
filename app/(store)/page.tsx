@@ -29,7 +29,7 @@ export default async function Home() {
       <LockScroll />
 
       {/* Logo — pegado arriba */}
-      <div className="flex items-start justify-center pt-1">
+      <div className="flex items-start justify-center -mt-4">
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
