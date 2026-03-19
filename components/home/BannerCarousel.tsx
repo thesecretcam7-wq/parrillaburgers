@@ -55,7 +55,8 @@ export default function BannerCarousel({ banners }: Props) {
 
   return (
     <div
-      className="relative w-full h-full overflow-hidden rounded-2xl"
+      className="relative w-full overflow-hidden rounded-2xl"
+      style={{ height: "clamp(160px, 45vw, 220px)" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
