@@ -72,7 +72,7 @@ export default async function Home() {
       {/* CTA */}
       <Link
         href="/menu"
-        className="flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold text-base px-8 py-4 rounded-2xl w-full max-w-xs shadow-[0_4px_20px_rgba(212,160,23,0.3)] active:scale-95 transition-transform"
+        className="flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold text-base px-8 py-4 rounded-2xl w-full max-w-xs shadow-[0_4px_20px_rgba(212,160,23,0.3)] hover:shadow-[0_6px_32px_rgba(212,160,23,0.55)] hover:scale-[1.03] active:scale-95 transition-all duration-200"
       >
         Ver Menú
         <ArrowRight size={18} />

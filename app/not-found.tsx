@@ -8,9 +8,9 @@ export default function NotFound() {
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
-          width={72}
-          height={56}
-          className="brightness-0 invert opacity-40 mx-auto"
+          width={160}
+          height={136}
+          className="brightness-0 invert opacity-50 mx-auto"
         />
       </div>
       <p className="text-[#D4A017] font-black text-7xl mb-2">404</p>

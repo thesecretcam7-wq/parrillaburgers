@@ -61,12 +61,12 @@ export default function BannerCarousel({ banners }: Props) {
       onTouchEnd={handleTouchEnd}
     >
       {/* Slides */}
-      <div
-        className="flex h-full transition-transform duration-500 ease-in-out"
-        style={{ transform: `translateX(-${current * 100}%)` }}
-      >
-        {banners.map((banner) => (
-          <div key={banner.id} className="relative h-full shrink-0 w-full">
+      <div className="relative h-full w-full">
+        {banners.map((banner, idx) => (
+          <div
+            key={banner.id}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${idx === current ? "opacity-100 z-10" : "opacity-0 z-0"}`}
+          >
             {banner.image_url ? (
               <Image
                 src={banner.image_url}

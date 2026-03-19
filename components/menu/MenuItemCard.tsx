@@ -30,7 +30,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
 
   return (
     <>
-      <div className="bg-[#1A1B21] rounded-2xl overflow-hidden border border-[#2E3038] flex flex-col hover:border-[#D4A017]/50 transition-colors">
+      <div className="bg-[#1A1B21] rounded-2xl overflow-hidden border border-[#2E3038] flex flex-col hover:border-[#D4A017]/50 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-200">
         {/* Image */}
         <div className="relative h-36 bg-[#22242C]">
           {item.image_url ? (
