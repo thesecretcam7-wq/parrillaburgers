@@ -34,7 +34,7 @@ export default async function Home() {
       )}
 
       {/* Logo */}
-      <div className="flex flex-col items-center mb-8">
+      <div className="flex flex-col items-center mb-2">
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
