@@ -68,7 +68,16 @@ export default function ReportesPage() {
     return all.filter((o) => new Date(o.created_at) >= start);
   }, [all, period]);
 
-  const paid = orders.filter((o) => o.payment_status === "paid" && o.status !== "cancelled");
+  // Contraentrega/Pagar en caja = sin wompi → se cuenta cuando está entregado
+  const isCash = (o: Order) =>
+    !o.wompi_transaction_id || o.wompi_transaction_id === "PAGAR_EN_CAJA";
+
+  const paid = orders.filter(
+    (o) =>
+      o.status !== "cancelled" &&
+      (o.payment_status === "paid" ||            // Wompi pagado
+        (isCash(o) && o.status === "delivered")) // Contraentrega/caja entregada
+  );
 
   const revenue      = paid.reduce((s, o) => s + (o.total ?? 0), 0);
   const avgTicket    = paid.length ? revenue / paid.length : 0;
