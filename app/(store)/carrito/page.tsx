@@ -33,7 +33,7 @@ export default function CartPage() {
         <h2 className="text-xl font-bold text-white mb-2">Tu carrito está vacío</h2>
         <p className="text-[#6B7280] mb-8 text-sm">Agrega productos desde el menú</p>
         <Link
-          href="/"
+          href="/menu"
           className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-3 rounded-xl"
         >
           Ver Menú
