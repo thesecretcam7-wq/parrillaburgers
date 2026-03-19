@@ -26,15 +26,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-[#0F1117] flex flex-col items-center px-6 pt-8 pb-24 text-center">
 
-      {/* Carrusel de banners */}
-      {activeBanners.length > 0 && (
-        <div className="w-full max-w-xs mb-6">
-          <BannerCarousel banners={activeBanners} />
-        </div>
-      )}
-
       {/* Logo */}
-      <div className="flex flex-col items-center mb-2">
+      <div className="flex flex-col items-center mb-4">
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
@@ -44,6 +37,13 @@ export default async function Home() {
           className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)]"
         />
       </div>
+
+      {/* Carrusel de banners */}
+      {activeBanners.length > 0 && (
+        <div className="w-full max-w-xs mb-4">
+          <BannerCarousel banners={activeBanners} />
+        </div>
+      )}
 
       {/* Barra libre banner */}
       {barraActiva && (
