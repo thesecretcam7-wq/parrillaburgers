@@ -232,8 +232,11 @@ export default function OrderPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address }));
       localStorage.setItem("pb-last-order", orderNumber);
 
+      const clearMesa = () => { try { localStorage.removeItem("pb-mesa"); } catch { /* ignore */ } };
+
       if (paymentMethod === "cash") {
         clearCart();
+        clearMesa();
         toast.success(mesaNum ? `¡Pedido ${orderNumber} creado! Paga en caja cuando termines.` : `¡Pedido ${orderNumber} creado! Pagarás al recibir.`);
         router.push(`/seguimiento?order=${orderNumber}`);
         return;
@@ -261,9 +264,11 @@ export default function OrderPage() {
         wompiUrl.searchParams.set("customer-data:phone-number", form.phone);
         wompiUrl.searchParams.set("customer-data:phone-number-prefix", "+57");
         clearCart();
+        clearMesa();
         window.location.href = wompiUrl.toString();
       } else {
         clearCart();
+        clearMesa();
         toast.success(`¡Pedido ${orderNumber} creado!`);
         router.push(`/seguimiento?order=${orderNumber}`);
       }
