@@ -9,17 +9,16 @@ type Horarios = Record<string, HorarioDia>;
 function checkOpenNow(localAbierto: boolean, horarios: Horarios): boolean {
   if (!localAbierto) return false;
 
-  // Siempre usar hora de Colombia (America/Bogota) sin importar dónde esté el navegador
-  const now = new Date();
-  const bogotaStr = now.toLocaleString("en-US", { timeZone: "America/Bogota" });
-  const bogota = new Date(bogotaStr);
-  const day = String(bogota.getDay()); // 0=Dom … 6=Sab
+  // Colombia siempre es UTC-5, sin cambio de horario de verano
+  const bogotaMs = Date.now() + (-5 * 60 * 60 * 1000);
+  const bogota = new Date(bogotaMs);
+  const day = String(bogota.getUTCDay()); // 0=Dom … 6=Sab en hora Bogotá
   const dia = horarios[day];
   if (!dia || !dia.active) return false;
 
   const [oh, om] = dia.open.split(":").map(Number);
   const [ch, cm] = dia.close.split(":").map(Number);
-  const currentMin = bogota.getHours() * 60 + bogota.getMinutes();
+  const currentMin = bogota.getUTCHours() * 60 + bogota.getUTCMinutes();
   const openMin = oh * 60 + om;
   const closeMin = ch * 60 + cm;
 
