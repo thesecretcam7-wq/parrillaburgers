@@ -25,7 +25,7 @@ export default async function Home() {
   const barraEmoji = settingsMap["barra_libre_emoji"] ?? "🥗";
 
   return (
-    <main className="h-[100dvh] bg-[#0F1117] flex flex-col items-center justify-between px-6 py-8 text-center overflow-hidden">
+    <main className="h-[calc(100dvh-56px-80px)] bg-[#0F1117] flex flex-col items-center justify-between px-6 py-6 text-center overflow-hidden">
       <LockScroll />
 
       {/* Logo */}
