@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
-import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X } from "lucide-react";
+import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X, Clock } from "lucide-react";
+
+const EMOJIS = ["🥗","🥬","🥦","🥕","🍅","🫑","🧅","🧄","🫒","🌽","🥒","🥑","🍋","🍓","🍇","🍉","🍎"];
 
 const DEFAULT_INGREDIENTES = [
   "Lechuga","Tomate","Cebolla","Pepinillos","Jalapeños",
