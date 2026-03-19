@@ -47,9 +47,9 @@ export default async function Home() {
 
       {/* Barra libre banner */}
       {barraActiva && (
-        <div className="w-full max-w-xs bg-[#2A2414] border border-[#D4A017]/30 rounded-2xl px-4 py-3 flex items-center gap-3 mb-6">
-          <span className="text-2xl">{barraEmoji}</span>
-          <p className="text-[#E8B830] text-xs font-medium text-left">{barraTexto}</p>
+        <div className="flex items-center gap-2 mb-6">
+          <span className="text-xl">{barraEmoji}</span>
+          <p className="text-white text-sm font-medium">{barraTexto}</p>
         </div>
       )}
 
