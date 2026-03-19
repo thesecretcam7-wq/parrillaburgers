@@ -52,6 +52,7 @@ export type Order = {
   status: OrderStatus;
   payment_status: "pending" | "paid" | "failed";
   wompi_transaction_id: string | null;
+  mesa_number: string | null;
   notes: string | null;
   points_earned: number;
   created_at: string;

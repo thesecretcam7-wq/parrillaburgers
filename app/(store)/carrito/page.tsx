@@ -10,13 +10,18 @@ import { createClient } from "@/lib/supabase/client";
 export default function CartPage() {
   const { items, updateQuantity, removeItem, total, clearCart } = useCartStore();
   const [delivery, setDelivery] = useState(3000);
+  const [mesaNum, setMesaNum] = useState<string | null>(null);
   const subtotal = total();
-  const grandTotal = subtotal + delivery;
+  const grandTotal = mesaNum ? subtotal : subtotal + delivery;
 
   useEffect(() => {
     createClient()
       .from("settings").select("value").eq("key", "delivery_fee").single()
       .then(({ data }) => { if (data) setDelivery(Number(data.value)); });
+    try {
+      const mesa = localStorage.getItem("pb-mesa");
+      if (mesa) setMesaNum(mesa);
+    } catch { /* ignore */ }
   }, []);
 
   if (items.length === 0) {
@@ -40,6 +45,14 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-[#0F1117] px-4 py-4">
       <div className="max-w-lg mx-auto space-y-3">
+
+        {/* Mesa badge */}
+        {mesaNum && (
+          <div className="bg-[#2A2414] border border-[#D4A017]/40 rounded-xl px-4 py-2.5 flex items-center gap-2">
+            <span className="text-lg">🪑</span>
+            <p className="text-[#D4A017] font-bold text-sm">Mesa {mesaNum}</p>
+          </div>
+        )}
 
         {/* Items */}
         <div className="space-y-2">
@@ -113,10 +126,17 @@ export default function CartPage() {
               <span>Subtotal</span>
               <span>${subtotal.toLocaleString("es-CO")}</span>
             </div>
-            <div className="flex justify-between text-[#9CA3AF]">
-              <span>Domicilio</span>
-              <span>${delivery.toLocaleString("es-CO")}</span>
-            </div>
+            {mesaNum ? (
+              <div className="flex justify-between text-[#9CA3AF]">
+                <span>En mesa</span>
+                <span className="text-green-400">gratis</span>
+              </div>
+            ) : (
+              <div className="flex justify-between text-[#9CA3AF]">
+                <span>Domicilio</span>
+                <span>${delivery.toLocaleString("es-CO")}</span>
+              </div>
+            )}
             <div className="border-t border-[#2E3038] pt-2.5 flex justify-between font-bold text-base">
               <span className="text-white">Total</span>
               <span className="text-[#D4A017]">${grandTotal.toLocaleString("es-CO")}</span>
@@ -127,7 +147,7 @@ export default function CartPage() {
           <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2 mb-4">
             <span className="text-lg">🎯</span>
             <p className="text-[#E8B830] text-xs font-medium">
-              Ganarás <strong>{Math.floor(grandTotal / 1000)} puntos</strong> con este pedido
+              Ganarás <strong>{Math.floor((mesaNum ? subtotal : grandTotal) / 1000)} puntos</strong> con este pedido
             </p>
           </div>
 

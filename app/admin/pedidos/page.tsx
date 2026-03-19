@@ -355,6 +355,11 @@ export default function AdminOrdersPage() {
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border shrink-0 ${statusColors[order.status]}`}>
                       {STATUS_OPTIONS.find((s) => s.value === order.status)?.label}
                     </span>
+                    {(order.mesa_number || order.delivery_address?.startsWith("Mesa ")) && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 bg-[#D4A017]/15 text-[#D4A017] border-[#D4A017]/30">
+                        🪑 {order.mesa_number ? `Mesa ${order.mesa_number}` : order.delivery_address}
+                      </span>
+                    )}
                   </div>
                   <span className="text-[#CCCCCC] text-sm font-medium truncate mt-0.5">{order.customer_name}</span>
                   <span className="text-[#888899] text-xs truncate">{order.customer_phone}</span>
@@ -378,7 +383,11 @@ export default function AdminOrdersPage() {
                     </div>
                     <div>
                       <p className="text-[#888899] text-xs mb-1">Pago</p>
-                      {order.wompi_transaction_id === "CONTRA_ENTREGA" ? (
+                      {order.wompi_transaction_id === "PAGAR_EN_CAJA" ? (
+                        <span className="inline-flex items-center gap-1 bg-[#D4A017]/10 text-[#D4A017] border border-[#D4A017]/20 text-xs font-semibold px-2 py-0.5 rounded-full">
+                          🪑 Pagar en caja
+                        </span>
+                      ) : order.wompi_transaction_id === "CONTRA_ENTREGA" ? (
                         <span className="inline-flex items-center gap-1 bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-semibold px-2 py-0.5 rounded-full">
                           💵 Contra entrega
                         </span>

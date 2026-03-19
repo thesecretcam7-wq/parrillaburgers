@@ -4,7 +4,7 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag, Settings, LogOut, BarChart2, Ticket, Star } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, UtensilsCrossed, Users, Image, Menu, X, ArrowLeft, Tag, Settings, LogOut, BarChart2, Ticket, Star, QrCode } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 
@@ -16,6 +16,7 @@ const navLinks = [
   { href: "/admin/categorias",     label: "Categorías",     icon: Tag },
   { href: "/admin/clientes",       label: "Clientes",       icon: Users },
   { href: "/admin/zonas",          label: "Zonas",          icon: Tag },
+  { href: "/admin/mesas",          label: "Mesas QR",       icon: QrCode },
   { href: "/admin/cupones",        label: "Cupones",        icon: Ticket },
   { href: "/admin/resenas",        label: "Reseñas",        icon: Star },
   { href: "/admin/banners",        label: "Banners",        icon: Image },

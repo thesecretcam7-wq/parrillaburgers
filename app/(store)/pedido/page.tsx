@@ -39,6 +39,7 @@ export default function OrderPage() {
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null);
   const [pedidosPausados, setPedidosPausados] = useState(false);
+  const [mesaNum, setMesaNum] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", address: "", notes: "",
   });
@@ -51,6 +52,10 @@ export default function OrderPage() {
       .then(({ data }) => { if (data && data.length > 0) setZones(data as DeliveryZone[]); });
     client.from("settings").select("value").eq("key", "pedidos_pausados").single()
       .then(({ data }) => { if (data?.value === "true") setPedidosPausados(true); });
+    try {
+      const mesa = localStorage.getItem("pb-mesa");
+      if (mesa) setMesaNum(mesa);
+    } catch { /* ignore */ }
   }, []);
 
   // Pre-fill form with saved customer data
@@ -80,7 +85,7 @@ export default function OrderPage() {
   }, [form.email]);
 
   const subtotal = total();
-  const effectiveDelivery = selectedZone ? selectedZone.price : delivery;
+  const effectiveDelivery = mesaNum ? 0 : (selectedZone ? selectedZone.price : delivery);
   // Points discount
   const maxDiscount = Math.min(
     Math.floor(customerPoints / POINTS_PER_DISCOUNT) * DISCOUNT_PER_BLOCK,
@@ -147,11 +152,11 @@ export default function OrderPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.phone || !form.address) {
+    if (!form.name || !form.email || !form.phone || (!mesaNum && !form.address)) {
       toast.error("Por favor completa todos los campos obligatorios");
       return;
     }
-    if (zones.length > 0 && !selectedZone) {
+    if (!mesaNum && zones.length > 0 && !selectedZone) {
       toast.error("Selecciona tu barrio / zona de entrega");
       return;
     }
@@ -188,7 +193,7 @@ export default function OrderPage() {
           customer_name: form.name,
           customer_email: form.email,
           customer_phone: form.phone,
-          delivery_address: form.address,
+          delivery_address: mesaNum ? `Mesa ${mesaNum}` : form.address,
           notes: form.notes || null,
           items: orderItems,
           subtotal,
@@ -197,9 +202,10 @@ export default function OrderPage() {
           status: "pending",
           payment_status: "pending",
           points_earned: pointsEarned,
-          wompi_transaction_id: paymentMethod === "cash" ? "CONTRA_ENTREGA" : null,
+          wompi_transaction_id: paymentMethod === "cash" ? (mesaNum ? "PAGAR_EN_CAJA" : "CONTRA_ENTREGA") : null,
           coupon_code: coupon?.code ?? null,
           coupon_discount: couponDiscount || null,
+          mesa_number: mesaNum ?? null,
         })
         .select()
         .single();
@@ -222,7 +228,7 @@ export default function OrderPage() {
 
       if (paymentMethod === "cash") {
         clearCart();
-        toast.success(`¡Pedido ${orderNumber} creado! Pagarás al recibir.`);
+        toast.success(mesaNum ? `¡Pedido ${orderNumber} creado! Paga en caja cuando termines.` : `¡Pedido ${orderNumber} creado! Pagarás al recibir.`);
         router.push(`/seguimiento?order=${orderNumber}`);
         return;
       }
@@ -300,6 +306,14 @@ export default function OrderPage() {
             </div>
           )}
 
+          {/* Mesa badge */}
+          {mesaNum && (
+            <div className="mb-4 bg-[#2A2414] border border-[#D4A017]/40 rounded-xl px-4 py-2.5 flex items-center gap-2">
+              <span className="text-lg">🪑</span>
+              <p className="text-[#D4A017] font-bold text-sm">Mesa {mesaNum} — pedido en el establecimiento</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -314,13 +328,15 @@ export default function OrderPage() {
                 <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Teléfono *</label>
                 <input className={inputClass} placeholder="300 000 0000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
               </div>
-              <div>
-                <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Dirección de entrega *</label>
-                <input className={inputClass} placeholder="Calle, barrio, ciudad" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
-              </div>
+              {!mesaNum && (
+                <div>
+                  <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Dirección de entrega *</label>
+                  <input className={inputClass} placeholder="Calle, barrio, ciudad" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
+                </div>
+              )}
             </div>
-            {/* Selector de zona — obligatorio si hay zonas configuradas */}
-            {zones.length > 0 && (
+            {/* Selector de zona — obligatorio si hay zonas configuradas y no es mesa */}
+            {!mesaNum && zones.length > 0 && (
               <div>
                 <label className="text-[#9CA3AF] text-xs mb-2 block font-medium flex items-center gap-1">
                   <MapPin size={12} /> Barrio / Zona de entrega *
@@ -371,8 +387,17 @@ export default function OrderPage() {
                 </div>
               ))}
               <div className="flex justify-between text-[#9CA3AF] pt-1 border-t border-[#2E3038]">
-                <span>Domicilio{selectedZone ? ` · ${selectedZone.name}` : ""}</span>
-                <span>${effectiveDelivery.toLocaleString("es-CO")}</span>
+                {mesaNum ? (
+                  <>
+                    <span>Mesa {mesaNum}</span>
+                    <span className="text-green-400">Gratis</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Domicilio{selectedZone ? ` · ${selectedZone.name}` : ""}</span>
+                    <span>${effectiveDelivery.toLocaleString("es-CO")}</span>
+                  </>
+                )}
               </div>
               {pointsDiscount > 0 && (
                 <div className="flex justify-between text-green-400">
@@ -495,7 +520,7 @@ export default function OrderPage() {
                   }`}
                 >
                   <Banknote size={16} />
-                  Contra entrega
+                  {mesaNum ? "Pagar en caja" : "Contra entrega"}
                 </button>
               </div>
             </div>
@@ -508,7 +533,7 @@ export default function OrderPage() {
               {loading
                 ? "Procesando..."
                 : paymentMethod === "cash"
-                ? "Pedir y pagar al recibir"
+                ? (mesaNum ? "Pagar en caja" : "Pedir y pagar al recibir")
                 : `Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
             </button>
           </form>
