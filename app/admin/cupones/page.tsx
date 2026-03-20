@@ -162,7 +162,8 @@ export default function CuponesPage() {
 
       {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50">
+          <div className="absolute inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-full p-4">
           <div className="bg-[#1A1B21] border border-[#2E3038] rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between p-6 border-b border-[#2E3038]">
@@ -210,6 +211,7 @@ export default function CuponesPage() {
                 {saving ? "Creando..." : "Crear cupón"}
               </button>
             </div>
+          </div>
           </div>
           </div>
         </div>

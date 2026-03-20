@@ -202,7 +202,8 @@ export default function AdminCategoriasPage() {
 
       {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/70 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 z-50">
+          <div className="absolute inset-0 overflow-y-auto">
           <div className="flex items-end sm:items-center justify-center min-h-full p-4">
           <div className="bg-[#1A1B21] border border-[#2E3038] rounded-2xl w-full max-w-md p-5">
             <div className="flex items-center justify-between mb-5">
@@ -271,6 +272,7 @@ export default function AdminCategoriasPage() {
                 {saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear categoría"}
               </button>
             </div>
+          </div>
           </div>
           </div>
         </div>
