@@ -399,7 +399,6 @@ export default function AdminMenuPage() {
               <ImageUpload
                 value={form.image_url}
                 onChange={(url) => setForm({ ...form, image_url: url })}
-                aiHint={form.name ? `appetizing ${form.name} burger${form.description ? `, ${form.description}` : ""}, real food photography, dark elegant background, restaurant` : undefined}
               />
 
               {/* Barra libre */}
