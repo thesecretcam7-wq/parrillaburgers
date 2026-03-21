@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X, MapPin, Clock } from "lucide-react";
+import { BrandEmoji } from "@/components/ui/BrandEmoji";
 import { Coupon } from "@/lib/types";
 import { useStoreStatus } from "@/lib/hooks/useStoreStatus";
 
@@ -430,7 +431,7 @@ export default function OrderPage() {
 
             {/* Cupón de descuento */}
             <div>
-              <label className="text-[#9CA3AF] text-xs mb-2 block font-medium">Cupón de descuento</label>
+              <label className="text-[#9CA3AF] text-xs mb-2 flex items-center gap-1.5 font-medium"><BrandEmoji name="coupon" size={18} /> Cupón de descuento</label>
               {coupon ? (
                 <div className="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -499,7 +500,7 @@ export default function OrderPage() {
 
             {/* Points earned strip */}
             <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2">
-              <span className="text-lg">🎯</span>
+              <BrandEmoji name="burger" size={28} />
               <p className="text-[#E8B830] text-xs font-medium">
                 Ganarás <strong>{pointsEarned} puntos</strong> con este pedido
               </p>

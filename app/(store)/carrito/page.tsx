@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/lib/store/cart";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock } from "lucide-react";
+import { Minus, Plus, Trash2, ArrowRight, Clock } from "lucide-react";
+import { BrandEmoji } from "@/components/ui/BrandEmoji";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
@@ -29,9 +30,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4">
-        <div className="w-20 h-20 rounded-full bg-[#22242C] flex items-center justify-center mb-4">
-          <ShoppingBag className="text-[#6B7280]" size={40} />
-        </div>
+        <BrandEmoji name="face" size={80} className="mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">Tu carrito está vacío</h2>
         <p className="text-[#6B7280] mb-8 text-sm">Agrega productos desde el menú</p>
         <Link
@@ -147,7 +146,7 @@ export default function CartPage() {
 
           {/* Points strip */}
           <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2 mb-4">
-            <span className="text-lg">🎯</span>
+            <BrandEmoji name="burger" size={28} />
             <p className="text-[#E8B830] text-xs font-medium">
               Ganarás <strong>{Math.floor((mesaNum ? subtotal : grandTotal) / 1000)} puntos</strong> con este pedido
             </p>
