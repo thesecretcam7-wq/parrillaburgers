@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User, CheckCircle, Star, X, MapPin, Clock } from "lucide-react";
+import { User, CheckCircle, Star, Tag, X, MapPin, Clock } from "lucide-react";
 import { BrandEmoji } from "@/components/ui/BrandEmoji";
 import { Coupon } from "@/lib/types";
 import { useStoreStatus } from "@/lib/hooks/useStoreStatus";
