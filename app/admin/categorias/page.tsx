@@ -13,6 +13,20 @@ const EMOJIS = [
   "🍩","🍪","🎂","🍫","🍬","🧃","🍺","🥛","🧋","🫖","🍵","🥂",
 ];
 
+const BRAND_EMOJIS = [
+  { name: "burger",  label: "Burger"  },
+  { name: "hotdog",  label: "Perro"   },
+  { name: "fries",   label: "Papas"   },
+  { name: "soda",    label: "Bebida"  },
+  { name: "grill",   label: "Parrilla"},
+  { name: "cheese",  label: "Queso"   },
+  { name: "scooter", label: "Domicilio"},
+  { name: "face",    label: "Carita"  },
+  { name: "coupon",  label: "Cupón"   },
+  { name: "timer",   label: "Timer"   },
+  { name: "flame",   label: "Llama"   },
+] as const;
+
 type FormState = { name: string; description: string; emoji: string };
 const EMPTY: FormState = { name: "", description: "", emoji: "🍽️" };
 
@@ -166,7 +180,12 @@ export default function AdminCategoriasPage() {
             >
               <GripVertical size={16} className="text-[#444455] shrink-0 cursor-grab active:cursor-grabbing" />
               {cat.emoji && (
-                <span className="text-2xl leading-none shrink-0">{cat.emoji}</span>
+                cat.emoji.startsWith("brand:") ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/emojis/${cat.emoji.replace("brand:", "")}.png`} alt="" width={28} height={28} className="object-contain shrink-0" />
+                ) : (
+                  <span className="text-2xl leading-none shrink-0">{cat.emoji}</span>
+                )
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-[#F5F0E8] font-semibold text-sm">{cat.name}</p>
@@ -237,7 +256,30 @@ export default function AdminCategoriasPage() {
 
               {/* Emoji picker */}
               <div>
-                <label className="text-[#888899] text-xs font-medium mb-2 block">Emoji</label>
+                <label className="text-[#888899] text-xs font-medium mb-2 block">Emoji de marca</label>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {BRAND_EMOJIS.map((b) => {
+                    const val = `brand:${b.name}`;
+                    return (
+                      <button
+                        key={b.name}
+                        type="button"
+                        title={b.label}
+                        onClick={() => setForm({ ...form, emoji: val })}
+                        className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all ${
+                          form.emoji === val
+                            ? "bg-[#D4A017]/20 border-2 border-[#D4A017]"
+                            : "bg-[#22242C] border border-[#2E3038] hover:border-[#D4A017]/50"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={`/emojis/${b.name}.png`} alt={b.label} width={28} height={28} className="object-contain" />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <label className="text-[#888899] text-xs font-medium mb-2 block">O elige un emoji de texto</label>
                 <div className="flex flex-wrap gap-2">
                   {EMOJIS.map((e) => (
                     <button

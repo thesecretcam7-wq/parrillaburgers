@@ -6,15 +6,10 @@ import { Category, MenuItem } from "@/lib/types";
 import MenuItemCard from "./MenuItemCard";
 import { BrandEmoji, BrandEmojiName } from "@/components/ui/BrandEmoji";
 
-const BRAND_MAP: Record<string, BrandEmojiName> = {
-  hamburguesas: "burger", bebidas: "soda", perros: "hotdog",
-  otros: "hotdog", acompañamientos: "fries", combos: "grill", postres: "cheese",
-};
-
 function CategoryIcon({ cat, size = 40 }: { cat: Category; size?: number }) {
-  const key = cat.name.toLowerCase();
-  for (const [k, name] of Object.entries(BRAND_MAP)) {
-    if (key.includes(k)) return <BrandEmoji name={name} size={size} />;
+  if (cat.emoji?.startsWith("brand:")) {
+    const name = cat.emoji.replace("brand:", "") as BrandEmojiName;
+    return <BrandEmoji name={name} size={size} />;
   }
   if (cat.emoji) return <span style={{ fontSize: size * 0.85 }} className="leading-none">{cat.emoji}</span>;
   return <BrandEmoji name="burger" size={size} />;
