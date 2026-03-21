@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { ChevronRight, ArrowLeft, Search, X } from "lucide-react";
 import { Category, MenuItem } from "@/lib/types";
 import MenuItemCard from "./MenuItemCard";
-import { BrandEmoji, BrandEmojiName } from "@/components/ui/BrandEmoji";
 
 interface MenuContentProps {
   categories: Category[];
@@ -22,11 +21,6 @@ const FALLBACK_EMOJI: Record<string, string> = {
   acompañamientos: "🍟", combos: "🎁", postres: "🍰", entradas: "🥗",
 };
 
-const BRAND_MAP: Record<string, BrandEmojiName> = {
-  hamburguesas: "burger", bebidas: "soda", perros: "hotdog",
-  otros: "hotdog", acompañamientos: "fries", combos: "grill", postres: "cheese",
-};
-
 function getCategoryEmoji(cat: Category): string {
   if (cat.emoji) return cat.emoji;
   const nameKey = cat.name.toLowerCase();
@@ -34,16 +28,6 @@ function getCategoryEmoji(cat: Category): string {
     if (nameKey.includes(k)) return emoji;
   }
   return "🍽️";
-}
-
-function CategoryIcon({ cat, size = 40 }: { cat: Category; size?: number }) {
-  if (!cat.emoji) {
-    const key = cat.name.toLowerCase();
-    for (const [k, name] of Object.entries(BRAND_MAP)) {
-      if (key.includes(k)) return <BrandEmoji name={name} size={size} />;
-    }
-  }
-  return <span style={{ fontSize: size * 0.85 }} className="leading-none">{getCategoryEmoji(cat)}</span>;
 }
 
 export default function MenuContent({
@@ -147,9 +131,7 @@ export default function MenuContent({
         {/* Lo más pedido */}
         {topItems.length > 0 && (
           <div className="mb-5">
-            <h2 className="text-white font-bold text-base mb-3 px-1 flex items-center gap-2">
-              <BrandEmoji name="flame" size={28} /> Lo más pedido
-            </h2>
+            <h2 className="text-white font-bold text-base mb-3 px-1">🔥 Lo más pedido</h2>
             <div className="flex gap-3 overflow-x-auto pb-1 -mx-3 px-3 scrollbar-none">
               {topItems.map((item) => (
                 <button
@@ -157,12 +139,12 @@ export default function MenuContent({
                   onClick={() => { setActiveCategory(item.category_id); setHighlightItemId(item.id); }}
                   className="flex-none w-36 bg-[#1A1B21] border border-[#2E3038] rounded-2xl p-3 text-left hover:border-[#D4A017]/50 active:scale-[0.97] transition-all"
                 >
-                  <div className="mb-2">
-                    {(() => {
+                  <div className="text-2xl mb-2">{
+                    (() => {
                       const cat = categories.find((c) => c.id === item.category_id);
-                      return cat ? <CategoryIcon cat={cat} size={32} /> : <BrandEmoji name="burger" size={32} />;
-                    })()}
-                  </div>
+                      return cat ? getCategoryEmoji(cat) : "🍔";
+                    })()
+                  }</div>
                   <p className="text-white font-semibold text-xs leading-tight line-clamp-2">{item.name}</p>
                   <p className="text-[#D4A017] font-bold text-xs mt-1">${item.price.toLocaleString("es-CO")}</p>
                 </button>
@@ -171,20 +153,19 @@ export default function MenuContent({
           </div>
         )}
 
-        <h2 className="text-white font-bold text-base mb-3 px-1 flex items-center gap-2">
-          <BrandEmoji name="burger" size={28} /> ¿Qué quieres comer?
-        </h2>
+        <h2 className="text-white font-bold text-base mb-3 px-1">¿Qué quieres comer?</h2>
 
         <div className="flex flex-col gap-3">
           {categories.map((cat) => {
             const count = items.filter((i) => i.category_id === cat.id).length;
+            const emoji = getCategoryEmoji(cat);
             return (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-2xl px-5 py-4 flex items-center gap-4 hover:border-[#D4A017]/50 active:scale-[0.98] transition-all text-left"
               >
-                <CategoryIcon cat={cat} size={48} />
+                <span className="text-4xl leading-none">{emoji}</span>
                 <div className="flex-1">
                   <p className="text-white font-bold text-base">{cat.name}</p>
                   <p className="text-[#6B7280] text-xs mt-0.5">
@@ -212,7 +193,9 @@ export default function MenuContent({
           <ArrowLeft size={18} className="text-white" />
         </button>
         <div className="flex items-center gap-2 flex-1">
-          <CategoryIcon cat={categories.find((c) => c.id === activeCategory)!} size={28} />
+          <span className="text-2xl leading-none">
+            {getCategoryEmoji(categories.find((c) => c.id === activeCategory)!)}
+          </span>
           <h2 className="text-white font-bold text-base">{activeCategoryName}</h2>
         </div>
       </div>
@@ -224,7 +207,7 @@ export default function MenuContent({
 
       {activeItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-[#6B7280]">
-          <div className="mb-3"><BrandEmoji name="flame" size={64} /></div>
+          <span className="text-5xl mb-3">🍔</span>
           <p className="text-sm">No hay productos en esta categoría</p>
         </div>
       ) : (

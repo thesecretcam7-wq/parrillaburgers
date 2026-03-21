@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/lib/store/cart";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock } from "lucide-react";
-import { BrandEmoji } from "@/components/ui/BrandEmoji";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
@@ -31,15 +30,15 @@ export default function CartPage() {
     return (
       <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4">
         <div className="w-20 h-20 rounded-full bg-[#22242C] flex items-center justify-center mb-4">
-          <BrandEmoji name="face" size={56} />
+          <ShoppingBag className="text-[#6B7280]" size={40} />
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Tu carrito está vacío 😔</h2>
+        <h2 className="text-xl font-bold text-white mb-2">Tu carrito está vacío</h2>
         <p className="text-[#6B7280] mb-8 text-sm">Agrega productos desde el menú</p>
         <Link
           href="/menu"
           className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-3 rounded-xl"
         >
-          Ver Menú 🍔
+          Ver Menú
         </Link>
       </main>
     );
@@ -122,7 +121,7 @@ export default function CartPage() {
 
         {/* Summary card */}
         <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
-          <h2 className="text-white font-bold mb-4">🧾 Resumen del pedido</h2>
+          <h2 className="text-white font-bold mb-4">Resumen del pedido</h2>
 
           <div className="space-y-2.5 mb-5 text-sm">
             <div className="flex justify-between text-[#9CA3AF]">
@@ -148,7 +147,7 @@ export default function CartPage() {
 
           {/* Points strip */}
           <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2 mb-4">
-            <BrandEmoji name="burger" size={28} />
+            <span className="text-lg">🎯</span>
             <p className="text-[#E8B830] text-xs font-medium">
               Ganarás <strong>{Math.floor((mesaNum ? subtotal : grandTotal) / 1000)} puntos</strong> con este pedido
             </p>
@@ -167,7 +166,7 @@ export default function CartPage() {
               href="/pedido"
               className={`flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold py-3.5 rounded-xl w-full transition-opacity ${isOpen === null ? "opacity-50 pointer-events-none" : ""}`}
             >
-              Continuar 🚀
+              Continuar
               <ArrowRight size={16} />
             </Link>
           )}

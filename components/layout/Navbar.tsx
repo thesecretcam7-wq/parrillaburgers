@@ -8,7 +8,7 @@ import { useCartStore } from "@/lib/store/cart";
 
 const TITLES: Record<string, string> = {
   "/carrito":     "Tu Carrito",
-  "/pedido":      "Tu Pedido",
+  "/pedido":      "Completa tu Pedido",
   "/seguimiento": "Seguimiento",
   "/mis-pedidos": "Mis Pedidos",
 };
