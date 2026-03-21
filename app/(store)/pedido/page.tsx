@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X, MapPin, Clock } from "lucide-react";
+import { User, CheckCircle, Star, X, MapPin, Clock } from "lucide-react";
+import { BrandEmoji } from "@/components/ui/BrandEmoji";
 import { Coupon } from "@/lib/types";
 import { useStoreStatus } from "@/lib/hooks/useStoreStatus";
 
@@ -328,20 +329,20 @@ export default function OrderPage() {
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Nombre completo *</label>
+                <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">👤 Nombre completo *</label>
                 <input className={inputClass} placeholder="Tu nombre" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div>
-                <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Email *</label>
+                <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">📧 Email *</label>
                 <input className={inputClass} type="email" placeholder="tu@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
               </div>
               <div>
-                <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Teléfono *</label>
+                <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">📱 Teléfono *</label>
                 <input className={inputClass} placeholder="300 000 0000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
               </div>
               {!mesaNum && (
                 <div>
-                  <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Dirección de entrega *</label>
+                  <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">📍 Dirección de entrega *</label>
                   <input className={inputClass} placeholder="Calle, barrio, ciudad" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
                 </div>
               )}
@@ -384,7 +385,7 @@ export default function OrderPage() {
             )}
 
             <div>
-              <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Notas (opcional)</label>
+              <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">💬 Notas (opcional)</label>
               <textarea className={`${inputClass} resize-none h-20`} placeholder="Sin cebolla, extra queso, indicaciones de entrega..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
             <p className="text-[#6B7280] text-xs">Al continuar, crearemos una cuenta para acumular puntos y rastrear tus pedidos.</p>
@@ -430,7 +431,9 @@ export default function OrderPage() {
 
             {/* Cupón de descuento */}
             <div>
-              <label className="text-[#9CA3AF] text-xs mb-2 block font-medium">Cupón de descuento</label>
+              <label className="text-[#9CA3AF] text-xs mb-2 flex items-center gap-1.5 font-medium">
+                <BrandEmoji name="coupon" size={20} /> Cupón de descuento
+              </label>
               {coupon ? (
                 <div className="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-2">
@@ -499,7 +502,7 @@ export default function OrderPage() {
 
             {/* Points earned strip */}
             <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2">
-              <span className="text-lg">🎯</span>
+              <BrandEmoji name="burger" size={28} />
               <p className="text-[#E8B830] text-xs font-medium">
                 Ganarás <strong>{pointsEarned} puntos</strong> con este pedido
               </p>
@@ -507,7 +510,7 @@ export default function OrderPage() {
 
             {/* Método de pago */}
             <div>
-              <label className="text-[#9CA3AF] text-xs mb-2 block font-medium">Método de pago</label>
+              <label className="text-[#9CA3AF] text-xs mb-2 block font-medium">💳 Método de pago</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -518,8 +521,7 @@ export default function OrderPage() {
                       : "border-[#2E3038] text-[#6B7280] hover:border-[#D4A017]/40"
                   }`}
                 >
-                  <CreditCard size={16} />
-                  Pagar en línea
+                  Pagar en línea 💳
                 </button>
                 <button
                   type="button"
@@ -530,8 +532,7 @@ export default function OrderPage() {
                       : "border-[#2E3038] text-[#6B7280] hover:border-[#D4A017]/40"
                   }`}
                 >
-                  <Banknote size={16} />
-                  {mesaNum ? "Pagar en caja" : "Contra entrega"}
+                  {mesaNum ? "Pagar en caja 🪑" : "Contra entrega 🛵"}
                 </button>
               </div>
             </div>
@@ -551,10 +552,10 @@ export default function OrderPage() {
                 className="w-full bg-[#D4A017] disabled:opacity-50 disabled:cursor-not-allowed text-[#0F1117] font-bold py-4 rounded-xl text-base"
               >
                 {loading
-                  ? "Procesando..."
+                  ? "⏳ Procesando..."
                   : paymentMethod === "cash"
-                  ? (mesaNum ? "Pagar en caja" : "Pedir y pagar al recibir")
-                  : `Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
+                  ? (mesaNum ? "🪑 Pagar en caja" : "🛵 Pedir y pagar al recibir")
+                  : `💳 Pagar $${grandTotal.toLocaleString("es-CO")} con Wompi`}
               </button>
             )}
           </form>
