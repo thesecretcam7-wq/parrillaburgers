@@ -32,6 +32,7 @@ function TrackingContent() {
   const [reviewSent, setReviewSent] = useState(false);
   const [reviewSending, setReviewSending] = useState(false);
   const [showReview, setShowReview] = useState(false);
+  const [paymentFailed, setPaymentFailed] = useState(false);
   const verifiedRef = useRef(false);
 
   // Resolve order number: URL param → localStorage fallback
@@ -62,7 +63,7 @@ function TrackingContent() {
         const data = await res.json();
         if (data.status === "APPROVED")      toast.success("¡Pago aprobado! Tu pedido está en camino 🎉");
         else if (data.status === "PENDING")  toast("Pago en proceso, te notificaremos pronto", { icon: "⏳" });
-        else                                 toast.error("El pago no fue aprobado. Contacta soporte si ya fue cobrado.");
+        else                                 setPaymentFailed(true);
       } catch { /* silent */ }
     })();
   }, [wompiTxId, urlOrder]);
@@ -243,6 +244,28 @@ function TrackingContent() {
 
         <Link href="/menu" className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base">
           Hacer otro pedido
+        </Link>
+      </main>
+    );
+  }
+
+  // ── Payment failed (Wompi declined while user was in checkout) ────────────
+  if (paymentFailed) {
+    return (
+      <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4 pb-24">
+        <div className="text-5xl mb-4">💳</div>
+        <p className="text-white font-bold text-xl mb-2">Pago rechazado</p>
+        <p className="text-[#9CA3AF] text-sm mb-1 text-center">
+          Tu pago no fue aprobado. <strong>No se realizó ningún cobro.</strong>
+        </p>
+        <p className="text-[#6B7280] text-xs mb-8 text-center">
+          Verifica los datos de tu tarjeta e intenta de nuevo desde el menú.
+        </p>
+        <Link
+          href="/menu"
+          className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base"
+        >
+          Volver al menú
         </Link>
       </main>
     );

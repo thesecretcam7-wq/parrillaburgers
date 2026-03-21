@@ -50,12 +50,18 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // If payment failed → also cancel the order so it doesn't clog the admin queue
+    const orderUpdate: Record<string, unknown> = {
+      payment_status: paymentStatus,
+      wompi_transaction_id: transactionId,
+    };
+    if (paymentStatus === "failed") {
+      orderUpdate.status = "cancelled";
+    }
+
     await supabase
       .from("orders")
-      .update({
-        payment_status: paymentStatus,
-        wompi_transaction_id: transactionId,
-      })
+      .update(orderUpdate)
       .eq("order_number", orderNumber);
 
     return NextResponse.json({
