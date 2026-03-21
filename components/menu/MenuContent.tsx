@@ -147,16 +147,23 @@ export default function MenuContent({
                 <button
                   key={item.id}
                   onClick={() => { setActiveCategory(item.category_id); setHighlightItemId(item.id); }}
-                  className="flex-none w-36 bg-[#1A1B21] border border-[#2E3038] rounded-2xl p-3 text-left hover:border-[#D4A017]/50 active:scale-[0.97] transition-all"
+                  className="flex-none w-36 bg-[#1A1B21] border border-[#2E3038] rounded-2xl overflow-hidden text-left hover:border-[#D4A017]/50 active:scale-[0.97] transition-all"
                 >
-                  <div className="mb-2">{
-                    (() => {
-                      const cat = categories.find((c) => c.id === item.category_id);
-                      return cat ? <CategoryIcon cat={cat} size={32} /> : <BrandEmoji name="burger" size={32} />;
-                    })()
-                  }</div>
-                  <p className="text-white font-semibold text-xs leading-tight line-clamp-2">{item.name}</p>
-                  <p className="text-[#D4A017] font-bold text-xs mt-1">${item.price.toLocaleString("es-CO")}</p>
+                  {item.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.image_url} alt={item.name} className="w-full h-24 object-cover" />
+                  ) : (
+                    <div className="w-full h-24 bg-[#22242C] flex items-center justify-center">
+                      {(() => {
+                        const cat = categories.find((c) => c.id === item.category_id);
+                        return cat ? <CategoryIcon cat={cat} size={40} /> : <BrandEmoji name="burger" size={40} />;
+                      })()}
+                    </div>
+                  )}
+                  <div className="p-2.5">
+                    <p className="text-white font-semibold text-xs leading-tight line-clamp-2">{item.name}</p>
+                    <p className="text-[#D4A017] font-bold text-xs mt-1">${item.price.toLocaleString("es-CO")}</p>
+                  </div>
                 </button>
               ))}
             </div>
