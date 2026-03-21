@@ -267,7 +267,7 @@ export default function AdminMenuPage() {
               <tr className="border-b border-[#2E3038]">
                 <th className="text-left px-4 py-3.5 text-[#888899] font-semibold">Producto</th>
                 <th className="text-left px-4 py-3.5 text-[#888899] font-semibold hidden sm:table-cell">Categoría</th>
-                <th className="text-right px-4 py-3.5 text-[#888899] font-semibold">Precio</th>
+                <th className="text-right px-4 py-3.5 text-[#888899] font-semibold hidden sm:table-cell">Precio</th>
                 <th className="text-center px-4 py-3.5 text-[#888899] font-semibold">Disp.</th>
                 <th className="text-right px-4 py-3.5 text-[#888899] font-semibold">Acc.</th>
               </tr>
@@ -307,7 +307,7 @@ export default function AdminMenuPage() {
                       {(item.category as Category)?.name ?? "—"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-[#F5F0E8] font-mono text-sm">
+                  <td className="px-4 py-3 text-right text-[#F5F0E8] font-mono text-sm hidden sm:table-cell">
                     ${Number(item.price).toLocaleString("es-CO")}
                   </td>
                   <td className="px-4 py-3 text-center">
