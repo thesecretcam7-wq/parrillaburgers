@@ -32,14 +32,26 @@ export default function ResenasPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    createClient()
-      .from("reviews")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setReviews((data as Review[]) ?? []);
-        setLoading(false);
-      });
+    const supabase = createClient();
+
+    const fetch = () =>
+      supabase
+        .from("reviews")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .then(({ data }) => {
+          setReviews((data as Review[]) ?? []);
+          setLoading(false);
+        });
+
+    fetch();
+
+    const channel = supabase
+      .channel("resenas-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "reviews" }, fetch)
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const avg = reviews.length

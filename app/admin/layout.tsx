@@ -47,14 +47,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [newReviewsCount, setNewReviewsCount] = useState(0);
   const knownIds = useRef<Set<string>>(new Set());
+  const knownReviewIds = useRef<Set<string>>(new Set());
   const firstLoad = useRef(true);
 
-  // Resetear badge al entrar a pedidos
+  // Resetear badges al entrar a las secciones
   useEffect(() => {
-    if (pathname.startsWith("/admin/pedidos")) {
-      setNewOrdersCount(0);
-    }
+    if (pathname.startsWith("/admin/pedidos")) setNewOrdersCount(0);
+    if (pathname.startsWith("/admin/resenas")) setNewReviewsCount(0);
   }, [pathname]);
 
   // Suscripción global a nuevos pedidos
@@ -135,9 +136,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     loadInitial();
 
+    // Cargar reseñas conocidas al inicio
+    supabase.from("reviews").select("id").then(({ data }) => {
+      (data ?? []).forEach((r: { id: string }) => knownReviewIds.current.add(r.id));
+    });
+
     const channel = supabase
       .channel("admin-layout-orders")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, handleNewOrders)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "reviews" }, (payload) => {
+        const id = payload.new?.id as string;
+        if (!id || knownReviewIds.current.has(id)) return;
+        knownReviewIds.current.add(id);
+        if (!pathname.startsWith("/admin/resenas")) {
+          setNewReviewsCount((c) => c + 1);
+        }
+        toast.custom(
+          (t) => (
+            <div className={`flex items-center gap-3 bg-[#1A1B21] border-2 border-[#D4A017] rounded-2xl px-4 py-3 shadow-xl ${t.visible ? "animate-enter" : "animate-leave"}`}>
+              <div className="w-9 h-9 rounded-full bg-[#D4A017]/20 flex items-center justify-center shrink-0">
+                <Star size={18} className="text-[#D4A017]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-bold text-sm">¡Nueva reseña!</p>
+                <p className="text-[#CCCCCC] text-xs truncate">{payload.new?.customer_name} · {"⭐".repeat(payload.new?.rating ?? 0)}</p>
+              </div>
+              <Link href="/admin/resenas" onClick={() => toast.dismiss(t.id)} className="shrink-0 bg-[#D4A017] hover:bg-[#E8B830] text-[#111217] font-bold text-xs px-3 py-1.5 rounded-lg transition-colors">Ver</Link>
+              <button onClick={() => toast.dismiss(t.id)} className="text-[#555566] hover:text-white text-lg leading-none shrink-0">×</button>
+            </div>
+          ),
+          { duration: 15000, position: "top-right" }
+        );
+      })
       .subscribe();
 
     const interval = setInterval(handleNewOrders, 5000);
@@ -156,6 +186,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ? pathname === "/admin"
           : pathname.startsWith(href);
         const isPedidos = href === "/admin/pedidos";
+        const isResenas = href === "/admin/resenas";
         return (
           <Link
             key={href}
@@ -174,11 +205,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {newOrdersCount > 9 ? "9+" : newOrdersCount}
                 </span>
               )}
+              {isResenas && newReviewsCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-black text-[9px] font-black rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 animate-pulse">
+                  {newReviewsCount > 9 ? "9+" : newReviewsCount}
+                </span>
+              )}
             </div>
             <span className="flex-1">{label}</span>
             {isPedidos && newOrdersCount > 0 && (
               <span className="bg-red-500 text-white text-[10px] font-black rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
                 {newOrdersCount > 9 ? "9+" : newOrdersCount}
+              </span>
+            )}
+            {isResenas && newReviewsCount > 0 && (
+              <span className="bg-yellow-500 text-black text-[10px] font-black rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+                {newReviewsCount > 9 ? "9+" : newReviewsCount}
               </span>
             )}
           </Link>
