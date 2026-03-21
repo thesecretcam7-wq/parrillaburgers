@@ -100,12 +100,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         // Notificación OS
         if ("Notification" in window && Notification.permission === "granted") {
-          new Notification(`🛎️ Nuevo pedido ${o.order_number}`, {
+          const notif = new Notification(`🛎️ Nuevo pedido ${o.order_number}`, {
             body: `${o.customer_name} · $${(o.total ?? 0).toLocaleString("es-CO")}`,
             icon: "/logo-real.png",
             tag: "nuevo-pedido",
             requireInteraction: true,
           });
+          notif.onclick = () => {
+            window.focus();
+            window.location.href = "/admin/pedidos";
+          };
         }
 
         // Toast global (visible desde cualquier sección)
