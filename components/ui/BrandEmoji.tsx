@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-
 /**
  * Emojis personalizados de ParillaBurgers.
  *
@@ -45,7 +43,8 @@ const EXT: Record<BrandEmojiName, string> = {
 
 export function BrandEmoji({ name, size = 32, className = "" }: BrandEmojiProps) {
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src={`/emojis/${name}.${EXT[name]}`}
       alt={name}
       width={size}

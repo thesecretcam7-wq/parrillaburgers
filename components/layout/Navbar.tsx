@@ -7,10 +7,10 @@ import { ArrowLeft, Home, UtensilsCrossed, ShoppingCart, PackageSearch } from "l
 import { useCartStore } from "@/lib/store/cart";
 
 const TITLES: Record<string, string> = {
-  "/carrito":     "🛒 Tu Carrito",
-  "/pedido":      "📋 Tu Pedido",
-  "/seguimiento": "📦 Seguimiento",
-  "/mis-pedidos": "🧾 Mis Pedidos",
+  "/carrito":     "Tu Carrito",
+  "/pedido":      "Tu Pedido",
+  "/seguimiento": "Seguimiento",
+  "/mis-pedidos": "Mis Pedidos",
 };
 
 const BACK: Record<string, string> = {
