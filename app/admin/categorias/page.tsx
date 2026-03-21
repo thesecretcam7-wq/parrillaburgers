@@ -25,6 +25,7 @@ const BRAND_EMOJIS = [
   { name: "coupon",  label: "Cupón"   },
   { name: "timer",   label: "Timer"   },
   { name: "flame",   label: "Llama"   },
+  { name: "combos",  label: "Combos"  },
 ] as const;
 
 type FormState = { name: string; description: string; emoji: string };

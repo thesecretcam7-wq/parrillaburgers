@@ -8,12 +8,18 @@ import toast from "react-hot-toast";
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
+  confirmOnChange?: boolean;
 }
 
-export default function ImageUpload({ value, onChange }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, confirmOnChange }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+
+  const needsConfirm = () =>
+    confirmOnChange && value
+      ? confirm("¿Seguro que quieres cambiar la imagen del producto?")
+      : true;
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Solo se permiten imágenes"); return; }
@@ -38,7 +44,7 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    if (file && needsConfirm()) handleFile(file);
   };
 
   return (
@@ -49,7 +55,7 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
         <div className="relative w-full h-40 rounded-xl overflow-hidden border border-[#2E3038] group">
           <Image src={value} alt="Preview" fill className="object-cover" unoptimized />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-            <button type="button" onClick={() => inputRef.current?.click()}
+            <button type="button" onClick={() => { if (needsConfirm()) inputRef.current?.click(); }}
               className="bg-[#D4A017] text-[#111217] text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1.5">
               <Upload size={13} /> Cambiar
             </button>
@@ -61,7 +67,7 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
         </div>
       ) : (
         <div
-          onClick={() => !uploading && inputRef.current?.click()}
+          onClick={() => !uploading && needsConfirm() && inputRef.current?.click()}
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}

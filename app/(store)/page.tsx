@@ -56,18 +56,28 @@ export default async function Home() {
 
         {/* Badges de features */}
         <div className="flex gap-2 flex-wrap justify-center">
-          {[
-            { icon: "🚴", label: "Domicilio" },
-            { icon: "🎯", label: "Puntos" },
-            { icon: "⚡", label: "Tiempo real" },
-          ].map(({ icon, label }) => (
-            <span
-              key={label}
-              className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] text-xs font-medium px-3 py-1.5 rounded-full"
-            >
-              <span>{icon}</span> {label}
+          {/* Domicilio */}
+          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] text-xs font-medium px-3 py-1.5 rounded-full">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/emojis/scooter.png" alt="" width={16} height={16} className="object-contain" />
+            Domicilio
+          </span>
+
+          {/* Puntos */}
+          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] text-xs font-medium px-3 py-1.5 rounded-full">
+            <span>🎯</span> Puntos
+          </span>
+
+          {/* Tiempo real */}
+          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] text-xs font-medium px-3 py-1.5 rounded-full">
+            <span className="flex items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/emojis/burger.png" alt="" width={16} height={16} className="object-contain" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/emojis/timer.png" alt="" width={14} height={14} className="object-contain -ml-1" />
             </span>
-          ))}
+            Tiempo real
+          </span>
         </div>
 
         {/* CTA */}

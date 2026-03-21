@@ -119,7 +119,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
       {/* Detail modal */}
       {showDetail && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pb-16 sm:pb-0 sm:p-4"
           onClick={() => setShowDetail(false)}
         >
           <div

@@ -31,6 +31,7 @@ function TrackingContent() {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSent, setReviewSent] = useState(false);
   const [reviewSending, setReviewSending] = useState(false);
+  const [showReview, setShowReview] = useState(false);
   const verifiedRef = useRef(false);
 
   // Resolve order number: URL param → localStorage fallback
@@ -105,6 +106,7 @@ function TrackingContent() {
     const handleUpdate = (newOrder: Order) => {
       if (prevStatusRef.current && newOrder.status !== prevStatusRef.current) {
         notifyChange(newOrder.status as OrderStatus);
+        if (newOrder.status === "delivered") setShowReview(true);
       }
       prevStatusRef.current = newOrder.status;
       setOrder(newOrder);
@@ -201,40 +203,42 @@ function TrackingContent() {
         <p className="text-[#9CA3AF] text-sm mb-2 text-center">Esperamos que lo hayas disfrutado 🍔</p>
         <p className="text-[#6B7280] text-xs mb-6">{order.order_number}</p>
 
-        {/* Review form */}
-        {!reviewSent ? (
-          <div className="w-full max-w-xs bg-[#1A1B21] border border-[#2E3038] rounded-2xl p-5 mb-6 space-y-4">
-            <p className="text-white font-semibold text-sm text-center">¿Cómo fue tu experiencia?</p>
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <button key={s} onClick={() => setReviewRating(s)}>
-                  <Star
-                    size={32}
-                    className={`transition-all ${s <= reviewRating ? "text-[#D4A017] fill-[#D4A017] scale-110" : "text-[#2E3038]"}`}
-                  />
-                </button>
-              ))}
+        {/* Review form — solo si el pedido se marcó entregado mientras el cliente estaba en pantalla */}
+        {showReview && (
+          !reviewSent ? (
+            <div className="w-full max-w-xs bg-[#1A1B21] border border-[#2E3038] rounded-2xl p-5 mb-6 space-y-4">
+              <p className="text-white font-semibold text-sm text-center">¿Cómo fue tu experiencia?</p>
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button key={s} onClick={() => setReviewRating(s)}>
+                    <Star
+                      size={32}
+                      className={`transition-all ${s <= reviewRating ? "text-[#D4A017] fill-[#D4A017] scale-110" : "text-[#2E3038]"}`}
+                    />
+                  </button>
+                ))}
+              </div>
+              {reviewRating > 0 && (
+                <textarea
+                  className="w-full bg-[#22242C] border border-[#2E3038] rounded-xl px-3 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm resize-none h-20 transition-colors"
+                  placeholder="Cuéntanos más (opcional)..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                />
+              )}
+              <button
+                onClick={submitReview}
+                disabled={reviewRating === 0 || reviewSending}
+                className="w-full bg-[#D4A017] disabled:opacity-40 text-[#0F1117] font-bold py-3 rounded-xl text-sm transition-opacity"
+              >
+                {reviewSending ? "Enviando..." : "Enviar reseña"}
+              </button>
             </div>
-            {reviewRating > 0 && (
-              <textarea
-                className="w-full bg-[#22242C] border border-[#2E3038] rounded-xl px-3 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm resize-none h-20 transition-colors"
-                placeholder="Cuéntanos más (opcional)..."
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-              />
-            )}
-            <button
-              onClick={submitReview}
-              disabled={reviewRating === 0 || reviewSending}
-              className="w-full bg-[#D4A017] disabled:opacity-40 text-[#0F1117] font-bold py-3 rounded-xl text-sm transition-opacity"
-            >
-              {reviewSending ? "Enviando..." : "Enviar reseña"}
-            </button>
-          </div>
-        ) : (
-          <div className="w-full max-w-xs bg-green-900/20 border border-green-800/30 rounded-2xl p-4 mb-6 text-center">
-            <p className="text-green-400 font-semibold text-sm">¡Gracias por tu reseña! 🙏</p>
-          </div>
+          ) : (
+            <div className="w-full max-w-xs bg-green-900/20 border border-green-800/30 rounded-2xl p-4 mb-6 text-center">
+              <p className="text-green-400 font-semibold text-sm">¡Gracias por tu reseña! 🙏</p>
+            </div>
+          )
         )}
 
         <Link href="/menu" className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base">

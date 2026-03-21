@@ -8,12 +8,6 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import ImageUpload from "@/components/admin/ImageUpload";
 
-const DEFAULT_BARRA_LIBRE = [
-  "Lechuga", "Tomate", "Cebolla", "Pepinillos", "Jalapeños",
-  "Maíz", "Zanahoria", "Aguacate", "Champiñones", "Pimentón",
-  "Ketchup", "Mostaza", "Mayonesa", "Salsa BBQ", "Salsa picante",
-];
-
 type FormState = {
   name: string;
   description: string;
@@ -44,7 +38,7 @@ export default function AdminMenuPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [barraLibreSugerencias, setBarraLibreSugerencias] = useState<string[]>(DEFAULT_BARRA_LIBRE);
+  const [barraLibreSugerencias, setBarraLibreSugerencias] = useState<string[]>([]);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -400,6 +394,7 @@ export default function AdminMenuPage() {
               <ImageUpload
                 value={form.image_url}
                 onChange={(url) => setForm({ ...form, image_url: url })}
+                confirmOnChange={!!editingId}
               />
 
               {/* Barra libre */}

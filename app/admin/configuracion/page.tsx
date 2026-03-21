@@ -7,12 +7,6 @@ import { Save, Eye, EyeOff, Bike, Store, MessageCircle, Plus, X, Clock } from "l
 
 const EMOJIS = ["🥗","🥬","🥦","🥕","🍅","🫑","🧅","🧄","🫒","🌽","🥒","🥑","🍋","🍓","🍇","🍉","🍎"];
 
-const DEFAULT_INGREDIENTES = [
-  "Lechuga","Tomate","Cebolla","Pepinillos","Jalapeños",
-  "Maíz","Zanahoria","Aguacate","Champiñones","Pimentón",
-  "Ketchup","Mostaza","Mayonesa","Salsa BBQ","Salsa picante",
-];
-
 export default function ConfiguracionPage() {
   const supabase = createClient();
   const [activa, setActiva] = useState(true);
@@ -23,7 +17,7 @@ export default function ConfiguracionPage() {
   const [mensajeCerrado, setMensajeCerrado] = useState("Estamos cerrados por el momento. Vuelve pronto 🕐");
   const [whatsappAdmin, setWhatsappAdmin] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("30-45");
-  const [ingredientes, setIngredientes] = useState<string[]>(DEFAULT_INGREDIENTES);
+  const [ingredientes, setIngredientes] = useState<string[]>([]);
   const [newIng, setNewIng] = useState("");
   const ingInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
