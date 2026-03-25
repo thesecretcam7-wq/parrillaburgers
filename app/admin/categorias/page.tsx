@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Category } from "@/lib/types";
-import { Plus, Trash2, X, GripVertical, Pencil } from "lucide-react";
+import { Plus, Trash2, X, GripVertical, Pencil, ChevronUp, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 
 const EMOJIS = [
@@ -122,6 +122,19 @@ export default function AdminCategoriasPage() {
     toast.success("Orden guardado");
   };
 
+  const moveCategory = async (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= categories.length) return;
+    const reordered = [...categories];
+    reordered.splice(newIndex, 0, reordered.splice(index, 1)[0]);
+    setCategories(reordered);
+    await Promise.all(
+      reordered.map((cat, i) =>
+        supabase.from("categories").update({ sort_order: i + 1 }).eq("id", cat.id)
+      )
+    );
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("¿Eliminar esta categoría? Los productos en esta categoría quedarán sin categoría.")) return;
     setDeletingId(id);
@@ -165,7 +178,7 @@ export default function AdminCategoriasPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {categories.map((cat) => (
+          {categories.map((cat, idx) => (
             <div
               key={cat.id}
               draggable
@@ -180,6 +193,22 @@ export default function AdminCategoriasPage() {
               }`}
             >
               <GripVertical size={16} className="text-[#444455] shrink-0 cursor-grab active:cursor-grabbing" />
+              <div className="flex flex-col gap-0.5 shrink-0">
+                <button
+                  onClick={() => moveCategory(idx, -1)}
+                  disabled={idx === 0}
+                  className="p-0.5 text-[#555566] hover:text-[#D4A017] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                >
+                  <ChevronUp size={14} />
+                </button>
+                <button
+                  onClick={() => moveCategory(idx, 1)}
+                  disabled={idx === categories.length - 1}
+                  className="p-0.5 text-[#555566] hover:text-[#D4A017] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                >
+                  <ChevronDown size={14} />
+                </button>
+              </div>
               {cat.emoji && (
                 cat.emoji.startsWith("brand:") ? (
                   // eslint-disable-next-line @next/next/no-img-element
