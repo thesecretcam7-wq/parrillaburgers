@@ -25,7 +25,7 @@ export default async function Home() {
   const barraEmoji = settingsMap["barra_libre_emoji"] ?? "🥗";
 
   return (
-    <main className="h-[calc(100dvh-56px-80px)] bg-[#0F1117] flex flex-col items-center justify-between px-6 py-4 text-center overflow-hidden">
+    <main className="h-[calc(100dvh-56px-80px)] bg-[#0F1117] flex flex-col items-center justify-between px-6 py-4 text-center">
       <LockScroll />
 
       {/* Logo — pegado arriba */}
@@ -48,7 +48,7 @@ export default async function Home() {
       )}
 
       {/* Barra libre + badges + CTA */}
-      <div className="w-full max-w-xs flex flex-col items-center gap-4 shrink-0">
+      <div className="w-full max-w-xs flex flex-col items-center gap-3 shrink-0">
 
         {barraActiva && (
           <div className="flex items-center gap-2 bg-[#D4A017]/10 border border-[#D4A017]/30 text-[#D4A017] text-xs font-semibold px-3.5 py-2 rounded-full">
