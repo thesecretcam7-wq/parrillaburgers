@@ -51,25 +51,28 @@ export default async function Home() {
       <div className="w-full max-w-xs flex flex-col items-center gap-4 shrink-0">
 
         {barraActiva && (
-          <p className="text-white text-sm font-medium">{barraTexto}</p>
+          <div className="flex items-center gap-2 bg-[#D4A017]/10 border border-[#D4A017]/30 text-[#D4A017] text-xs font-semibold px-3.5 py-2 rounded-full">
+            <span>{barraEmoji}</span>
+            <span>{barraTexto}</span>
+          </div>
         )}
 
         {/* Badges de features */}
         <div className="flex gap-2 flex-wrap justify-center">
           {/* Domicilio */}
-          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] text-xs font-medium px-3 py-1.5 rounded-full">
+          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] hover:border-[#D4A017]/40 text-[#9CA3AF] hover:text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors duration-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/emojis/scooter.png" alt="" width={16} height={16} className="object-contain" />
             Domicilio
           </span>
 
           {/* Puntos */}
-          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] text-xs font-medium px-3 py-1.5 rounded-full">
+          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] hover:border-[#D4A017]/40 text-[#9CA3AF] hover:text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors duration-200">
             <span>🎯</span> Puntos
           </span>
 
           {/* Tiempo real */}
-          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] text-xs font-medium px-3 py-1.5 rounded-full">
+          <span className="flex items-center gap-1.5 bg-[#1A1B21] border border-[#2E3038] hover:border-[#D4A017]/40 text-[#9CA3AF] hover:text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors duration-200">
             <span className="flex items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/emojis/burger.png" alt="" width={16} height={16} className="object-contain" />

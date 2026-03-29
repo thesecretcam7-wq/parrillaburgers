@@ -38,7 +38,7 @@ export default function Navbar() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 bg-[#1A1B21] border-b border-[#2E3038] h-14"
+      className="fixed top-0 left-0 right-0 z-50 bg-[#1A1B21]/85 backdrop-blur-md border-b border-[#2E3038]/60 h-14"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div className="flex items-center h-full px-4 max-w-[430px] mx-auto gap-3 relative">

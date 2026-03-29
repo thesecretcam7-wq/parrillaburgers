@@ -43,7 +43,8 @@
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D4D4D8; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #3A3B42; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #D4A017; }
 
 /* Hide scrollbar for horizontal scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }

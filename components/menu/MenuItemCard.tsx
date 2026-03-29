@@ -31,15 +31,15 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
 
   return (
     <>
-      <div className="bg-[#1A1B21] rounded-2xl overflow-hidden border border-[#2E3038] flex flex-col hover:border-[#D4A017]/50 hover:scale-[1.03] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-all duration-200">
+      <div className="group bg-[#1A1B21] rounded-2xl overflow-hidden border border-[#2E3038] flex flex-col hover:border-[#D4A017]/50 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(212,160,23,0.12),0_4px_16px_rgba(0,0,0,0.5)] transition-all duration-200">
         {/* Image — clickable */}
         <button
           type="button"
           onClick={() => setShowDetail(true)}
-          className="relative h-36 bg-[#22242C] w-full text-left"
+          className="relative h-36 bg-[#22242C] w-full text-left overflow-hidden"
         >
           {item.image_url ? (
-            <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />
+            <Image src={item.image_url} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" unoptimized />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <span className="text-5xl">🍔</span>
@@ -119,11 +119,11 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
       {/* Detail modal */}
       {showDetail && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center pb-16 sm:pb-0 sm:p-4"
+          className="fixed inset-0 bg-black/75 backdrop-blur-[2px] z-50 flex items-end sm:items-center justify-center pb-16 sm:pb-0 sm:p-4 animate-in fade-in duration-200"
           onClick={() => setShowDetail(false)}
         >
           <div
-            className="bg-[#1A1B21] border border-[#2E3038] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-2xl overflow-hidden"
+            className="bg-[#1A1B21] border border-[#2E3038] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
