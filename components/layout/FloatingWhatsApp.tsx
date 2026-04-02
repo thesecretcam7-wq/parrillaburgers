@@ -19,7 +19,7 @@ export default function FloatingWhatsApp() {
     <>
       {/* Menu expandible */}
       {showMenu && (
-        <div className="fixed bottom-20 right-6 z-40 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="fixed bottom-28 right-6 z-40 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <button
             onClick={() => handleWhatsAppClick("Hola, tengo una pregunta sobre mi pedido")}
             className="flex items-center gap-3 bg-[#22242C] hover:bg-[#2E3038] border border-[#D4A017]/40 rounded-full px-4 py-2.5 text-white text-sm font-semibold transition-all"
@@ -49,7 +49,7 @@ export default function FloatingWhatsApp() {
       {/* Botón flotante principal */}
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-green-600 hover:shadow-[0_8px_24px_rgba(34,197,94,0.3)] shadow-lg flex items-center justify-center transition-all duration-300 ${
+        className={`fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-green-600 hover:shadow-[0_8px_24px_rgba(34,197,94,0.3)] shadow-lg flex items-center justify-center transition-all duration-300 ${
           showMenu ? "scale-110" : "hover:scale-110"
         }`}
         aria-label="Abrir WhatsApp"
