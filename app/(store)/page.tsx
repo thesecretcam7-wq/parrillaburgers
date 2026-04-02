@@ -8,13 +8,22 @@ import { Banner, MenuItem } from "@/lib/types";
 
 export const revalidate = 60;
 
+type SpecialOffer = {
+  id: string;
+  title: string;
+  emoji: string;
+  description: string;
+  active: boolean;
+};
+
 export default async function Home() {
   const supabase = await createClient();
 
-  const [{ data: banners }, { data: settings }, { data: items }] = await Promise.all([
+  const [{ data: banners }, { data: settings }, { data: items }, { data: specials }] = await Promise.all([
     supabase.from("banners").select("*").eq("active", true).order("sort_order"),
     supabase.from("settings").select("*").in("key", ["barra_libre_activa", "barra_libre_texto", "barra_libre_emoji"]),
     supabase.from("menu_items").select("*").eq("available", true).limit(6),
+    supabase.from("specials_offers").select("*").eq("active", true).order("sort_order"),
   ]);
 
   const activeBanners: Banner[] = banners ?? [];
@@ -27,17 +36,27 @@ export default async function Home() {
 
   const menuItems = (items ?? []) as MenuItem[];
 
+  // Ofertas especiales con fallback a valores por defecto
+  const specialOffers = (specials ?? []) as SpecialOffer[];
+  const defaultOffers: SpecialOffer[] = [
+    { id: "1", title: "Combo Hamburguesero", emoji: "🍔", description: "Hasta -30%", active: true },
+    { id: "2", title: "Acompañamientos", emoji: "🍟", description: "Compra 2, lleva 3", active: true },
+    { id: "3", title: "Parrilla a la Brasa", emoji: "🔥", description: "Jugosas y tiernas", active: true },
+    { id: "4", title: "Gana Puntos", emoji: "🎯", description: "100 pts = $1.000", active: true },
+  ];
+  const offersToDisplay = specialOffers.length > 0 ? specialOffers : defaultOffers;
+
   return (
     <main className="min-h-screen bg-[#0F1117] pb-8">
-      {/* Header con Logo Grande */}
-      <div className="bg-gradient-to-b from-[#0F1117] to-[#0F1117]/95 py-8 px-6 text-center border-b border-[#2E3038]/30">
+      {/* Header con Logo Mega */}
+      <div className="bg-gradient-to-b from-[#0F1117] via-[#0F1117] to-[#0F1117]/90 py-12 px-6 text-center border-b border-[#2E3038]/30">
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
           width={260}
           height={222}
           priority
-          className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)] w-auto h-32 mx-auto"
+          className="brightness-0 invert drop-shadow-[0_0_32px_rgba(255,255,255,0.15)] w-auto h-56 mx-auto"
         />
       </div>
 
@@ -56,47 +75,19 @@ export default async function Home() {
           <h2 className="text-white text-xl font-black">Ofertas Especiales</h2>
         </div>
 
-        {/* Ofertas cards */}
+        {/* Ofertas cards — dinámicas desde Supabase */}
         <div className="grid grid-cols-2 gap-4">
-          {/* Oferta 1: Hamburguesas */}
-          <Link
-            href="/menu"
-            className="bg-gradient-to-br from-[#2E3038] to-[#22242C] border border-[#3A3F4A] rounded-2xl p-4 hover:border-[#D4A017]/50 hover:shadow-[0_8px_24px_rgba(212,160,23,0.15)] transition-all duration-300"
-          >
-            <div className="text-2xl mb-2">🍔</div>
-            <p className="text-white font-black text-sm leading-tight">Combo Hamburguesero</p>
-            <p className="text-[#D4A017] text-xs mt-1 font-semibold">Hasta -30%</p>
-          </Link>
-
-          {/* Oferta 2: Acompañamientos */}
-          <Link
-            href="/menu"
-            className="bg-gradient-to-br from-[#2E3038] to-[#22242C] border border-[#3A3F4A] rounded-2xl p-4 hover:border-[#D4A017]/50 hover:shadow-[0_8px_24px_rgba(212,160,23,0.15)] transition-all duration-300"
-          >
-            <div className="text-2xl mb-2">🍟</div>
-            <p className="text-white font-black text-sm leading-tight">Acompañamientos</p>
-            <p className="text-[#D4A017] text-xs mt-1 font-semibold">Compra 2, lleva 3</p>
-          </Link>
-
-          {/* Oferta 3: Asados */}
-          <Link
-            href="/menu"
-            className="bg-gradient-to-br from-[#2E3038] to-[#22242C] border border-[#3A3F4A] rounded-2xl p-4 hover:border-[#D4A017]/50 hover:shadow-[0_8px_24px_rgba(212,160,23,0.15)] transition-all duration-300"
-          >
-            <div className="text-2xl mb-2">🔥</div>
-            <p className="text-white font-black text-sm leading-tight">Parrilla a la Brasa</p>
-            <p className="text-[#9CA3AF] text-xs mt-1">Jugosas y tiernas</p>
-          </Link>
-
-          {/* Oferta 4: Puntos */}
-          <Link
-            href="/menu"
-            className="bg-gradient-to-br from-[#2E3038] to-[#22242C] border border-[#3A3F4A] rounded-2xl p-4 hover:border-[#D4A017]/50 hover:shadow-[0_8px_24px_rgba(212,160,23,0.15)] transition-all duration-300"
-          >
-            <div className="text-2xl mb-2">🎯</div>
-            <p className="text-white font-black text-sm leading-tight">Gana Puntos</p>
-            <p className="text-[#D4A017] text-xs mt-1 font-semibold">100 pts = $1.000</p>
-          </Link>
+          {offersToDisplay.map((offer) => (
+            <Link
+              key={offer.id}
+              href="/menu"
+              className="bg-gradient-to-br from-[#2E3038] to-[#22242C] border border-[#3A3F4A] rounded-2xl p-4 hover:border-[#D4A017]/50 hover:shadow-[0_8px_24px_rgba(212,160,23,0.15)] transition-all duration-300"
+            >
+              <div className="text-2xl mb-2">{offer.emoji}</div>
+              <p className="text-white font-black text-sm leading-tight">{offer.title}</p>
+              <p className="text-[#D4A017] text-xs mt-1 font-semibold">{offer.description}</p>
+            </Link>
+          ))}
         </div>
       </div>
 
