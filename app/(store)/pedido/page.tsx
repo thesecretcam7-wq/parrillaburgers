@@ -192,6 +192,62 @@ export default function OrderPage() {
         barra_libre_selected: ci.barra_libre_selected ?? [],
       }));
 
+      const clearMesa = () => { try { localStorage.removeItem("pb-mesa"); } catch { /* ignore */ } };
+
+      // ====== WOMPI PAYMENT FLOW ======
+      if (paymentMethod === "wompi") {
+        // Store pending order data in localStorage (don't create in DB yet)
+        const pendingOrderData = {
+          orderNumber,
+          customer_id: customer?.id ?? null,
+          customer_name: form.name,
+          customer_email: form.email,
+          customer_phone: form.phone,
+          delivery_address: mesaNum ? `Mesa ${mesaNum}` : form.address,
+          notes: form.notes || null,
+          items: orderItems,
+          subtotal,
+          delivery_fee: effectiveDelivery,
+          total: grandTotal,
+          points_earned: pointsEarned,
+          coupon_code: coupon?.code ?? null,
+          coupon_discount: couponDiscount || null,
+          mesa_number: mesaNum ?? null,
+          pointsUsed,
+        };
+
+        localStorage.setItem("pb-pending-wompi-order", JSON.stringify(pendingOrderData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address }));
+        localStorage.setItem("pb-last-order", orderNumber);
+
+        // Generate Wompi signature and redirect
+        const amountInCents = grandTotal * 100;
+        const sigRes = await fetch("/api/wompi/signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reference: orderNumber, amountInCents, currency: "COP" }),
+        });
+        const { signature } = await sigRes.json();
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${window.location.protocol}//${window.location.host}`;
+        const wompiUrl = new URL("https://checkout.wompi.co/p/");
+        wompiUrl.searchParams.set("public-key", process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY || "");
+        wompiUrl.searchParams.set("currency", "COP");
+        wompiUrl.searchParams.set("amount-in-cents", String(amountInCents));
+        wompiUrl.searchParams.set("reference", orderNumber);
+        wompiUrl.searchParams.set("signature:integrity", signature);
+        wompiUrl.searchParams.set("redirect-url", `${appUrl}/seguimiento?order=${orderNumber}`);
+        wompiUrl.searchParams.set("customer-data:email", form.email);
+        wompiUrl.searchParams.set("customer-data:full-name", form.name);
+        wompiUrl.searchParams.set("customer-data:phone-number", form.phone);
+        wompiUrl.searchParams.set("customer-data:phone-number-prefix", "+57");
+
+        clearCart();
+        clearMesa();
+        window.location.href = wompiUrl.toString();
+        return;
+      }
+
+      // ====== CASH / CONTRAENTREGA FLOW (create order immediately) ======
       const { data: order, error } = await supabase
         .from("orders")
         .insert({
@@ -209,7 +265,7 @@ export default function OrderPage() {
           status: "pending",
           payment_status: "pending",
           points_earned: pointsEarned,
-          wompi_transaction_id: paymentMethod === "cash" ? (mesaNum ? "PAGAR_EN_CAJA" : "CONTRA_ENTREGA") : null,
+          wompi_transaction_id: mesaNum ? "PAGAR_EN_CAJA" : "CONTRA_ENTREGA",
           coupon_code: coupon?.code ?? null,
           coupon_discount: couponDiscount || null,
           mesa_number: mesaNum ?? null,
@@ -233,46 +289,10 @@ export default function OrderPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address }));
       localStorage.setItem("pb-last-order", orderNumber);
 
-      const clearMesa = () => { try { localStorage.removeItem("pb-mesa"); } catch { /* ignore */ } };
-
-      if (paymentMethod === "cash") {
-        clearCart();
-        clearMesa();
-        toast.success(mesaNum ? `¡Pedido ${orderNumber} creado! Paga en caja cuando termines.` : `¡Pedido ${orderNumber} creado! Pagarás al recibir.`);
-        router.push(`/seguimiento?order=${orderNumber}`);
-        return;
-      }
-
-      const wompiKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY;
-      if (wompiKey && !wompiKey.includes("PEGAR") && order) {
-        const amountInCents = grandTotal * 100;
-        const sigRes = await fetch("/api/wompi/signature", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reference: order.order_number, amountInCents, currency: "COP" }),
-        });
-        const { signature } = await sigRes.json();
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${window.location.protocol}//${window.location.host}`;
-        const wompiUrl = new URL("https://checkout.wompi.co/p/");
-        wompiUrl.searchParams.set("public-key", wompiKey);
-        wompiUrl.searchParams.set("currency", "COP");
-        wompiUrl.searchParams.set("amount-in-cents", String(amountInCents));
-        wompiUrl.searchParams.set("reference", order.order_number);
-        wompiUrl.searchParams.set("signature:integrity", signature);
-        wompiUrl.searchParams.set("redirect-url", `${appUrl}/seguimiento?order=${order.order_number}`);
-        wompiUrl.searchParams.set("customer-data:email", form.email);
-        wompiUrl.searchParams.set("customer-data:full-name", form.name);
-        wompiUrl.searchParams.set("customer-data:phone-number", form.phone);
-        wompiUrl.searchParams.set("customer-data:phone-number-prefix", "+57");
-        clearCart();
-        clearMesa();
-        window.location.href = wompiUrl.toString();
-      } else {
-        clearCart();
-        clearMesa();
-        toast.success(`¡Pedido ${orderNumber} creado!`);
-        router.push(`/seguimiento?order=${orderNumber}`);
-      }
+      clearCart();
+      clearMesa();
+      toast.success(mesaNum ? `¡Pedido ${orderNumber} creado! Paga en caja cuando termines.` : `¡Pedido ${orderNumber} creado! Pagarás al recibir.`);
+      router.push(`/seguimiento?order=${orderNumber}`);
     } catch (err) {
       console.error(err);
       toast.error("Error al crear el pedido. Intenta de nuevo.");

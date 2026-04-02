@@ -55,15 +55,38 @@ function TrackingContent() {
     verifiedRef.current = true;
     (async () => {
       try {
-        const res  = await fetch("/api/wompi/verify", {
+        // Retrieve pending order data from localStorage
+        let fullOrderData = null;
+        try {
+          const pendingData = localStorage.getItem("pb-pending-wompi-order");
+          if (pendingData) {
+            fullOrderData = JSON.parse(pendingData);
+            // Clean up the pending order data after retrieving it
+            localStorage.removeItem("pb-pending-wompi-order");
+          }
+        } catch { /* ignore */ }
+
+        const res = await fetch("/api/wompi/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transactionId: wompiTxId, orderNumber: urlOrder }),
+          body: JSON.stringify({
+            transactionId: wompiTxId,
+            orderNumber: urlOrder,
+            fullOrderData
+          }),
         });
         const data = await res.json();
-        if (data.status === "APPROVED")      toast.success("¡Pago aprobado! Tu pedido está en camino 🎉");
-        else if (data.status === "PENDING")  toast("Pago en proceso, te notificaremos pronto", { icon: "⏳" });
-        else                                 setPaymentFailed(true);
+        if (data.status === "APPROVED") {
+          toast.success("¡Pago aprobado! Tu pedido está confirmado 🎉");
+          // Wait a moment for the order to be created in Supabase, then force reload
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else if (data.status === "PENDING") {
+          toast("Pago en proceso, te notificaremos pronto", { icon: "⏳" });
+        } else {
+          setPaymentFailed(true);
+        }
       } catch { /* silent */ }
     })();
   }, [wompiTxId, urlOrder]);
