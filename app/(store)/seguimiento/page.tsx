@@ -90,10 +90,8 @@ function TrackingContent() {
         if (data.status === "APPROVED") {
           clearCart();
           toast.success("¡Pago aprobado! Tu pedido está confirmado 🎉");
-          // Wait a moment for the order to be created in Supabase, then force reload
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
+          // Remove the transaction ID from URL to prevent re-verification on reload
+          router.replace(`/seguimiento?order=${urlOrder}`);
         } else if (data.status === "PENDING") {
           toast("Pago en proceso, te notificaremos pronto", { icon: "⏳" });
         } else {
@@ -101,7 +99,7 @@ function TrackingContent() {
         }
       } catch { /* silent */ }
     })();
-  }, [wompiTxId, urlOrder]);
+  }, [wompiTxId, urlOrder, router]);
 
   // Request notification permission once
   useEffect(() => {
