@@ -29,17 +29,15 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-[#0F1117] pb-8">
-      <LockScroll />
-
-      {/* Header con Logo */}
-      <div className="sticky top-14 z-40 bg-gradient-to-b from-[#0F1117] to-[#0F1117]/90 backdrop-blur-md border-b border-[#2E3038]/30 py-4 px-6 text-center">
+      {/* Header con Logo Grande */}
+      <div className="bg-gradient-to-b from-[#0F1117] to-[#0F1117]/95 py-8 px-6 text-center border-b border-[#2E3038]/30">
         <Image
           src="/logo-real.png"
           alt="ParillaBurgers"
-          width={120}
-          height={100}
+          width={260}
+          height={222}
           priority
-          className="brightness-0 invert drop-shadow-[0_0_16px_rgba(255,255,255,0.08)] w-auto h-12 mx-auto"
+          className="brightness-0 invert drop-shadow-[0_0_24px_rgba(255,255,255,0.12)] w-auto h-32 mx-auto"
         />
       </div>
 
