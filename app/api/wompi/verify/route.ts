@@ -50,45 +50,27 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Check if order already exists
-    const { data: existingOrder } = await supabase
+    // Update order with payment status
+    const orderUpdate: Record<string, unknown> = {
+      payment_status: paymentStatus,
+      wompi_transaction_id: transactionId,
+    };
+
+    // If payment failed, also cancel the order
+    if (paymentStatus === "failed") {
+      orderUpdate.status = "cancelled";
+    }
+
+    // If payment is approved, keep status as "pending" for admin confirmation
+    // (already created in /pedido/page.tsx)
+
+    await supabase
       .from("orders")
-      .select("id, order_number")
-      .eq("order_number", orderNumber)
-      .single();
+      .update(orderUpdate)
+      .eq("order_number", orderNumber);
 
-    // If payment is approved and order doesn't exist, create it
-    if (paymentStatus === "paid" && !existingOrder && fullOrderData) {
-      const { data: order, error: createError } = await supabase
-        .from("orders")
-        .insert({
-          order_number: orderNumber,
-          customer_id: fullOrderData.customer_id ?? null,
-          customer_name: fullOrderData.customer_name,
-          customer_email: fullOrderData.customer_email,
-          customer_phone: fullOrderData.customer_phone,
-          delivery_address: fullOrderData.delivery_address,
-          notes: fullOrderData.notes || null,
-          items: fullOrderData.items,
-          subtotal: fullOrderData.subtotal,
-          delivery_fee: fullOrderData.delivery_fee,
-          total: fullOrderData.total,
-          status: "pending",
-          payment_status: "paid",
-          wompi_transaction_id: transactionId,
-          points_earned: fullOrderData.points_earned,
-          coupon_code: fullOrderData.coupon_code ?? null,
-          coupon_discount: fullOrderData.coupon_discount || null,
-          mesa_number: fullOrderData.mesa_number ?? null,
-        })
-        .select()
-        .single();
-
-      if (createError) {
-        console.error("Error creating order:", createError);
-        return NextResponse.json({ error: "Error al crear el pedido" }, { status: 500 });
-      }
-
+    // Deduct points and increment coupon ONLY if payment is approved
+    if (paymentStatus === "paid" && fullOrderData) {
       // Deduct used points and add earned points
       if (fullOrderData.customer_id) {
         const { data: customer } = await supabase
@@ -108,7 +90,6 @@ export async function POST(req: NextRequest) {
 
       // Increment coupon uses_count if a coupon was used
       if (fullOrderData.coupon_code) {
-        // Get the coupon to find its ID
         const { data: couponData } = await supabase
           .from("coupons")
           .select("id, uses_count")
@@ -122,64 +103,14 @@ export async function POST(req: NextRequest) {
             .eq("id", couponData.id);
         }
       }
-
-      return NextResponse.json({
-        status: transaction.status,
-        paymentStatus,
-        orderId: order?.id,
-        orderNumber: order?.order_number,
-        amount: transaction.amount_in_cents,
-        message: "Pago confirmado y pedido creado",
-      });
     }
 
-    // If order already exists and payment is approved, just confirm the status
-    if (existingOrder && paymentStatus === "paid") {
-      await supabase
-        .from("orders")
-        .update({
-          payment_status: "paid",
-          wompi_transaction_id: transactionId,
-        })
-        .eq("order_number", orderNumber);
-
-      return NextResponse.json({
-        status: transaction.status,
-        paymentStatus,
-        orderNumber,
-        amount: transaction.amount_in_cents,
-        message: "Pago confirmado",
-      });
-    }
-
-    // If payment failed
-    if (paymentStatus === "failed") {
-      // Only cancel if order exists
-      if (existingOrder) {
-        await supabase
-          .from("orders")
-          .update({
-            payment_status: "failed",
-            status: "cancelled",
-            wompi_transaction_id: transactionId,
-          })
-          .eq("order_number", orderNumber);
-      }
-
-      return NextResponse.json({
-        status: transaction.status,
-        paymentStatus,
-        amount: transaction.amount_in_cents,
-        message: "Pago rechazado",
-      });
-    }
-
-    // If payment is still pending
     return NextResponse.json({
       status: transaction.status,
       paymentStatus,
+      orderNumber,
       amount: transaction.amount_in_cents,
-      message: "Pago en proceso",
+      message: paymentStatus === "paid" ? "Pago confirmado" : paymentStatus === "failed" ? "Pago rechazado" : "Pago en proceso",
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error verificando pago";

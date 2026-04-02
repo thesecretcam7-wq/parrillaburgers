@@ -196,27 +196,34 @@ export default function OrderPage() {
 
       // ====== WOMPI PAYMENT FLOW ======
       if (paymentMethod === "wompi") {
-        // Store pending order data in localStorage (don't create in DB yet)
-        const pendingOrderData = {
-          orderNumber,
-          customer_id: customer?.id ?? null,
-          customer_name: form.name,
-          customer_email: form.email,
-          customer_phone: form.phone,
-          delivery_address: mesaNum ? `Mesa ${mesaNum}` : form.address,
-          notes: form.notes || null,
-          items: orderItems,
-          subtotal,
-          delivery_fee: effectiveDelivery,
-          total: grandTotal,
-          points_earned: pointsEarned,
-          coupon_code: coupon?.code ?? null,
-          coupon_discount: couponDiscount || null,
-          mesa_number: mesaNum ?? null,
-          pointsUsed,
-        };
+        // Create order with pending payment status
+        const { data: wompiOrder, error: wompiError } = await supabase
+          .from("orders")
+          .insert({
+            order_number: orderNumber,
+            customer_id: customer?.id ?? null,
+            customer_name: form.name,
+            customer_email: form.email,
+            customer_phone: form.phone,
+            delivery_address: mesaNum ? `Mesa ${mesaNum}` : form.address,
+            notes: form.notes || null,
+            items: orderItems,
+            subtotal,
+            delivery_fee: effectiveDelivery,
+            total: grandTotal,
+            status: "pending",
+            payment_status: "pending",
+            points_earned: pointsEarned,
+            wompi_transaction_id: null,
+            coupon_code: coupon?.code ?? null,
+            coupon_discount: couponDiscount || null,
+            mesa_number: mesaNum ?? null,
+          })
+          .select()
+          .single();
 
-        localStorage.setItem("pb-pending-wompi-order", JSON.stringify(pendingOrderData));
+        if (wompiError) throw wompiError;
+
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address }));
         localStorage.setItem("pb-last-order", orderNumber);
 
