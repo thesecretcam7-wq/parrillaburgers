@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useCartStore } from "@/lib/store/cart";
 import { Order, OrderStatus } from "@/lib/types";
 import { CheckCircle, Clock, ChefHat, Bike, Package, ShoppingBag, Timer, Star } from "lucide-react";
 import { Suspense } from "react";
@@ -20,6 +21,7 @@ const STATUS_ORDER: OrderStatus[] = ["pending", "confirmed", "preparing", "on_th
 
 function TrackingContent() {
   const router = useRouter();
+  const { clearCart } = useCartStore();
   const params = useSearchParams();
   const urlOrder        = params.get("order");
   const wompiTxId       = params.get("id");
@@ -86,6 +88,7 @@ function TrackingContent() {
         });
         const data = await res.json();
         if (data.status === "APPROVED") {
+          clearCart();
           toast.success("¡Pago aprobado! Tu pedido está confirmado 🎉");
           // Wait a moment for the order to be created in Supabase, then force reload
           setTimeout(() => {
