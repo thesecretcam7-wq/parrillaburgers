@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
 import { CheckCircle, Clock, ChefHat, Bike, Package, ShoppingBag, Timer, Star } from "lucide-react";
@@ -19,6 +19,7 @@ const STATUS_STEPS: { key: OrderStatus; label: string; icon: React.ReactNode; de
 const STATUS_ORDER: OrderStatus[] = ["pending", "confirmed", "preparing", "on_the_way", "delivered"];
 
 function TrackingContent() {
+  const router = useRouter();
   const params = useSearchParams();
   const urlOrder        = params.get("order");
   const wompiTxId       = params.get("id");
@@ -37,10 +38,18 @@ function TrackingContent() {
 
   // Resolve order number: URL param → localStorage fallback
   useEffect(() => {
+    // If user came back from Wompi without completing payment, redirect to cart
+    if (urlOrder && !wompiTxId && !verifiedRef.current) {
+      verifiedRef.current = true;
+      // User pressed back in Wompi - redirect to cart to retry
+      router.push("/carrito");
+      return;
+    }
+
     const resolved = urlOrder ?? localStorage.getItem("pb-last-order");
     setOrderNumber(resolved);
     if (!resolved) setLoading(false);
-  }, [urlOrder]);
+  }, [urlOrder, wompiTxId]);
 
   // Fetch delivery time setting
   useEffect(() => {
@@ -288,58 +297,6 @@ function TrackingContent() {
         <Link
           href="/menu"
           className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base"
-        >
-          Volver al menú
-        </Link>
-      </main>
-    );
-  }
-
-  // ── Payment pending (user pressed back in Wompi) ────────────────────────────
-  if (order.payment_status === "pending" && order.wompi_transaction_id === null) {
-    const handleRetryPayment = () => {
-      // Regenerate Wompi checkout URL
-      const amountInCents = order.total! * 100;
-      fetch("/api/wompi/signature", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reference: order.order_number, amountInCents, currency: "COP" }),
-      }).then((res) => res.json()).then(({ signature }) => {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${window.location.protocol}//${window.location.host}`;
-        const wompiUrl = new URL("https://checkout.wompi.co/p/");
-        wompiUrl.searchParams.set("public-key", process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY || "");
-        wompiUrl.searchParams.set("currency", "COP");
-        wompiUrl.searchParams.set("amount-in-cents", String(amountInCents));
-        wompiUrl.searchParams.set("reference", order.order_number);
-        wompiUrl.searchParams.set("signature:integrity", signature);
-        wompiUrl.searchParams.set("redirect-url", `${appUrl}/seguimiento?order=${order.order_number}`);
-        wompiUrl.searchParams.set("customer-data:email", order.customer_email);
-        wompiUrl.searchParams.set("customer-data:full-name", "Parrilla Burgers");
-        wompiUrl.searchParams.set("customer-data:phone-number", order.customer_phone);
-        wompiUrl.searchParams.set("customer-data:phone-number-prefix", "+57");
-        window.location.href = wompiUrl.toString();
-      });
-    };
-
-    return (
-      <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4 pb-24">
-        <div className="text-5xl mb-4">⏳</div>
-        <p className="text-white font-bold text-xl mb-2">Pago pendiente</p>
-        <p className="text-[#9CA3AF] text-sm mb-1 text-center">
-          Tu pedido está listo, solo falta completar el pago.
-        </p>
-        <p className="text-[#6B7280] text-xs mb-8 text-center">
-          Presiona el botón de abajo para continuar con el pago en Wompi.
-        </p>
-        <button
-          onClick={handleRetryPayment}
-          className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base mb-4"
-        >
-          Continuar con el pago
-        </button>
-        <Link
-          href="/menu"
-          className="bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] hover:text-white hover:border-[#D4A017]/40 font-medium px-8 py-4 rounded-xl text-base transition-colors"
         >
           Volver al menú
         </Link>
