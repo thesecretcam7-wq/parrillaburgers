@@ -68,6 +68,12 @@ export default function SearchModal({ items, categories, onClose }: Props) {
     localStorage.removeItem(RECENT_SEARCHES_KEY);
   };
 
+  // Handle closing modal and cleaning state
+  const handleClose = () => {
+    setSearch("");
+    onClose();
+  };
+
   // Handle product click
   const handleProductClick = (item: MenuItem) => {
     handleSearch(item.name);
@@ -77,11 +83,11 @@ export default function SearchModal({ items, categories, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/75 backdrop-blur-[2px] z-50 flex items-end sm:items-start justify-center pt-20 pb-16 sm:pb-0 sm:p-4 animate-in fade-in duration-200"
-      onClick={onClose}
+      className="fixed inset-0 bg-black/75 backdrop-blur-[2px] z-50 flex items-end sm:items-start justify-center pb-16 sm:pb-0 sm:p-4 sm:pt-20 animate-in fade-in duration-200"
+      onClick={handleClose}
     >
       <div
-        className="bg-[#1A1B21] border border-[#2E3038] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-top-4 duration-300 max-h-[80vh] flex flex-col"
+        className="bg-[#1A1B21] border border-[#2E3038] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-top-4 duration-300 max-h-[85vh] sm:max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header */}
@@ -102,10 +108,10 @@ export default function SearchModal({ items, categories, onClose }: Props) {
               />
             </div>
             <button
-              onClick={onClose}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#22242C] transition-colors"
+              onClick={handleClose}
+              className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-[#22242C] transition-colors active:scale-95"
             >
-              <X size={20} className="text-[#9CA3AF]" />
+              <X size={24} className="sm:size-20 text-[#9CA3AF]" />
             </button>
           </div>
 
