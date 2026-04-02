@@ -42,6 +42,7 @@ export default function OrderPage() {
   const [selectedZone, setSelectedZone] = useState<DeliveryZone | null>(null);
   const [pedidosPausados, setPedidosPausados] = useState(false);
   const [mesaNum, setMesaNum] = useState<string | null>(null);
+  const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
   const { isOpen, mensajeCerrado } = useStoreStatus();
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", address: "", notes: "",
@@ -88,7 +89,7 @@ export default function OrderPage() {
   }, [form.email]);
 
   const subtotal = total();
-  const effectiveDelivery = mesaNum ? 0 : (selectedZone ? selectedZone.price : delivery);
+  const effectiveDelivery = mesaNum || deliveryType === "pickup" ? 0 : (selectedZone ? selectedZone.price : delivery);
   // Points discount
   const maxDiscount = Math.min(
     Math.floor(customerPoints / POINTS_PER_DISCOUNT) * DISCOUNT_PER_BLOCK,
@@ -159,11 +160,15 @@ export default function OrderPage() {
       toast.error("El local está cerrado, no se pueden hacer pedidos ahora");
       return;
     }
-    if (!form.name || !form.email || !form.phone || (!mesaNum && !form.address)) {
+    if (!form.name || !form.email || !form.phone) {
       toast.error("Por favor completa todos los campos obligatorios");
       return;
     }
-    if (!mesaNum && zones.length > 0 && !selectedZone) {
+    if (!mesaNum && deliveryType === "delivery" && !form.address) {
+      toast.error("Ingresa tu dirección de entrega");
+      return;
+    }
+    if (!mesaNum && deliveryType === "delivery" && zones.length > 0 && !selectedZone) {
       toast.error("Selecciona tu barrio / zona de entrega");
       return;
     }
@@ -345,6 +350,56 @@ export default function OrderPage() {
             </div>
           )}
 
+          {/* Delivery type selector — only show if not mesa */}
+          {!mesaNum && (
+            <div className="mb-4 space-y-2">
+              <label className="text-[#9CA3AF] text-xs block font-medium">Tipo de entrega *</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryType("delivery")}
+                  className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
+                    deliveryType === "delivery"
+                      ? "bg-[#D4A017]/10 border-[#D4A017]"
+                      : "bg-[#22242C] border-[#2E3038] hover:border-[#D4A017]/50"
+                  }`}
+                >
+                  <span className="text-2xl">🛵</span>
+                  <p className="text-white font-bold text-sm">Domicilio</p>
+                  <p className="text-[#9CA3AF] text-xs">${delivery.toLocaleString("es-CO")}</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryType("pickup")}
+                  className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
+                    deliveryType === "pickup"
+                      ? "bg-[#D4A017]/10 border-[#D4A017]"
+                      : "bg-[#22242C] border-[#2E3038] hover:border-[#D4A017]/50"
+                  }`}
+                >
+                  <span className="text-2xl">🏪</span>
+                  <p className="text-white font-bold text-sm">Recoger</p>
+                  <p className="text-green-400 text-xs font-semibold">Gratis</p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Pickup info */}
+          {!mesaNum && deliveryType === "pickup" && (
+            <div className="mb-4 bg-[#22242C] border border-[#D4A017]/40 rounded-xl px-4 py-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Clock size={16} className="text-[#D4A017]" />
+                <p className="text-[#9CA3AF] text-xs font-medium">Tiempo de recogida estimado</p>
+              </div>
+              <p className="text-white font-bold text-sm">15-20 minutos desde la confirmación</p>
+              <p className="text-[#6B7280] text-xs mt-2">
+                Recibirás una notificación cuando tu pedido esté listo para recoger.
+              </p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -359,15 +414,15 @@ export default function OrderPage() {
                 <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Teléfono *</label>
                 <input className={inputClass} placeholder="300 000 0000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
               </div>
-              {!mesaNum && (
+              {!mesaNum && deliveryType === "delivery" && (
                 <div>
                   <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Dirección de entrega *</label>
                   <input className={inputClass} placeholder="Calle, barrio, ciudad" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
                 </div>
               )}
             </div>
-            {/* Selector de zona — obligatorio si hay zonas configuradas y no es mesa */}
-            {!mesaNum && zones.length > 0 && (
+            {/* Selector de zona — obligatorio si hay zonas configuradas, es delivery y no es mesa */}
+            {!mesaNum && deliveryType === "delivery" && zones.length > 0 && (
               <div>
                 <label className="text-[#9CA3AF] text-xs mb-2 block font-medium flex items-center gap-1">
                   <MapPin size={12} /> Barrio / Zona de entrega *
@@ -421,6 +476,11 @@ export default function OrderPage() {
                 {mesaNum ? (
                   <>
                     <span>Mesa {mesaNum}</span>
+                    <span className="text-green-400">Gratis</span>
+                  </>
+                ) : deliveryType === "pickup" ? (
+                  <>
+                    <span>Recogida en tienda</span>
                     <span className="text-green-400">Gratis</span>
                   </>
                 ) : (

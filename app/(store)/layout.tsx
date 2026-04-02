@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import BottomNav from "@/components/layout/BottomNav";
+import FloatingWhatsApp from "@/components/layout/FloatingWhatsApp";
 import { pageVariants, pageTransition } from "@/lib/animations";
 
 export default function StoreLayout({ children }: { children: ReactNode }) {
@@ -27,6 +28,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
         </motion.div>
       </AnimatePresence>
       <BottomNav />
+      <FloatingWhatsApp />
     </div>
   );
 }
