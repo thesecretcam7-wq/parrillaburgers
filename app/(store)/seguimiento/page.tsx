@@ -33,6 +33,7 @@ function TrackingContent() {
   const [reviewSending, setReviewSending] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [paymentFailed, setPaymentFailed] = useState(false);
+  const [paymentAbandoned, setPaymentAbandoned] = useState(false);
   const verifiedRef = useRef(false);
 
   // Resolve order number: URL param → localStorage fallback
@@ -40,7 +41,25 @@ function TrackingContent() {
     const resolved = urlOrder ?? localStorage.getItem("pb-last-order");
     setOrderNumber(resolved);
     if (!resolved) setLoading(false);
-  }, [urlOrder]);
+
+    // Detect if user returned from Wompi without completing payment
+    if (urlOrder && !wompiTxId && !verifiedRef.current) {
+      verifiedRef.current = true;
+      // Check if order exists in DB
+      createClient()
+        .from("orders")
+        .select("id")
+        .eq("order_number", urlOrder)
+        .single()
+        .then(({ data, error }) => {
+          // If order doesn't exist, user pressed back in Wompi
+          if (error || !data) {
+            setPaymentAbandoned(true);
+            setLoading(false);
+          }
+        });
+    }
+  }, [urlOrder, wompiTxId]);
 
   // Fetch delivery time setting
   useEffect(() => {
@@ -267,6 +286,28 @@ function TrackingContent() {
 
         <Link href="/menu" className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base">
           Hacer otro pedido
+        </Link>
+      </main>
+    );
+  }
+
+  // ── Payment abandoned (user pressed back in Wompi) ────────────────────────
+  if (paymentAbandoned) {
+    return (
+      <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-4 pb-24">
+        <div className="text-5xl mb-4">⏳</div>
+        <p className="text-white font-bold text-xl mb-2">Pago no completado</p>
+        <p className="text-[#9CA3AF] text-sm mb-1 text-center">
+          Parece que saliste del proceso de pago sin completarlo.
+        </p>
+        <p className="text-[#6B7280] text-xs mb-8 text-center">
+          <strong>No se realizó ningún cobro.</strong> Puedes intentar de nuevo cuando quieras.
+        </p>
+        <Link
+          href="/menu"
+          className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-4 rounded-xl text-base"
+        >
+          Volver al menú
         </Link>
       </main>
     );
