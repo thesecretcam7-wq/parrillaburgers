@@ -83,11 +83,11 @@ export default function SearchModal({ items, categories, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/75 backdrop-blur-[2px] z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 animate-in fade-in duration-200 overflow-y-auto"
+      className="fixed inset-0 bg-black/75 backdrop-blur-[2px] z-50 flex flex-col animate-in fade-in duration-200"
       onClick={handleClose}
     >
       <div
-        className="bg-[#1A1B21] border border-[#2E3038] rounded-2xl w-full sm:max-w-sm shadow-2xl overflow-hidden animate-in slide-in-from-top-4 duration-300 max-h-[90vh] flex flex-col"
+        className="bg-[#1A1B21] border-b border-[#2E3038] w-full shadow-[0_8px_32px_rgba(0,0,0,0.8)] animate-in slide-in-from-top-4 duration-300 max-h-[75vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header */}
