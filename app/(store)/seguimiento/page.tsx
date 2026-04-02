@@ -314,7 +314,7 @@ function TrackingContent() {
         wompiUrl.searchParams.set("signature:integrity", signature);
         wompiUrl.searchParams.set("redirect-url", `${appUrl}/seguimiento?order=${order.order_number}`);
         wompiUrl.searchParams.set("customer-data:email", order.customer_email);
-        wompiUrl.searchParams.set("customer-data:full-name", order.customer_name);
+        wompiUrl.searchParams.set("customer-data:full-name", "Parrilla Burgers");
         wompiUrl.searchParams.set("customer-data:phone-number", order.customer_phone);
         wompiUrl.searchParams.set("customer-data:phone-number-prefix", "+57");
         window.location.href = wompiUrl.toString();

@@ -244,7 +244,7 @@ export default function OrderPage() {
         wompiUrl.searchParams.set("signature:integrity", signature);
         wompiUrl.searchParams.set("redirect-url", `${appUrl}/seguimiento?order=${orderNumber}`);
         wompiUrl.searchParams.set("customer-data:email", form.email);
-        wompiUrl.searchParams.set("customer-data:full-name", form.name);
+        wompiUrl.searchParams.set("customer-data:full-name", "Parrilla Burgers");
         wompiUrl.searchParams.set("customer-data:phone-number", form.phone);
         wompiUrl.searchParams.set("customer-data:phone-number-prefix", "+57");
 
