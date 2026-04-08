@@ -16,7 +16,7 @@ export function PrintReceiptButton({ order, className = "" }: PrintReceiptButton
   const [usbSupported, setUsbSupported] = useState(false);
 
   useEffect(() => {
-    setUsbSupported(!!navigator.usb);
+    setUsbSupported(!!(navigator as any).usb);
   }, []);
 
   const handlePrint = async (e: React.MouseEvent) => {

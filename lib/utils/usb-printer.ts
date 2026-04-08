@@ -16,12 +16,13 @@ let selectedDevice: USBDevice | null = null;
  */
 export async function selectUSBPrinter(): Promise<boolean> {
   try {
-    if (!navigator.usb) {
+    const nav = navigator as any;
+    if (!nav.usb) {
       console.error("WebUSB no está disponible en este navegador");
       return false;
     }
 
-    const devices = await navigator.usb.requestDevice({
+    const devices = await nav.usb.requestDevice({
       filters: [
         { classCode: 0x07 }, // Clase de impresora
       ],
@@ -121,7 +122,8 @@ function generateESCPOS(order: Order): Buffer {
  */
 export async function printUSB(order: Order): Promise<boolean> {
   try {
-    if (!navigator.usb) {
+    const nav = navigator as any;
+    if (!nav.usb) {
       throw new Error("WebUSB no disponible");
     }
 
