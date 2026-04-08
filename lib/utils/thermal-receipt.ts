@@ -3,21 +3,17 @@ import { Order } from "@/lib/types";
 /**
  * Genera HTML formateado para imprimir en impresora térmica de 58mm
  * Aproximadamente 32 caracteres por línea
+ * Optimizado para cocina: énfasis en productos y detalles
  */
 export function generateThermalReceiptHTML(order: Order): string {
   const lineLength = 32;
   const divider = "=".repeat(lineLength);
+  const subDivider = "-".repeat(lineLength);
 
   // Helper para centrar texto
   const center = (text: string): string => {
     const padding = Math.max(0, Math.floor((lineLength - text.length) / 2));
     return " ".repeat(padding) + text;
-  };
-
-  // Helper para alinear a la derecha
-  const rightAlign = (left: string, right: string): string => {
-    const totalSpace = lineLength - left.length - right.length;
-    return left + " ".repeat(Math.max(1, totalSpace)) + right;
   };
 
   // Helper para partir línea si es muy larga
@@ -48,10 +44,12 @@ export function generateThermalReceiptHTML(order: Order): string {
 
     body {
       font-family: 'Courier New', monospace;
-      font-size: 12px;
-      line-height: 1.4;
+      font-size: 14px;
+      line-height: 1.3;
       width: 58mm;
       padding: 2mm;
+      background: white;
+      color: black;
     }
 
     .receipt {
@@ -61,92 +59,124 @@ export function generateThermalReceiptHTML(order: Order): string {
 
     .header {
       text-align: center;
-      margin-bottom: 2mm;
+      margin-bottom: 3mm;
       font-weight: bold;
+      font-size: 16px;
     }
 
     .order-number {
-      font-size: 14px;
+      font-size: 18px;
       font-weight: bold;
       text-align: center;
-      margin: 2mm 0;
+      margin: 3mm 0;
+      border: 2px solid black;
+      padding: 2mm;
+      letter-spacing: 2px;
     }
 
     .divider {
       text-align: center;
       margin: 2mm 0;
       letter-spacing: 0.5px;
+      font-weight: bold;
     }
 
-    .section {
+    .customer-info {
+      font-size: 12px;
       margin: 2mm 0;
+      padding: 2mm;
+      border: 1px solid black;
+    }
+
+    .customer-line {
+      margin: 1mm 0;
     }
 
     .section-title {
       font-weight: bold;
-      font-size: 11px;
-      margin-bottom: 1mm;
+      font-size: 13px;
+      margin: 3mm 0 2mm 0;
       text-decoration: underline;
+      text-align: center;
     }
 
-    .customer-info {
-      font-size: 11px;
+    .items-container {
+      margin: 2mm 0;
+    }
+
+    .item-block {
+      margin: 3mm 0;
+      padding: 2mm;
+      border: 1px solid black;
+      page-break-inside: avoid;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 1mm;
-    }
-
-    .item {
-      font-size: 11px;
-      margin: 1mm 0;
     }
 
     .item-name {
       font-weight: bold;
+      font-size: 13px;
+      flex: 1;
     }
 
-    .item-qty-price {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
+    .item-qty {
+      font-size: 18px;
+      font-weight: bold;
+      margin-left: 5mm;
+      padding: 1mm 3mm;
+      border: 1px solid black;
+      min-width: 20mm;
+      text-align: center;
     }
 
     .item-options {
-      font-size: 10px;
-      color: #666;
-      margin-left: 2mm;
-      margin-top: 0.5mm;
-    }
-
-    .totals {
       font-size: 11px;
-      margin: 2mm 0;
-    }
-
-    .total-row {
-      display: flex;
-      justify-content: space-between;
+      margin: 1mm 0 0 0;
       padding: 1mm 0;
+      background-color: #f5f5f5;
+      padding-left: 2mm;
     }
 
-    .total-final {
-      font-weight: bold;
-      font-size: 13px;
-      background-color: #f0f0f0;
-      padding: 2mm;
-      text-align: center;
-      border: 1px solid #ccc;
+    .option-line {
+      margin: 0.5mm 0;
     }
 
-    .payment-info {
-      font-size: 10px;
-      text-align: center;
+    .notes-section {
       margin: 2mm 0;
+      padding: 2mm;
+      background-color: #fff9e6;
+      border: 1px dashed black;
+    }
+
+    .notes-title {
+      font-weight: bold;
+      font-size: 11px;
+      margin-bottom: 1mm;
+    }
+
+    .notes-text {
+      font-size: 11px;
+      font-weight: bold;
+      color: #cc0000;
     }
 
     .footer {
       text-align: center;
       font-size: 10px;
       margin-top: 3mm;
-      color: #666;
+      padding-top: 2mm;
+      border-top: 1px solid black;
+    }
+
+    .total-info {
+      text-align: center;
+      font-size: 11px;
+      margin: 2mm 0;
     }
 
     @media print {
@@ -154,6 +184,7 @@ export function generateThermalReceiptHTML(order: Order): string {
         width: 58mm;
         margin: 0;
         padding: 2mm;
+        background: white;
       }
       .no-print {
         display: none;
@@ -165,110 +196,106 @@ export function generateThermalReceiptHTML(order: Order): string {
   <div class="receipt">
     <div class="header">🍔 PARILLA BURGERS</div>
 
-    <div class="divider">${divider}</div>
-
     <div class="order-number">PEDIDO #${order.order_number}</div>
 
     <div class="divider">${divider}</div>
-`;
 
-  // Información del cliente
-  html += `
-    <div class="section">
-      <div class="customer-info">
-        <strong>${order.customer_name}</strong><br>
-        📱 ${order.customer_phone}
-      </div>
+    <div class="customer-info">
+      <div class="customer-line"><strong>${order.customer_name}</strong></div>
+      <div class="customer-line">📱 ${order.customer_phone}</div>
   `;
 
   if (order.mesa_number) {
-    html += `<div class="customer-info">🪑 Mesa ${order.mesa_number}</div>`;
+    html += `<div class="customer-line">🪑 <strong>MESA ${order.mesa_number}</strong></div>`;
   } else if (order.delivery_address) {
     const addressLines = wrapText(order.delivery_address);
-    html += `<div class="customer-info">📍 ${addressLines.join("<br>")}</div>`;
+    html += `<div class="customer-line">📍 ${addressLines.join("<br>")}</div>`;
   }
 
   html += `</div>`;
 
-  // Productos
-  html += `
-    <div class="divider">${divider}</div>
-    <div class="section">
-      <div class="section-title">PRODUCTOS</div>
-  `;
+  html += `<div class="divider">${divider}</div>`;
+  html += `<div class="section-title">▶ PREPARA ESTO ◀</div>`;
 
+  // Productos - Sección principal y prominente
   const items = order.items || [];
-  items.forEach((item) => {
-    html += `
-      <div class="item">
-        <div class="item-name">${item.menu_item_name}</div>
-        <div class="item-qty-price">
-          <span>x${item.quantity}</span>
-          <span>$${item.subtotal?.toLocaleString("es-CO") || "0"}</span>
-        </div>
-    `;
 
-    if (item.barra_libre_selected && item.barra_libre_selected.length > 0) {
-      html += `<div class="item-options">${item.barra_libre_selected.join(", ")}</div>`;
-    }
+  if (items.length > 0) {
+    html += `<div class="items-container">`;
+
+    items.forEach((item) => {
+      html += `
+      <div class="item-block">
+        <div class="item-header">
+          <div class="item-name">${item.menu_item_name}</div>
+          <div class="item-qty">x${item.quantity}</div>
+        </div>
+      `;
+
+      // Opciones de barra libre
+      if (item.barra_libre_selected && item.barra_libre_selected.length > 0) {
+        html += `<div class="item-options">`;
+        item.barra_libre_selected.forEach((opt: string) => {
+          html += `<div class="option-line">✓ ${opt}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+    });
 
     html += `</div>`;
-  });
+  }
 
-  html += `</div>`;
+  // Notas especiales
+  if (order.notes) {
+    html += `
+    <div class="divider">${divider}</div>
+    <div class="notes-section">
+      <div class="notes-title">⚠️ NOTAS ESPECIALES:</div>
+      <div class="notes-text">${wrapText(order.notes).join("<br>")}</div>
+    </div>
+    `;
+  }
 
-  // Totales
+  // Info de totales (más pequeño, menos importante)
   html += `
     <div class="divider">${divider}</div>
-    <div class="totals">
-      <div class="total-row">
-        <span>Subtotal:</span>
-        <span>$${order.subtotal?.toLocaleString("es-CO") || "0"}</span>
-      </div>
+    <div class="total-info">
+      <div style="margin: 1mm 0;"><strong>Subtotal:</strong> $${order.subtotal?.toLocaleString("es-CO") || "0"}</strong></div>
   `;
 
   if (order.delivery_fee > 0) {
-    html += `
-      <div class="total-row">
-        <span>Domicilio:</span>
-        <span>$${order.delivery_fee?.toLocaleString("es-CO") || "0"}</span>
-      </div>
-    `;
+    html += `<div style="margin: 1mm 0;"><strong>Domicilio:</strong> $${order.delivery_fee?.toLocaleString("es-CO") || "0"}</strong></div>`;
   }
 
   html += `
-      <div class="total-final">
-        TOTAL: $${order.total?.toLocaleString("es-CO") || "0"}
+      <div style="margin: 2mm 0; font-size: 12px; font-weight: bold; border-top: 1px solid black; padding-top: 1mm;">
+        <strong>TOTAL: $${order.total?.toLocaleString("es-CO") || "0"}</strong>
       </div>
     </div>
   `;
 
   // Método de pago
   let paymentMethod = "Desconocido";
+  let paymentEmoji = "❓";
   if (order.wompi_transaction_id === "PAGAR_EN_CAJA") {
-    paymentMethod = "💵 Pagar en caja";
+    paymentMethod = "Pagar en caja";
+    paymentEmoji = "💵";
   } else if (order.wompi_transaction_id === null) {
-    paymentMethod = "💰 Contra entrega";
+    paymentMethod = "Contra entrega";
+    paymentEmoji = "💰";
   } else if (order.payment_status === "paid") {
-    paymentMethod = "✓ Pagado en línea";
+    paymentMethod = "Pagado en línea";
+    paymentEmoji = "✓";
   }
 
   html += `
-    <div class="payment-info">
-      ${paymentMethod}
+    <div class="divider">${divider}</div>
+    <div class="total-info" style="font-size: 10px; color: #666;">
+      ${paymentEmoji} ${paymentMethod}
     </div>
   `;
-
-  // Notas
-  if (order.notes) {
-    html += `
-    <div class="divider">${divider}</div>
-    <div class="section">
-      <div class="section-title">NOTAS</div>
-      <div style="font-size: 11px;">${wrapText(order.notes).join("<br>")}</div>
-    </div>
-    `;
-  }
 
   // Footer
   const now = new Date();
@@ -279,10 +306,9 @@ export function generateThermalReceiptHTML(order: Order): string {
   });
 
   html += `
-    <div class="divider">${divider}</div>
     <div class="footer">
       <p>${timeStr}</p>
-      <p style="margin-top: 1mm;">¡Gracias por su orden!</p>
+      <p style="margin-top: 1mm; font-weight: bold;">¡Buen provecho! 🍔</p>
     </div>
   </div>
 </body>
