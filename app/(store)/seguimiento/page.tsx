@@ -9,6 +9,7 @@ import { CheckCircle, Clock, ChefHat, Bike, Package, ShoppingBag, Timer, Star } 
 import { Suspense } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { MetaEvents } from "@/lib/pixel";
 
 const STATUS_STEPS: { key: OrderStatus; label: string; icon: React.ReactNode; desc: string }[] = [
   { key: "confirmed",  label: "Confirmado", icon: <CheckCircle size={20} />, desc: "Tu pedido fue recibido y confirmado" },
@@ -89,6 +90,7 @@ function TrackingContent() {
         const data = await res.json();
         if (data.status === "APPROVED") {
           clearCart();
+          if (data.order?.total) MetaEvents.purchase(urlOrder ?? "", data.order.total);
           toast.success("¡Pago aprobado! Tu pedido está confirmado 🎉");
           // Remove the transaction ID from URL to prevent re-verification on reload
           router.replace(`/seguimiento?order=${urlOrder}`);

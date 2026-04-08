@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { User, CheckCircle, CreditCard, Banknote, Star, Tag, X, MapPin, Clock } from "lucide-react";
 import { BrandEmoji } from "@/components/ui/BrandEmoji";
+import { MetaEvents } from "@/lib/pixel";
 import { Coupon } from "@/lib/types";
 import { useStoreStatus } from "@/lib/hooks/useStoreStatus";
 
@@ -301,6 +302,7 @@ export default function OrderPage() {
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: form.name, email: form.email, phone: form.phone, address: form.address }));
       localStorage.setItem("pb-last-order", orderNumber);
+      MetaEvents.purchase(orderNumber, grandTotal);
 
       clearCart();
       clearMesa();
