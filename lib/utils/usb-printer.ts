@@ -10,7 +10,8 @@ const PRINTER_VENDOR_ID = 0x0483; // STMicroelectronics (común en impresoras t�
 // 0x0416 - Winbond
 // Si tu impresora no funciona, busca su vendor/product ID
 
-let selectedDevice: USBDevice | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let selectedDevice: any = null;
 
 /**
  * Busca y conecta a una impresora térmica USB
@@ -40,7 +41,7 @@ export async function selectUSBPrinter(): Promise<boolean> {
 /**
  * Genera los comandos ESC/POS para el recibo
  */
-function generateESCPOS(order: Order): Buffer {
+function generateESCPOS(order: Order): Uint8Array {
   const encoder = new EscPosEncoder();
 
   // Encabezado
