@@ -1,3 +1,4 @@
+// @ts-ignore - esc-pos-encoder no tiene tipos TypeScript
 import EscPosEncoder from "esc-pos-encoder";
 import { Order } from "@/lib/types";
 
