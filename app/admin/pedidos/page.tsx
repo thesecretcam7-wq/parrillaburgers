@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Order, OrderStatus } from "@/lib/types";
 import toast from "react-hot-toast";
 import { ShoppingBag, PauseCircle, PlayCircle, Bell, BellOff } from "lucide-react";
+import { PrintReceiptButton } from "@/components/admin/PrintReceiptButton";
 
 const WA_MESSAGES: Partial<Record<OrderStatus, string>> = {
   confirmed:  "✅ Tu pedido {number} fue *confirmado*. ¡Lo estamos preparando! 🍔",
@@ -428,6 +429,10 @@ export default function AdminOrdersPage() {
                         )}
                       </div>
                     ))}
+                  </div>
+
+                  <div className="flex gap-3 flex-wrap">
+                    <PrintReceiptButton order={order} />
                   </div>
 
                   <div>
