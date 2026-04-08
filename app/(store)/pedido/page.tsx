@@ -32,6 +32,7 @@ export default function OrderPage() {
   const [loading, setLoading] = useState(false);
   const [returning, setReturning] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"wompi" | "cash">("wompi");
+  const [changeAmount, setChangeAmount] = useState<number | null>(null);
   const [customerPoints, setCustomerPoints] = useState(0);
   const [usePoints, setUsePoints] = useState(false);
   const [couponInput, setCouponInput] = useState("");
@@ -252,6 +253,14 @@ export default function OrderPage() {
       }
 
       // ====== CASH / CONTRAENTREGA FLOW (create order immediately) ======
+      // Construir notas con información de cambio si es contra entrega
+      let orderNotes = form.notes || "";
+      if (!mesaNum && changeAmount !== null && changeAmount > grandTotal) {
+        const change = changeAmount - grandTotal;
+        const notasExtra = `[CAMBIO: $${change.toLocaleString("es-CO")}]`;
+        orderNotes = orderNotes ? `${orderNotes}\n${notasExtra}` : notasExtra;
+      }
+
       const { data: order, error } = await supabase
         .from("orders")
         .insert({
@@ -261,7 +270,7 @@ export default function OrderPage() {
           customer_email: form.email,
           customer_phone: form.phone,
           delivery_address: mesaNum ? `Mesa ${mesaNum}` : form.address,
-          notes: form.notes || null,
+          notes: orderNotes || null,
           items: orderItems,
           subtotal,
           delivery_fee: effectiveDelivery,
@@ -614,6 +623,33 @@ export default function OrderPage() {
                   {mesaNum ? "Pagar en caja" : "Contra entrega"}
                 </button>
               </div>
+
+              {/* Campo de cambio para contra entrega */}
+              {paymentMethod === "cash" && !mesaNum && (
+                <div className="space-y-3 p-3 bg-[#D4A017]/5 border border-[#D4A017]/30 rounded-xl">
+                  <label className="text-[#9CA3AF] text-xs block font-medium">
+                    ¿Paga con cuánto? (para calcular el cambio)
+                  </label>
+                  <input
+                    type="number"
+                    value={changeAmount || ""}
+                    onChange={(e) => setChangeAmount(e.target.value ? Number(e.target.value) : null)}
+                    placeholder={`Mínimo: $${grandTotal.toLocaleString("es-CO")}`}
+                    min={grandTotal}
+                    className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#D4A017]"
+                  />
+                  {changeAmount !== null && changeAmount > grandTotal && (
+                    <div className="text-sm p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <p className="text-green-400 font-semibold">Cambio: ${(changeAmount - grandTotal).toLocaleString("es-CO")}</p>
+                    </div>
+                  )}
+                  {changeAmount !== null && changeAmount < grandTotal && (
+                    <div className="text-sm p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+                      <p className="text-red-400 font-semibold">⚠️ Monto insuficiente</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {isOpen === false ? (
