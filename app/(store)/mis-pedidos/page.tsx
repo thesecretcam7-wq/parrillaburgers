@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Order, OrderStatus } from "@/lib/types";
+import { Order, OrderStatus, OrderItem } from "@/lib/types";
 import Link from "next/link";
-import { ClipboardList, ChevronRight, Clock, RotateCcw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ClipboardList, Clock, RotateCcw, X, MapPin, StickyNote, ChevronRight } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
-import { OrderItem } from "@/lib/types";
 import toast from "react-hot-toast";
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
@@ -30,10 +30,11 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
 const ACTIVE_STATUSES: OrderStatus[] = ["pending", "confirmed", "preparing", "on_the_way"];
 
 export default function MisPedidosPage() {
-  const [orders, setOrders]     = useState<Order[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [orders, setOrders]             = useState<Order[]>([]);
+  const [loading, setLoading]           = useState(true);
   const [customerName, setCustomerName] = useState("");
-  const [noAccount, setNoAccount] = useState(false);
+  const [noAccount, setNoAccount]       = useState(false);
+  const [selected, setSelected]         = useState<Order | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("pb-customer");
@@ -71,10 +72,7 @@ export default function MisPedidosPage() {
         </div>
         <h2 className="text-white font-bold text-lg mb-2">Aún no tienes pedidos</h2>
         <p className="text-[#6B7280] text-sm mb-8">Cuando hagas tu primer pedido aparecerá aquí</p>
-        <Link
-          href="/menu"
-          className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-3 rounded-xl"
-        >
+        <Link href="/menu" className="bg-[#D4A017] text-[#0F1117] font-bold px-8 py-3 rounded-xl">
           Ver Menú
         </Link>
       </main>
@@ -107,8 +105,6 @@ export default function MisPedidosPage() {
           </div>
         ) : (
           <div className="space-y-6">
-
-            {/* Pedidos activos */}
             {activeOrders.length > 0 && (
               <section>
                 <h2 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
@@ -116,14 +112,13 @@ export default function MisPedidosPage() {
                   En curso
                 </h2>
                 <div className="space-y-2">
-                  {activeOrders.map((order) => (
-                    <OrderCard key={order.id} order={order} />
+                  {activeOrders.map((o) => (
+                    <OrderCard key={o.id} order={o} onOpen={() => setSelected(o)} />
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Historial */}
             {pastOrders.length > 0 && (
               <section>
                 <h2 className="text-[#888899] font-semibold text-sm mb-3 flex items-center gap-2">
@@ -131,32 +126,81 @@ export default function MisPedidosPage() {
                   Historial
                 </h2>
                 <div className="space-y-2">
-                  {pastOrders.map((order) => (
-                    <OrderCard key={order.id} order={order} />
+                  {pastOrders.map((o) => (
+                    <OrderCard key={o.id} order={o} onOpen={() => setSelected(o)} />
                   ))}
                 </div>
               </section>
             )}
-
           </div>
         )}
       </div>
+
+      {selected && (
+        <OrderDetailModal order={selected} onClose={() => setSelected(null)} />
+      )}
     </main>
   );
 }
 
-function OrderCard({ order }: { order: Order }) {
-  const isActive = ACTIVE_STATUSES.includes(order.status as OrderStatus);
+/* ─── Tarjeta ─── */
+function OrderCard({ order, onOpen }: { order: Order; onOpen: () => void }) {
+  const isActive  = ACTIVE_STATUSES.includes(order.status as OrderStatus);
   const itemCount = (order.items as OrderItem[])?.length ?? 0;
-  const date = new Date(order.created_at).toLocaleDateString("es-CO", {
+  const date      = new Date(order.created_at).toLocaleDateString("es-CO", {
     day: "2-digit", month: "short", year: "numeric",
   });
-  const addItem = useCartStore((s) => s.addItem);
 
-  function repeatOrder(e: React.MouseEvent) {
-    e.preventDefault();
-    const orderItems = order.items as OrderItem[];
-    orderItems.forEach((oi) => {
+  return (
+    <button
+      onClick={onOpen}
+      className={`w-full flex items-center gap-4 bg-[#1A1B21] rounded-2xl p-4 border transition-colors active:scale-[0.99] text-left ${
+        isActive
+          ? "border-[#D4A017]/30 hover:border-[#D4A017]/60"
+          : "border-[#2E3038] hover:border-[#3E4048]"
+      }`}
+    >
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+        isActive ? "bg-[#D4A017]/15" : "bg-[#22242C]"
+      }`}>
+        <span className="text-xl">🍔</span>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[#D4A017] font-mono font-bold text-xs">{order.order_number}</span>
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${STATUS_COLOR[order.status as OrderStatus]}`}>
+            {STATUS_LABEL[order.status as OrderStatus]}
+          </span>
+        </div>
+        <p className="text-white font-semibold text-sm truncate">
+          {itemCount} {itemCount === 1 ? "producto" : "productos"}
+        </p>
+        <p className="text-[#6B7280] text-xs mt-0.5">{date}</p>
+      </div>
+
+      <div className="flex flex-col items-end gap-1.5 shrink-0">
+        <p className="text-[#F5F0E8] font-bold text-sm">${order.total?.toLocaleString("es-CO")}</p>
+        <ChevronRight size={16} className="text-[#6B7280]" />
+      </div>
+    </button>
+  );
+}
+
+/* ─── Modal detalle ─── */
+function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => void }) {
+  const router   = useRouter();
+  const addItem  = useCartStore((s) => s.addItem);
+  const isActive = ACTIVE_STATUSES.includes(order.status as OrderStatus);
+  const items    = order.items as OrderItem[];
+
+  const date = new Date(order.created_at).toLocaleDateString("es-CO", {
+    day: "2-digit", month: "long", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+
+  function repeatOrder() {
+    items.forEach((oi) => {
       addItem({
         id: oi.menu_item_id,
         name: oi.menu_item_name,
@@ -171,50 +215,129 @@ function OrderCard({ order }: { order: Order }) {
       }, oi.barra_libre_selected);
     });
     toast.success("Pedido agregado al carrito");
+    onClose();
+    router.push("/carrito");
+  }
+
+  function handleBackdrop(e: React.MouseEvent<HTMLDivElement>) {
+    if (e.target === e.currentTarget) onClose();
   }
 
   return (
-    <Link
-      href={`/seguimiento?order=${order.order_number}`}
-      className={`flex items-center gap-4 bg-[#1A1B21] rounded-2xl p-4 border transition-colors active:scale-[0.99] ${
-        isActive ? "border-[#D4A017]/30 hover:border-[#D4A017]/60" : "border-[#2E3038] hover:border-[#3E4048]"
-      }`}
+    <div
+      className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center"
+      onClick={handleBackdrop}
     >
-      {/* Icono */}
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-        isActive ? "bg-[#D4A017]/15" : "bg-[#22242C]"
-      }`}>
-        <span className="text-xl">🍔</span>
-      </div>
+      <div className="bg-[#1A1B21] w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden max-h-[90dvh] flex flex-col">
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[#D4A017] font-mono font-bold text-xs">{order.order_number}</span>
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${STATUS_COLOR[order.status as OrderStatus]}`}>
-            {STATUS_LABEL[order.status as OrderStatus]}
-          </span>
-        </div>
-        <p className="text-white font-semibold text-sm truncate">
-          {itemCount} {itemCount === 1 ? "producto" : "productos"}
-        </p>
-        <p className="text-[#6B7280] text-xs mt-0.5">{date}</p>
-      </div>
-
-      {/* Repetir + Total */}
-      <div className="flex flex-col items-end gap-1.5 shrink-0">
-        <p className="text-[#F5F0E8] font-bold text-sm">${order.total?.toLocaleString("es-CO")}</p>
-        {!isActive && (
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#2E3038]">
+          <div>
+            <p className="text-[#D4A017] font-mono font-bold text-sm">{order.order_number}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${STATUS_COLOR[order.status as OrderStatus]}`}>
+                {STATUS_LABEL[order.status as OrderStatus]}
+              </span>
+              <span className="text-[#6B7280] text-xs">{date}</span>
+            </div>
+          </div>
           <button
-            onClick={repeatOrder}
-            className="flex items-center gap-1 text-[#D4A017] text-[10px] font-semibold hover:text-[#E8B830] transition-colors"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-[#2E3038] flex items-center justify-center text-[#888899] hover:text-white transition-colors"
           >
-            <RotateCcw size={11} />
-            Repetir
+            <X size={16} />
           </button>
-        )}
-        {isActive && <ChevronRight size={16} className="text-[#6B7280]" />}
+        </div>
+
+        {/* Cuerpo scrolleable */}
+        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-5">
+
+          {/* Productos */}
+          <div>
+            <p className="text-[#888899] text-xs font-semibold uppercase tracking-wide mb-3">Productos</p>
+            <div className="space-y-2">
+              {items.map((item, i) => (
+                <div key={i} className="bg-[#22242C] rounded-xl p-3">
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1">
+                      <p className="text-white font-semibold text-sm">{item.menu_item_name}</p>
+                      {item.barra_libre_selected && item.barra_libre_selected.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {item.barra_libre_selected.map((opt, j) => (
+                            <span key={j} className="px-2 py-0.5 rounded-full text-[10px] bg-[#D4A017]/10 text-[#D4A017] border border-[#D4A017]/20">
+                              {opt}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[#888899] text-xs">x{item.quantity}</p>
+                      <p className="text-[#F5F0E8] font-semibold text-sm">${item.subtotal?.toLocaleString("es-CO")}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Dirección o Mesa */}
+          {order.delivery_address && (
+            <div className="flex items-start gap-2">
+              <MapPin size={14} className="text-[#6B7280] mt-0.5 shrink-0" />
+              <p className="text-[#888899] text-sm">{order.delivery_address}</p>
+            </div>
+          )}
+
+          {/* Notas */}
+          {order.notes && (
+            <div className="flex items-start gap-2 bg-[#22242C] rounded-xl p-3">
+              <StickyNote size={14} className="text-[#D4A017] mt-0.5 shrink-0" />
+              <p className="text-[#CCCCCC] text-sm">{order.notes}</p>
+            </div>
+          )}
+
+          {/* Totales */}
+          <div className="border-t border-[#2E3038] pt-4 space-y-1.5">
+            <div className="flex justify-between text-sm text-[#888899]">
+              <span>Subtotal</span>
+              <span>${order.subtotal?.toLocaleString("es-CO")}</span>
+            </div>
+            {order.delivery_fee > 0 && (
+              <div className="flex justify-between text-sm text-[#888899]">
+                <span>Domicilio</span>
+                <span>${order.delivery_fee?.toLocaleString("es-CO")}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-white text-base pt-1">
+              <span>Total</span>
+              <span>${order.total?.toLocaleString("es-CO")}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Botones */}
+        <div className="px-5 py-4 border-t border-[#2E3038] flex gap-3">
+          {isActive ? (
+            <Link
+              href={`/seguimiento?order=${order.order_number}`}
+              className="flex-1 bg-[#D4A017] text-[#0F1117] font-bold py-3 rounded-xl text-sm text-center"
+              onClick={onClose}
+            >
+              Ver seguimiento
+            </Link>
+          ) : (
+            <button
+              onClick={repeatOrder}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#D4A017] text-[#0F1117] font-bold py-3 rounded-xl text-sm"
+            >
+              <RotateCcw size={15} />
+              Repetir pedido
+            </button>
+          )}
+        </div>
+
       </div>
-    </Link>
+    </div>
   );
 }
