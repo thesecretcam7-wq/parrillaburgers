@@ -158,3 +158,23 @@ INSERT INTO menu_items (category_id, name, description, price, sort_order) VALUE
   ((SELECT id FROM cat), 'Combo 2', 'Tu hamburguesa + cerveza + papas', 6500, 2),
   ((SELECT id FROM cat), 'Combo 3', 'Tu hamburguesa + soda italiana + papas', 8500, 3)
 ON CONFLICT DO NOTHING;
+
+-- Ofertas especiales
+CREATE TABLE IF NOT EXISTS specials_offers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  emoji TEXT NOT NULL,
+  description TEXT NOT NULL,
+  active BOOLEAN DEFAULT TRUE,
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Datos iniciales de ofertas
+INSERT INTO specials_offers (title, emoji, description, active, sort_order) VALUES
+  ('Combo Hamburguesero', '🍔', 'Hasta -30%', TRUE, 1),
+  ('Acompañamientos', '🍟', 'Compra 2, lleva 3', TRUE, 2),
+  ('Parrilla a la Brasa', '🔥', 'Jugosas y tiernas', TRUE, 3),
+  ('Gana Puntos', '🎯', '100 pts = $1.000', TRUE, 4)
+ON CONFLICT DO NOTHING;
