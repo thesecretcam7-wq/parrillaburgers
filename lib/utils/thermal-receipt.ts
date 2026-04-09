@@ -116,6 +116,13 @@ export function generateThermalReceiptHTML(order: Order): string {
       margin: 0.5mm 0;
     }
 
+    .address {
+      font-size: 11px;
+      text-align: center;
+      margin: 1mm 0 2mm 0;
+      line-height: 1.4;
+    }
+
     .notes {
       margin: 3mm 0 0 0;
       padding: 2mm;
@@ -160,6 +167,8 @@ export function generateThermalReceiptHTML(order: Order): string {
 
   ${order.mesa_number ? '' : `<div class="tipo" style="font-size: 11px; font-weight: normal; margin-top: 1mm;">${order.customer_name}</div>`}
 
+  ${!order.mesa_number && order.delivery_address ? `<div class="address">${wrapText(order.delivery_address).join("<br>")}</div>` : ''}
+
   <div class="divider">${divider}</div>
 
   <div class="items-container">
@@ -194,14 +203,29 @@ export function generateThermalReceiptHTML(order: Order): string {
   <div class="divider">${divider}</div>
 `;
 
-  // Notas
+  // Notas — separar nota del cliente del cambio [CAMBIO: ...]
   if (order.notes) {
-    html += `
-  <div class="notes">
-    <div class="notes-title">NOTAS:</div>
-    <div class="notes-text">${wrapText(order.notes).join("<br>")}</div>
-  </div>
-`;
+    const cambioMatch = order.notes.match(/\[CAMBIO:\s*([^\]]+)\]/);
+    const cleanNotes = order.notes.replace(/\[CAMBIO:[^\]]*\]/g, "").trim();
+
+    html += `<div class="notes">`;
+
+    if (cleanNotes) {
+      html += `
+      <div class="notes-title">NOTAS DEL CLIENTE:</div>
+      <div class="notes-text">${wrapText(cleanNotes).join("<br>")}</div>
+      `;
+    }
+
+    if (cambioMatch) {
+      html += `
+      ${cleanNotes ? '<div style="margin-top:2mm;border-top:1px dashed black;padding-top:2mm;"></div>' : ''}
+      <div class="notes-title">CAMBIO A ENTREGAR:</div>
+      <div class="notes-text" style="font-size:14px;">$ ${cambioMatch[1]}</div>
+      `;
+    }
+
+    html += `</div>`;
   }
 
   html += `
