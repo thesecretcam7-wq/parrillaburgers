@@ -225,7 +225,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-[60] bg-black/70 flex items-end sm:items-center justify-center"
       onClick={handleBackdrop}
     >
       <div className="bg-[#1A1B21] w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden max-h-[90dvh] flex flex-col">
