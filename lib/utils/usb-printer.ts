@@ -94,13 +94,13 @@ function generateESCPOS(order: Order): Uint8Array {
   // Divisor
   encoder.align("left").text("================================").newline();
 
-  const fmt = (n: number) => `$${n.toLocaleString("es-CO")}`;
+  const fmt = (n: number) => `$${Number(n || 0).toLocaleString("es-CO")}`;
 
   // Productos
   const items = order.items || [];
   items.forEach((item) => {
     encoder.bold(true).text(item.menu_item_name).bold(false).newline();
-    const lineTotal = item.unit_price * item.quantity;
+    const lineTotal = (item.unit_price || 0) * (item.quantity || 1);
     encoder.text(`${item.quantity} x ${fmt(item.unit_price)} = ${fmt(lineTotal)}`).newline();
 
     if (item.barra_libre_selected && item.barra_libre_selected.length > 0) {
@@ -115,16 +115,16 @@ function generateESCPOS(order: Order): Uint8Array {
   encoder.text("================================").newline();
   encoder.align("left");
   encoder.text(`Subtotal:  ${fmt(order.subtotal)}`).newline();
-  if (order.delivery_fee > 0) {
+  if ((order.delivery_fee || 0) > 0) {
     encoder.text(`Domicilio: ${fmt(order.delivery_fee)}`).newline();
   }
   encoder.bold(true).text(`TOTAL:     ${fmt(order.total)}`).bold(false).newline();
   encoder.text("================================").newline();
 
   // Notas y pago contra entrega
-  const cambioMatch = order.notes?.match(/\[CAMBIO:\s*\$?([\d.,]+)\]/);
-  const cleanNotes = order.notes?.replace(/\[CAMBIO:[^\]]*\]/g, "").trim() || "";
-  const isContraEntrega = !order.wompi_transaction_id && !order.mesa_number;
+  // Si hay [CAMBIO:...] en las notas, es contra entrega
+  const cambioMatch = (order.notes || "").match(/\[CAMBIO:\s*\$?([\d.]+)\]/);
+  const cleanNotes = (order.notes || "").replace(/\[CAMBIO:[^\]]*\]/g, "").trim();
 
   if (cleanNotes) {
     encoder.bold(true).text("NOTAS:").bold(false).newline();
@@ -132,9 +132,9 @@ function generateESCPOS(order: Order): Uint8Array {
     encoder.newline();
   }
 
-  if (isContraEntrega && cambioMatch) {
-    const cambioNum = Number(cambioMatch[1].replace(/\./g, "").replace(",", "."));
-    const pagaCon = order.total + cambioNum;
+  if (cambioMatch) {
+    const cambioNum = Number(cambioMatch[1].replace(/\./g, ""));
+    const pagaCon = (order.total || 0) + cambioNum;
     encoder.bold(true).text(`PAGA CON:  ${fmt(pagaCon)}`).bold(false).newline();
     encoder.bold(true).text(`CAMBIO:    ${fmt(cambioNum)}`).bold(false).newline();
     encoder.newline();

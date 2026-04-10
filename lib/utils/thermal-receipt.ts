@@ -259,12 +259,11 @@ export function generateThermalReceiptHTML(order: Order): string {
   <div class="divider" style="margin-top:2mm;">${divider}</div>
 `;
 
-  // Notas — separar nota del cliente del cambio [CAMBIO: ...]
-  const isContraEntrega = !order.wompi_transaction_id && !order.mesa_number;
-  const cambioMatch = order.notes?.match(/\[CAMBIO:\s*\$?([\d.,]+)\]/);
-  const cleanNotes = order.notes?.replace(/\[CAMBIO:[^\]]*\]/g, "").trim() || "";
+  // Notas — si hay [CAMBIO:...] es contra entrega
+  const cambioMatch = (order.notes || "").match(/\[CAMBIO:\s*\$?([\d.]+)\]/);
+  const cleanNotes = (order.notes || "").replace(/\[CAMBIO:[^\]]*\]/g, "").trim();
 
-  if (cleanNotes || (isContraEntrega && cambioMatch)) {
+  if (cleanNotes || cambioMatch) {
     html += `<div class="notes">`;
 
     if (cleanNotes) {
@@ -274,15 +273,15 @@ export function generateThermalReceiptHTML(order: Order): string {
       `;
     }
 
-    if (isContraEntrega && cambioMatch) {
-      const cambioNum = Number(cambioMatch[1].replace(/[.,]/g, (m) => m === "." ? "" : ""));
-      const pagaCon = order.total + cambioNum;
+    if (cambioMatch) {
+      const cambioNum = Number(cambioMatch[1].replace(/\./g, ""));
+      const pagaCon = (order.total || 0) + cambioNum;
       html += `
       ${cleanNotes ? '<div style="margin-top:2mm;border-top:1px dashed black;padding-top:2mm;"></div>' : ''}
       <div class="notes-title">PAGA CON:</div>
       <div class="notes-text" style="font-size:14px;">$${pagaCon.toLocaleString("es-CO")}</div>
       <div class="notes-title" style="margin-top:1mm;">CAMBIO A ENTREGAR:</div>
-      <div class="notes-text" style="font-size:14px;">$${cambioMatch[1]}</div>
+      <div class="notes-text" style="font-size:14px;">$${cambioNum.toLocaleString("es-CO")}</div>
       `;
     }
 
