@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit } from "@/lib/utils/rate-limit";
 
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req, "wompi-verify", 10, 60);
+  if (rl) return rl;
+
   try {
     const { transactionId, orderNumber, fullOrderData } = await req.json();
 

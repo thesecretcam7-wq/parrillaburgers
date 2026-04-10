@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit } from "@/lib/utils/rate-limit";
 
 // Uses service role key → bypasses RLS → no policy setup needed
 const supabaseAdmin = createClient(
@@ -8,6 +9,8 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(req: NextRequest) {
+  const rl = await rateLimit(req, "upload", 5, 60);
+  if (rl) return rl;
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
