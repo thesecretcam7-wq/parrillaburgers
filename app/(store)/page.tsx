@@ -98,10 +98,11 @@ export default async function Home() {
             <Image
               src="/logo-real.png"
               alt="ParillaBurgers"
-              width={400}
-              height={400}
+              width={300}
+              height={300}
               priority
-              className="relative w-auto h-[320px] mx-auto"
+              className="relative w-auto h-64 mx-auto"
+              style={{ transform: "scale(1.45)", transformOrigin: "center center" }}
               style={{
                 filter: [
                   "contrast(1.35)",
