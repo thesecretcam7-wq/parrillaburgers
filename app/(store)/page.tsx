@@ -85,8 +85,9 @@ export default async function Home() {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-80 h-80 rounded-full bg-[#C47800]/8 blur-3xl" />
         </div>
-        <div className="relative py-6 px-2 text-center">
-          <div className="w-64 mx-auto relative">
+        <div className="relative py-6 px-2 text-center flex flex-col items-center">
+          {/* Logo con overlay */}
+          <div className="relative">
             {/* Capa metálica dorada encima del logo — blend overlay */}
             <div
               className="absolute inset-0 z-10 pointer-events-none"
@@ -101,7 +102,7 @@ export default async function Home() {
               width={300}
               height={300}
               priority
-              className="relative w-auto h-64 mx-auto"
+              className="relative w-auto h-64"
               style={{
                 transform: "scale(1.45)",
                 transformOrigin: "center center",
@@ -117,8 +118,12 @@ export default async function Home() {
               }}
             />
           </div>
+          {/* Slogan */}
+          <p className="mt-1 text-[#D4A017] text-2xl" style={{ fontFamily: "var(--font-dancing)" }}>
+            ¡A la parrilla sabe mejor!
+          </p>
           {/* Horario badge */}
-          <div className={`inline-flex items-center gap-2 mt-4 px-4 py-1.5 rounded-full text-xs font-semibold ${
+          <div className={`inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full text-xs font-semibold ${
             isOpen
               ? "bg-green-900/40 border border-green-700/50 text-green-400"
               : "bg-red-900/40 border border-red-700/50 text-red-400"
@@ -126,9 +131,6 @@ export default async function Home() {
             <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? "bg-green-400" : "bg-red-400"}`} />
             {isOpen ? "Abierto ahora · 6:00 PM - 11:59 PM" : "Cerrado · Abrimos a las 6:00 PM"}
           </div>
-          <p className="mt-3 text-[#D4A017] text-2xl" style={{ fontFamily: "var(--font-dancing)" }}>
-            ¡A la parrilla sabe mejor!
-          </p>
         </div>
         {/* Gold bottom border */}
         <div className="h-px bg-gradient-to-r from-transparent via-[#D4A017]/40 to-transparent" />
