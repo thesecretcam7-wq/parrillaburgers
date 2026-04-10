@@ -119,7 +119,7 @@ export default function Navbar() {
           {/* Search Icon */}
           <button
             onClick={() => setShowSearch(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full border border-[#2E3038] hover:border-[#D4A017]/40 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-[#D4A017]/40 bg-[#16130A] hover:border-[#D4A017]/80 hover:bg-[#2A1E00] transition-colors"
             aria-label="Buscar"
           >
             <Search size={17} className="text-white" />
@@ -138,7 +138,7 @@ export default function Navbar() {
           {/* Profile Icon */}
           <Link
             href="/perfil"
-            className="w-9 h-9 flex items-center justify-center rounded-full border border-[#2E3038] hover:border-[#D4A017]/40 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-[#D4A017]/40 bg-[#16130A] hover:border-[#D4A017]/80 hover:bg-[#2A1E00] transition-colors"
             aria-label="Perfil"
           >
             <User size={17} className="text-white" />
