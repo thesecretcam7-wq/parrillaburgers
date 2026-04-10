@@ -85,7 +85,7 @@ export default async function Home() {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-80 h-80 rounded-full bg-[#C47800]/8 blur-3xl" />
         </div>
-        <div className="relative py-10 px-6 text-center">
+        <div className="relative py-6 px-2 text-center">
           <div className="relative mx-auto w-fit">
             {/* Capa metálica dorada encima del logo — blend overlay */}
             <div
@@ -98,10 +98,10 @@ export default async function Home() {
             <Image
               src="/logo-real.png"
               alt="ParillaBurgers"
-              width={260}
-              height={222}
+              width={400}
+              height={400}
               priority
-              className="relative w-auto h-52 mx-auto"
+              className="relative w-auto h-[320px] mx-auto"
               style={{
                 filter: [
                   "contrast(1.35)",
