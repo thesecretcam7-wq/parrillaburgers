@@ -126,6 +126,9 @@ export default async function Home() {
             <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? "bg-green-400" : "bg-red-400"}`} />
             {isOpen ? "Abierto ahora · 6:00 PM - 11:59 PM" : "Cerrado · Abrimos a las 6:00 PM"}
           </div>
+          <p className="mt-3 text-[#D4A017] text-2xl" style={{ fontFamily: "var(--font-dancing)" }}>
+            ¡A la parrilla sabe mejor!
+          </p>
         </div>
         {/* Gold bottom border */}
         <div className="h-px bg-gradient-to-r from-transparent via-[#D4A017]/40 to-transparent" />
