@@ -204,7 +204,7 @@ export function generateThermalReceiptHTML(order: Order): string {
   </div>
 
   <div class="tipo" style="font-size:10px; font-weight:normal; margin-top:0.5mm; border:1px solid black; display:inline-block; padding:0.5mm 2mm; border-radius:2mm;">
-    ${order.wompi_transaction_id ? '💳 PAGADO EN LÍNEA' : order.delivery_address ? '💵 CONTRA ENTREGA' : '💵 PAGO EN TIENDA'}
+    ${order.wompi_transaction_id === 'CONTRA_ENTREGA' ? '💵 CONTRA ENTREGA' : order.wompi_transaction_id === 'PAGAR_EN_CAJA' ? '💵 PAGO EN TIENDA' : order.payment_status === 'paid' ? '💳 PAGADO EN LÍNEA' : '💵 PAGO EN TIENDA'}
   </div>
 
   ${!order.mesa_number ? `<div class="tipo" style="font-size: 11px; font-weight: normal; margin-top: 1mm;">${order.customer_name}</div>` : ''}

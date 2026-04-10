@@ -91,11 +91,13 @@ function generateESCPOS(order: Order): Uint8Array {
   encoder.newline();
 
   // Forma de pago
-  const tipoPago = order.wompi_transaction_id
-    ? "PAGADO EN LINEA"
-    : order.delivery_address
-      ? "CONTRA ENTREGA"
-      : "PAGO EN TIENDA";
+  const tipoPago = order.wompi_transaction_id === "CONTRA_ENTREGA"
+    ? "CONTRA ENTREGA"
+    : order.wompi_transaction_id === "PAGAR_EN_CAJA"
+      ? "PAGO EN TIENDA"
+      : order.payment_status === "paid"
+        ? "PAGADO EN LINEA"
+        : "PAGO EN TIENDA";
   encoder.text(`[${tipoPago}]`).newline();
 
   if (!order.mesa_number && order.customer_name) {

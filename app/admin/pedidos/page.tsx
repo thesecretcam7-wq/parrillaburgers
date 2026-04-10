@@ -361,6 +361,16 @@ export default function AdminOrdersPage() {
                         🪑 {order.mesa_number ? `Mesa ${order.mesa_number}` : order.delivery_address}
                       </span>
                     )}
+                    {!order.mesa_number && !order.delivery_address && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 bg-purple-500/15 text-purple-400 border-purple-500/30">
+                        🛍️ Para recoger
+                      </span>
+                    )}
+                    {!order.mesa_number && !order.delivery_address && order.payment_status === "paid" && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 bg-blue-500/15 text-blue-400 border-blue-500/30">
+                        💳 Pagado en línea
+                      </span>
+                    )}
                   </div>
                   <span className="text-[#CCCCCC] text-sm font-medium truncate mt-0.5">{order.customer_name}</span>
                   <span className="text-[#888899] text-xs truncate">{order.customer_phone}</span>
