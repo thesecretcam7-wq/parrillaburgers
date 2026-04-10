@@ -118,9 +118,6 @@ export default async function Home() {
               }}
             />
           </div>
-          <p className="font-[family-name:var(--font-dancing)] text-[#D4A017] text-2xl mt-3 drop-shadow-[0_2px_8px_rgba(212,160,23,0.4)]">
-            ¡ A la parrilla sabe mejor !
-          </p>
           {/* Horario badge */}
           <div className={`inline-flex items-center gap-2 mt-4 px-4 py-1.5 rounded-full text-xs font-semibold ${
             isOpen
