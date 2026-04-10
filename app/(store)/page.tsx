@@ -67,10 +67,22 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-[#0F1117] pb-8">
-      {/* Hero — logo sobre fondo oscuro cálido */}
-      <div className="relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0D0A04 0%, #1A1105 40%, #120D03 100%)" }}>
-        {/* Texture overlay */}
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(180,120,0,0.03) 2px, rgba(180,120,0,0.03) 4px)" }} />
+      {/* Hero — logo sobre fondo parrilla */}
+      <div className="relative overflow-hidden" style={{
+        backgroundColor: "#080503",
+        backgroundImage: [
+          /* brasas: brillo naranja desde abajo */
+          "radial-gradient(ellipse 100% 50% at 50% 115%, rgba(255,90,0,0.55) 0%, rgba(200,50,0,0.25) 35%, transparent 65%)",
+          /* glow suave detrás del logo */
+          "radial-gradient(ellipse 60% 40% at 50% 48%, rgba(212,160,23,0.08) 0%, transparent 70%)",
+          /* barras de parrilla horizontales — metal oscuro con reflejo */
+          "repeating-linear-gradient(0deg, transparent 0px, transparent 18px, rgba(20,16,10,0.95) 18px, rgba(30,24,14,0.95) 20px, rgba(55,44,22,1) 21px, rgba(70,56,28,1) 22px, rgba(55,44,22,1) 23px, rgba(30,24,14,0.95) 24px, rgba(20,16,10,0.95) 26px, transparent 26px)",
+          /* brillo metálico diagonal tenue en las barras */
+          "repeating-linear-gradient(90deg, transparent 0px, transparent 60px, rgba(255,200,80,0.04) 60px, rgba(255,200,80,0.04) 61px)",
+        ].join(", "),
+      }}>
+        {/* Smoke / heat shimmer */}
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[rgba(255,60,0,0.12)] to-transparent" />
         {/* Radial glow behind logo */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-72 h-72 rounded-full bg-[#D4A017]/5 blur-3xl" />
