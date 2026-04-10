@@ -52,7 +52,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-[#22242C] to-[#1A1B21] rounded-3xl overflow-hidden border border-[#2E3038] flex flex-col hover:border-[#D4A017] hover:shadow-[0_12px_48px_rgba(212,160,23,0.15)] transition-all duration-300 h-full">
+      <div className="bg-gradient-to-br from-[#1C1800] to-[#16130A] rounded-3xl overflow-hidden border border-[#2A2210] flex flex-col hover:border-[#D4A017] hover:shadow-[0_12px_48px_rgba(212,160,23,0.15)] transition-all duration-300 h-full">
         {/* Image section — larger */}
         <button
           type="button"
@@ -62,7 +62,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
           {item.image_url ? (
             <Image src={item.image_url} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" unoptimized />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2E3038] to-[#1A1B21]">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2A2210] to-[#16130A]">
               <span className="text-7xl">🍔</span>
             </div>
           )}
@@ -153,7 +153,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
           )}
 
           {/* Price and controls */}
-          <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#2E3038]">
+          <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#2A2210]">
             <span className="text-[#D4A017] font-black text-lg">
               ${Number(item.price).toLocaleString("es-CO")}
             </span>
@@ -169,7 +169,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
                     <Plus size={18} strokeWidth={3} />
                   </button>
                 ) : (
-                  <div className="flex items-center gap-2 bg-[#22242C] rounded-full px-2 py-1 border border-[#D4A017]">
+                  <div className="flex items-center gap-2 bg-[#1C1800] rounded-full px-2 py-1 border border-[#D4A017]">
                     <button
                       onClick={() => updateQuantity(item.id, qty - 1)}
                       className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[#2E3038] transition-colors"
@@ -200,11 +200,11 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
           onClick={() => setShowDetail(false)}
         >
           <div
-            className="bg-[#1A1B21] border border-[#2E3038] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300"
+            className="bg-[#16130A] border border-[#2A2210] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
-            <div className="relative h-52 bg-[#22242C]">
+            <div className="relative h-52 bg-[#1C1800]">
               {item.image_url ? (
                 <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />
               ) : (
@@ -246,7 +246,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
                   Agregar al carrito
                 </button>
               ) : (
-                <div className="mt-5 w-full py-3 bg-[#22242C] text-[#6B7280] font-semibold rounded-xl text-center text-sm">
+                <div className="mt-5 w-full py-3 bg-[#1C1800] text-[#6B7280] font-semibold rounded-xl text-center text-sm">
                   No disponible
                 </div>
               )}

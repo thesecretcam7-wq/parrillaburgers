@@ -127,9 +127,9 @@ export default function MenuContent({
 
         {/* Banner barra libre */}
         {barraActiva && localAbierto && (
-          <div className="mt-3 bg-[#D4A017] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
+          <div className="mt-3 border-2 border-[#D4A017]/60 rounded-2xl px-4 py-3 flex items-center gap-2 mb-4" style={{ background: "linear-gradient(135deg, #1A1200 0%, #2A1E00 100%)" }}>
             <span className="text-xl">{barraEmoji}</span>
-            <span className="text-[#111217] font-semibold text-xs">{barraTexto}</span>
+            <span className="text-[#D4A017] font-semibold text-xs">{barraTexto}</span>
           </div>
         )}
 
@@ -147,13 +147,13 @@ export default function MenuContent({
                 <button
                   key={item.id}
                   onClick={() => { setActiveCategory(item.category_id); setHighlightItemId(item.id); }}
-                  className="flex-none w-36 bg-[#1A1B21] border border-[#2E3038] rounded-2xl overflow-hidden text-left hover:border-[#D4A017]/50 active:scale-[0.97] transition-all"
+                  className="flex-none w-36 bg-[#16130A] border border-[#2A2210] rounded-2xl overflow-hidden text-left hover:border-[#D4A017]/50 active:scale-[0.97] transition-all"
                 >
                   {item.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={item.image_url} alt={item.name} className="w-full h-24 object-cover" />
                   ) : (
-                    <div className="w-full h-24 bg-[#22242C] flex items-center justify-center">
+                    <div className="w-full h-24 bg-[#1C1800] flex items-center justify-center">
                       {(() => {
                         const cat = categories.find((c) => c.id === item.category_id);
                         return cat ? <CategoryIcon cat={cat} size={40} /> : <BrandEmoji name="burger" size={40} />;
@@ -179,7 +179,7 @@ export default function MenuContent({
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-2xl px-5 py-4 flex items-center gap-4 hover:border-[#D4A017]/50 active:scale-[0.98] transition-all text-left"
+                className="w-full bg-[#16130A] border border-[#2A2210] rounded-2xl px-5 py-4 flex items-center gap-4 hover:border-[#D4A017]/50 active:scale-[0.98] transition-all text-left"
               >
                 <CategoryIcon cat={cat} size={48} />
                 <div className="flex-1">
@@ -204,7 +204,7 @@ export default function MenuContent({
       <div className="flex items-center gap-3 mt-3 mb-4">
         <button
           onClick={() => setActiveCategory(null)}
-          className="w-9 h-9 bg-[#22242C] rounded-full flex items-center justify-center shrink-0 hover:bg-[#2E3038] transition-colors"
+          className="w-9 h-9 bg-[#16130A] border border-[#2A2210] rounded-full flex items-center justify-center shrink-0 hover:border-[#D4A017]/40 transition-colors"
         >
           <ArrowLeft size={18} className="text-white" />
         </button>
@@ -251,7 +251,7 @@ function SearchBar({ value, onChange }: { value: string; onChange: (v: string) =
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Buscar producto..."
-        className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-xl pl-10 pr-10 py-2.5 text-white text-sm placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] transition-colors"
+        className="w-full bg-[#16130A] border border-[#2A2210] rounded-xl pl-10 pr-10 py-2.5 text-white text-sm placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] transition-colors"
       />
       {value && (
         <button
