@@ -87,9 +87,9 @@ export default function Navbar() {
                 src="/logo-real.png"
                 alt="ParillaBurgers"
                 width={44}
-                height={38}
+                height={44}
                 priority
-                className="brightness-0 invert"
+                className="w-10 h-10 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
               />
               <div className="flex flex-col leading-none">
                 <span className="font-black text-white text-sm leading-tight">
