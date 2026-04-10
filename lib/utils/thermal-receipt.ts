@@ -115,6 +115,32 @@ export function generateThermalReceiptHTML(order: Order): string {
       flex-shrink: 0;
     }
 
+    .item-price {
+      font-size: 10px;
+      text-align: right;
+      margin-top: 1mm;
+      color: #333;
+    }
+
+    .totals {
+      margin: 2mm 0 0 0;
+      font-size: 10px;
+    }
+
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5mm 0;
+    }
+
+    .totals-row.total {
+      font-size: 13px;
+      font-weight: bold;
+      border-top: 2px solid black;
+      margin-top: 1mm;
+      padding-top: 1.5mm;
+    }
+
     .item-options {
       font-size: 10px;
       margin: 1mm 0 0 2mm;
@@ -202,6 +228,10 @@ export function generateThermalReceiptHTML(order: Order): string {
       html += `</div>`;
     }
 
+    // Precio
+    const lineTotal = item.unit_price * item.quantity;
+    html += `<div class="item-price">${item.quantity} x $${item.unit_price.toLocaleString("es-CO")} = $${lineTotal.toLocaleString("es-CO")}</div>`;
+
     html += `</div>`;
   });
 
@@ -209,6 +239,24 @@ export function generateThermalReceiptHTML(order: Order): string {
   </div>
 
   <div class="divider">${divider}</div>
+
+  <div class="totals">
+    <div class="totals-row">
+      <span>Subtotal</span>
+      <span>$${order.subtotal.toLocaleString("es-CO")}</span>
+    </div>
+    ${order.delivery_fee > 0 ? `
+    <div class="totals-row">
+      <span>Domicilio</span>
+      <span>$${order.delivery_fee.toLocaleString("es-CO")}</span>
+    </div>` : ''}
+    <div class="totals-row total">
+      <span>TOTAL</span>
+      <span>$${order.total.toLocaleString("es-CO")}</span>
+    </div>
+  </div>
+
+  <div class="divider" style="margin-top:2mm;">${divider}</div>
 `;
 
   // Notas — separar nota del cliente del cambio [CAMBIO: ...]
