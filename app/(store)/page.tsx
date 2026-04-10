@@ -86,14 +86,38 @@ export default async function Home() {
           <div className="w-80 h-80 rounded-full bg-[#C47800]/8 blur-3xl" />
         </div>
         <div className="relative py-10 px-6 text-center">
-          <Image
-            src="/logo-real.png"
-            alt="ParillaBurgers"
-            width={260}
-            height={222}
-            priority
-            className="w-auto h-52 mx-auto drop-shadow-[0_8px_24px_rgba(212,160,23,0.25)]"
-          />
+          <div className="relative mx-auto w-fit">
+            {/* Capa metálica dorada encima del logo — blend overlay */}
+            <div
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,230,120,0.22) 0%, rgba(200,140,20,0.12) 25%, rgba(80,50,0,0.08) 50%, rgba(180,120,20,0.14) 75%, rgba(255,220,100,0.2) 100%)",
+                mixBlendMode: "overlay",
+              }}
+            />
+            <Image
+              src="/logo-real.png"
+              alt="ParillaBurgers"
+              width={260}
+              height={222}
+              priority
+              className="relative w-auto h-52 mx-auto"
+              style={{
+                filter: [
+                  "contrast(1.35)",
+                  "brightness(1.08)",
+                  "saturate(1.3)",
+                  /* sombra profunda — da el relieve */
+                  "drop-shadow(0px 8px 20px rgba(0,0,0,0.95))",
+                  "drop-shadow(0px 3px 6px rgba(0,0,0,0.85))",
+                  /* luz desde arriba-izquierda — resalte metálico */
+                  "drop-shadow(-2px -2px 3px rgba(255,200,80,0.35))",
+                  /* sombra lateral derecha — profundidad 3D */
+                  "drop-shadow(3px 3px 6px rgba(0,0,0,0.7))",
+                ].join(" "),
+              }}
+            />
+          </div>
           <p className="font-[family-name:var(--font-dancing)] text-[#D4A017] text-2xl mt-3 drop-shadow-[0_2px_8px_rgba(212,160,23,0.4)]">
             ¡ A la parrilla sabe mejor !
           </p>
