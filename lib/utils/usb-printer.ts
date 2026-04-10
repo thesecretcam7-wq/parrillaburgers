@@ -94,53 +94,54 @@ function generateESCPOS(order: Order): Uint8Array {
   // Divisor
   encoder.align("left").text("================================").newline();
 
+  const fmt = (n: number) => `$${n.toLocaleString("es-CO")}`;
+
   // Productos
   const items = order.items || [];
   items.forEach((item) => {
-    encoder
-      .bold(true)
-      .text(item.menu_item_name)
-      .bold(false)
-      .newline();
+    encoder.bold(true).text(item.menu_item_name).bold(false).newline();
+    const lineTotal = item.unit_price * item.quantity;
+    encoder.text(`${item.quantity} x ${fmt(item.unit_price)} = ${fmt(lineTotal)}`).newline();
 
-    // Cantidad
-    encoder.text(`Cantidad: ${item.quantity}`).newline();
-
-    // Opciones
     if (item.barra_libre_selected && item.barra_libre_selected.length > 0) {
       item.barra_libre_selected.forEach((opt: string) => {
-        encoder.text(`  • ${opt}`).newline();
+        encoder.text(`  * ${opt}`).newline();
       });
     }
-
     encoder.newline();
   });
 
-  // Notas — separar nota del cliente del cambio
-  if (order.notes) {
-    const cambioMatch = order.notes.match(/\[CAMBIO:\s*([^\]]+)\]/);
-    const cleanNotes = order.notes.replace(/\[CAMBIO:[^\]]*\]/g, "").trim();
+  // Totales
+  encoder.text("================================").newline();
+  encoder.align("left");
+  encoder.text(`Subtotal:  ${fmt(order.subtotal)}`).newline();
+  if (order.delivery_fee > 0) {
+    encoder.text(`Domicilio: ${fmt(order.delivery_fee)}`).newline();
+  }
+  encoder.bold(true).text(`TOTAL:     ${fmt(order.total)}`).bold(false).newline();
+  encoder.text("================================").newline();
 
-    encoder.text("================================").newline();
+  // Notas y pago contra entrega
+  const cambioMatch = order.notes?.match(/\[CAMBIO:\s*\$?([\d.,]+)\]/);
+  const cleanNotes = order.notes?.replace(/\[CAMBIO:[^\]]*\]/g, "").trim() || "";
+  const isContraEntrega = !order.wompi_transaction_id && !order.mesa_number;
 
-    if (cleanNotes) {
-      encoder.bold(true).text("NOTAS:").bold(false).newline();
-      encoder.text(cleanNotes).newline();
-    }
+  if (cleanNotes) {
+    encoder.bold(true).text("NOTAS:").bold(false).newline();
+    encoder.text(cleanNotes).newline();
+    encoder.newline();
+  }
 
-    if (cambioMatch) {
-      encoder.newline();
-      encoder.bold(true).text("CAMBIO A ENTREGAR:").bold(false).newline();
-      encoder.bold(true).text(cambioMatch[1].trim()).bold(false).newline();
-    }
-
+  if (isContraEntrega && cambioMatch) {
+    const cambioNum = Number(cambioMatch[1].replace(/\./g, "").replace(",", "."));
+    const pagaCon = order.total + cambioNum;
+    encoder.bold(true).text(`PAGA CON:  ${fmt(pagaCon)}`).bold(false).newline();
+    encoder.bold(true).text(`CAMBIO:    ${fmt(cambioNum)}`).bold(false).newline();
     encoder.newline();
   }
 
   // Footer
   encoder
-    .text("================================")
-    .newline()
     .align("center")
     .text(`Pedido #${order.order_number}`)
     .newline()
