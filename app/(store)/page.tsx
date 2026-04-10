@@ -102,18 +102,16 @@ export default async function Home() {
               height={300}
               priority
               className="relative w-auto h-64 mx-auto"
-              style={{ transform: "scale(1.45)", transformOrigin: "center center" }}
               style={{
+                transform: "scale(1.45)",
+                transformOrigin: "center center",
                 filter: [
                   "contrast(1.35)",
                   "brightness(1.08)",
                   "saturate(1.3)",
-                  /* sombra profunda — da el relieve */
                   "drop-shadow(0px 8px 20px rgba(0,0,0,0.95))",
                   "drop-shadow(0px 3px 6px rgba(0,0,0,0.85))",
-                  /* luz desde arriba-izquierda — resalte metálico */
                   "drop-shadow(-2px -2px 3px rgba(255,200,80,0.35))",
-                  /* sombra lateral derecha — profundidad 3D */
                   "drop-shadow(3px 3px 6px rgba(0,0,0,0.7))",
                 ].join(" "),
               }}

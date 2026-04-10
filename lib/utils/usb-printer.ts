@@ -1,5 +1,3 @@
-// @ts-ignore - esc-pos-encoder no tiene tipos TypeScript
-import EscPosEncoder from "esc-pos-encoder";
 import { Order } from "@/lib/types";
 import { generateThermalReceiptHTML } from "./thermal-receipt";
 
@@ -62,7 +60,14 @@ export async function selectUSBPrinter(): Promise<boolean> {
 /**
  * Genera los comandos ESC/POS para el recibo
  */
-function generateESCPOS(order: Order): Uint8Array {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadEncoder(): Promise<any> {
+  const mod = await import("esc-pos-encoder");
+  return mod.default ?? mod;
+}
+
+async function generateESCPOS(order: Order): Promise<Uint8Array> {
+  const EscPosEncoder = await loadEncoder();
   const encoder = new EscPosEncoder();
 
   // Encabezado
@@ -212,7 +217,7 @@ export async function printUSB(order: Order): Promise<boolean> {
     } catch { /* usar endpoint 1 por defecto */ }
 
     // Generar y enviar comandos ESC/POS
-    const data = generateESCPOS(order);
+    const data = await generateESCPOS(order);
     await device.transferOut(endpointNumber, data);
 
     // Liberar interfaz y cerrar
