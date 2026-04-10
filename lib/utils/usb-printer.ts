@@ -79,17 +79,29 @@ function generateESCPOS(order: Order): Uint8Array {
     .bold(false)
     .newline();
 
-  // Tipo
+  // Tipo de pedido
   encoder.align("center");
   if (order.mesa_number) {
     encoder.text(`MESA ${order.mesa_number}`);
-  } else {
+  } else if (order.delivery_address) {
     encoder.text("DOMICILIO");
+  } else {
+    encoder.text("PARA RECOGER");
   }
+  encoder.newline();
+
+  // Forma de pago
+  const tipoPago = order.wompi_transaction_id
+    ? "PAGADO EN LINEA"
+    : order.delivery_address
+      ? "CONTRA ENTREGA"
+      : "PAGO EN TIENDA";
+  encoder.text(`[${tipoPago}]`).newline();
+
   if (!order.mesa_number && order.customer_name) {
-    encoder.newline().text(order.customer_name);
+    encoder.text(order.customer_name).newline();
   }
-  encoder.newline().newline();
+  encoder.newline();
 
   // Divisor
   encoder.align("left").text("================================").newline();

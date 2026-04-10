@@ -196,10 +196,18 @@ export function generateThermalReceiptHTML(order: Order): string {
   <div class="order-number">PEDIDO #${order.order_number}</div>
 
   <div class="tipo">
-    ${order.mesa_number ? `🪑 MESA ${order.mesa_number}` : '🏠 DOMICILIO'}
+    ${order.mesa_number
+      ? `🪑 MESA ${order.mesa_number}`
+      : order.delivery_address
+        ? '🏠 DOMICILIO'
+        : '🛍️ PARA RECOGER'}
   </div>
 
-  ${order.mesa_number ? '' : `<div class="tipo" style="font-size: 11px; font-weight: normal; margin-top: 1mm;">${order.customer_name}</div>`}
+  <div class="tipo" style="font-size:10px; font-weight:normal; margin-top:0.5mm; border:1px solid black; display:inline-block; padding:0.5mm 2mm; border-radius:2mm;">
+    ${order.wompi_transaction_id ? '💳 PAGADO EN LÍNEA' : order.delivery_address ? '💵 CONTRA ENTREGA' : '💵 PAGO EN TIENDA'}
+  </div>
+
+  ${!order.mesa_number ? `<div class="tipo" style="font-size: 11px; font-weight: normal; margin-top: 1mm;">${order.customer_name}</div>` : ''}
 
   ${!order.mesa_number && order.delivery_address ? `<div class="address">${wrapText(order.delivery_address).join("<br>")}</div>` : ''}
 
