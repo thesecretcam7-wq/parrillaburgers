@@ -1,256 +1,166 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Plus, Trash2, Edit2, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { Plus, Trash2, Save } from "lucide-react";
 
-type Offer = {
+type SpecialOffer = {
   id: string;
   title: string;
   emoji: string;
   description: string;
-  sort_order: number;
   active: boolean;
 };
 
 export default function OfertasPage() {
-  const [offers, setOffers] = useState<Offer[]>([]);
+  const [offers, setOffers] = useState<SpecialOffer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newOffer, setNewOffer] = useState({ title: "", emoji: "🎯", description: "", active: true });
-  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState<SpecialOffer | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Load offers
+  const supabase = createClient();
+
   useEffect(() => {
-    const loadOffers = async () => {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("specials_offers")
-          .select("*")
-          .order("sort_order");
-
-        if (error) throw error;
-        setOffers(data || []);
-      } catch (error) {
-        console.error("Error loading offers:", error);
-        toast.error("Error al cargar ofertas");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadOffers();
+    fetchOffers();
   }, []);
 
-  // Add new offer
-  const handleAddOffer = async () => {
-    if (!newOffer.title || !newOffer.emoji || !newOffer.description) {
-      toast.error("Completa todos los campos");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("specials_offers")
-        .insert({
-          title: newOffer.title,
-          emoji: newOffer.emoji,
-          description: newOffer.description,
-          active: newOffer.active,
-          sort_order: offers.length,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setOffers([...offers, data as Offer]);
-      setNewOffer({ title: "", emoji: "🎯", description: "", active: true });
-      toast.success("Oferta agregada");
-    } catch (error) {
-      console.error("Error adding offer:", error);
-      toast.error("Error al agregar oferta");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Update offer
-  const handleUpdateOffer = async (id: string, field: string, value: any) => {
-    try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("specials_offers")
-        .update({ [field]: value })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setOffers(offers.map((o) => (o.id === id ? { ...o, [field]: value } : o)));
-      toast.success("Oferta actualizada");
-    } catch (error) {
-      console.error("Error updating offer:", error);
-      toast.error("Error al actualizar oferta");
-    }
-  };
-
-  // Delete offer
-  const handleDeleteOffer = async (id: string) => {
-    if (!window.confirm("¿Eliminar esta oferta?")) return;
-
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.from("specials_offers").delete().eq("id", id);
-
-      if (error) throw error;
-
-      setOffers(offers.filter((o) => o.id !== id));
-      toast.success("Oferta eliminada");
-    } catch (error) {
-      console.error("Error deleting offer:", error);
-      toast.error("Error al eliminar oferta");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A017]" />
-      </div>
-    );
+  async function fetchOffers() {
+    setLoading(true);
+    const { data } = await supabase.from("specials_offers").select("*").order("sort_order");
+    setOffers((data ?? []) as SpecialOffer[]);
+    setLoading(false);
   }
+
+  async function saveOffer(formData: any) {
+    try {
+      if (editing) {
+        await supabase.from("specials_offers").update(formData).eq("id", editing.id);
+        toast.success("Actualizada");
+      } else {
+        await supabase.from("specials_offers").insert([formData]);
+        toast.success("Creada");
+      }
+      setEditing(null);
+      setIsOpen(false);
+      fetchOffers();
+    } catch (err) {
+      toast.error("Error");
+    }
+  }
+
+  async function deleteOffer(id: string) {
+    if (!confirm("Eliminar?")) return;
+    try {
+      await supabase.from("specials_offers").delete().eq("id", id);
+      toast.success("Eliminada");
+      fetchOffers();
+    } catch {
+      toast.error("Error");
+    }
+  }
+
+  async function toggleActive(id: string, active: boolean) {
+    try {
+      await supabase.from("specials_offers").update({ active: !active }).eq("id", id);
+      fetchOffers();
+    } catch {
+      toast.error("Error");
+    }
+  }
+
+  if (loading) return <div className="flex justify-center items-center h-96"><div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-white text-2xl font-black mb-1">Ofertas Especiales</h1>
-        <p className="text-[#9CA3AF] text-sm">
-          Personaliza las ofertas que se muestran en la página principal
-        </p>
-      </div>
-
-      {/* Add new offer */}
-      <div className="bg-[#22242C] border border-[#2E3038] rounded-xl p-5 space-y-4">
-        <h2 className="text-white font-bold flex items-center gap-2">
-          <Plus size={18} className="text-[#D4A017]" />
-          Nueva Oferta
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Título</label>
-            <input
-              type="text"
-              placeholder="Ej: Combo Hamburguesero"
-              value={newOffer.title}
-              onChange={(e) => setNewOffer({ ...newOffer, title: e.target.value })}
-              className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Emoji</label>
-            <input
-              type="text"
-              placeholder="🍔"
-              maxLength={2}
-              value={newOffer.emoji}
-              onChange={(e) => setNewOffer({ ...newOffer, emoji: e.target.value })}
-              className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm"
-            />
-          </div>
-
-          <div className="sm:col-span-2">
-            <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Descripción</label>
-            <input
-              type="text"
-              placeholder="Ej: Hasta -30%"
-              value={newOffer.description}
-              onChange={(e) => setNewOffer({ ...newOffer, description: e.target.value })}
-              className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm"
-            />
-          </div>
-        </div>
-
-        <button
-          onClick={handleAddOffer}
-          disabled={saving}
-          className="w-full bg-[#D4A017] hover:bg-[#E8B92A] disabled:opacity-50 text-[#0F1117] font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          <Plus size={16} />
-          Agregar Oferta
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-black text-white">Ofertas Especiales</h1>
+        <button onClick={() => { setEditing(null); setIsOpen(true); }} className="flex gap-2 items-center bg-[#D4A017] text-[#0F1117] font-bold px-6 py-3 rounded-xl">
+          <Plus size={18} /> Nueva
         </button>
       </div>
 
-      {/* Existing offers */}
-      <div className="space-y-3">
-        <h2 className="text-white font-bold">Ofertas Activas ({offers.length})</h2>
+      {isOpen && <OfertaForm offer={editing} onSave={saveOffer} onClose={() => { setIsOpen(false); setEditing(null); }} />}
 
-        {offers.length === 0 ? (
-          <div className="bg-[#22242C] border border-[#2E3038] rounded-xl p-6 text-center">
-            <p className="text-[#9CA3AF]">No hay ofertas. Crea una nueva para comenzar.</p>
-          </div>
-        ) : (
-          offers.map((offer, idx) => (
-            <div key={offer.id} className="bg-[#22242C] border border-[#2E3038] rounded-xl p-4 space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Título</label>
-                  <input
-                    type="text"
-                    value={offer.title}
-                    onChange={(e) => handleUpdateOffer(offer.id, "title", e.target.value)}
-                    className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm"
-                  />
+      {offers.length === 0 ? (
+        <div className="bg-[#1A1B21] rounded-2xl p-8 text-center">
+          <p className="text-[#6B7280] mb-4">Sin ofertas</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {offers.map((offer) => (
+            <div key={offer.id} className="bg-[#1A1B21] rounded-2xl p-4 border border-[#2E3038]">
+              <div className="flex justify-between">
+                <div className="flex-1">
+                  <div className="flex gap-2 mb-2">
+                    <span className="text-3xl">{offer.emoji}</span>
+                    <div>
+                      <p className="text-white font-bold text-sm">{offer.title}</p>
+                      <p className="text-[#6B7280] text-xs">{offer.description}</p>
+                    </div>
+                  </div>
+                  <label className="flex gap-2 items-center cursor-pointer mt-3">
+                    <input type="checkbox" checked={offer.active} onChange={() => toggleActive(offer.id, offer.active)} className="w-4 h-4 accent-[#D4A017]" />
+                    <span className="text-xs text-[#6B7280]">{offer.active ? "Activa" : "Inactiva"}</span>
+                  </label>
                 </div>
-
-                <div>
-                  <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Emoji</label>
-                  <input
-                    type="text"
-                    maxLength={2}
-                    value={offer.emoji}
-                    onChange={(e) => handleUpdateOffer(offer.id, "emoji", e.target.value)}
-                    className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm"
-                  />
+                <div className="flex gap-2">
+                  <button onClick={() => { setEditing(offer); setIsOpen(true); }} className="p-2 bg-[#2E3038] rounded-lg text-[#D4A017]">
+                    <Edit2 size={16} />
+                  </button>
+                  <button onClick={() => deleteOffer(offer.id)} className="p-2 bg-red-500/10 rounded-lg text-red-400">
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-
-                <div className="sm:col-span-2">
-                  <label className="text-[#9CA3AF] text-xs mb-1.5 block font-medium">Descripción</label>
-                  <input
-                    type="text"
-                    value={offer.description}
-                    onChange={(e) => handleUpdateOffer(offer.id, "description", e.target.value)}
-                    className="w-full bg-[#1A1B21] border border-[#2E3038] rounded-lg px-4 py-2 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 pt-2 border-t border-[#2E3038]">
-                <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={offer.active}
-                    onChange={(e) => handleUpdateOffer(offer.id, "active", e.target.checked)}
-                    className="w-4 h-4 rounded bg-[#1A1B21] border border-[#D4A017] cursor-pointer"
-                  />
-                  <span className="text-[#9CA3AF] text-sm">Activa</span>
-                </label>
-
-                <button
-                  onClick={() => handleDeleteOffer(offer.id)}
-                  className="bg-red-600/20 hover:bg-red-600/30 text-red-400 p-2 rounded-lg transition-colors"
-                  title="Eliminar oferta"
-                >
-                  <Trash2 size={16} />
-                </button>
               </div>
             </div>
-          ))
-        )}
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OfertaForm({ offer, onSave, onClose }: any) {
+  const [title, setTitle] = useState(offer?.title ?? "");
+  const [emoji, setEmoji] = useState(offer?.emoji ?? "");
+  const [description, setDescription] = useState(offer?.description ?? "");
+  const [active, setActive] = useState(offer?.active ?? true);
+
+  return (
+    <div className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center p-4">
+      <div className="bg-[#1A1B21] rounded-2xl p-6 w-full max-w-md border border-[#2E3038]">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-white font-bold">{offer ? "Editar" : "Nueva Oferta"}</h2>
+          <button onClick={onClose} className="text-[#6B7280]"><X size={20} /></button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs text-[#6B7280] uppercase block mb-2">Título</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Combo Hamburguesero" className="w-full bg-[#22242C] text-white px-3 py-2 rounded-lg border border-[#2E3038] focus:border-[#D4A017] outline-none text-sm" />
+          </div>
+
+          <div>
+            <label className="text-xs text-[#6B7280] uppercase block mb-2">Emoji</label>
+            <input type="text" value={emoji} onChange={(e) => setEmoji(e.target.value)} placeholder="🍔" maxLength={2} className="w-full bg-[#22242C] text-white px-3 py-2 rounded-lg border border-[#2E3038] focus:border-[#D4A017] outline-none text-sm" />
+          </div>
+
+          <div>
+            <label className="text-xs text-[#6B7280] uppercase block mb-2">Descripción</label>
+            <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Hasta -30%" className="w-full bg-[#22242C] text-white px-3 py-2 rounded-lg border border-[#2E3038] focus:border-[#D4A017] outline-none text-sm" />
+          </div>
+
+          <label className="flex gap-2 items-center cursor-pointer">
+            <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="w-4 h-4 accent-[#D4A017]" />
+            <span className="text-sm text-[#6B7280]">Activa en home</span>
+          </label>
+
+          <div className="flex gap-3 pt-4">
+            <button onClick={onClose} className="flex-1 bg-[#2E3038] text-white font-bold py-2 rounded-lg">Cancelar</button>
+            <button onClick={() => onSave({ title, emoji, description, active })} className="flex-1 bg-[#D4A017] text-[#0F1117] font-bold py-2 rounded-lg">{offer ? "Actualizar" : "Crear"}</button>
+          </div>
+        </div>
       </div>
     </div>
   );

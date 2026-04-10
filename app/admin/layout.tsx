@@ -18,6 +18,7 @@ const navLinks = [
   { href: "/admin/zonas",          label: "Zonas",          icon: Tag },
   { href: "/admin/mesas",          label: "Mesas QR",       icon: QrCode },
   { href: "/admin/cupones",        label: "Cupones",        icon: Ticket },
+  { href: "/admin/ofertas",        label: "Ofertas",        icon: BarChart2 },
   { href: "/admin/resenas",        label: "Reseñas",        icon: Star },
   { href: "/admin/banners",        label: "Banners",        icon: Image },
   { href: "/admin/configuracion",  label: "Configuración",  icon: Settings },
