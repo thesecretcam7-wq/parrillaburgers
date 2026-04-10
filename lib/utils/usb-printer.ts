@@ -178,17 +178,20 @@ export async function printWithFallback(order: Order): Promise<void> {
 
   if (!success) {
     console.log("Usando fallback a window.print()");
-    // Fallback: generar HTML y abrir en ventana nueva
     const html = generateThermalReceiptHTML(order);
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open("", "_blank", "width=300,height=600");
 
     if (printWindow) {
       printWindow.document.write(html);
       printWindow.document.close();
+      // Cerrar ventana automáticamente después de imprimir
+      printWindow.onafterprint = () => {
+        printWindow.close();
+      };
       printWindow.onload = () => {
         setTimeout(() => {
           printWindow.print();
-        }, 100);
+        }, 250);
       };
     }
   }
@@ -217,76 +220,82 @@ function generateThermalReceiptHTML(order: Order): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pedido ${order.order_number}</title>
   <style>
+    @page {
+      size: 58mm auto;
+      margin: 0;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      line-height: 1.2;
+    html, body {
       width: 58mm;
-      padding: 3mm;
       background: white;
       color: black;
     }
+    body {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.3;
+      padding: 2mm 3mm 4mm 3mm;
+    }
     .order-number {
-      font-size: 24px;
+      font-size: 18px;
       font-weight: bold;
       text-align: center;
-      margin: 5mm 0;
+      margin: 3mm 0;
       border: 2px solid black;
-      padding: 3mm;
+      padding: 2mm;
       letter-spacing: 1px;
     }
     .tipo {
-      font-size: 12px;
+      font-size: 11px;
       text-align: center;
-      margin: 2mm 0;
+      margin: 1.5mm 0;
       font-weight: bold;
     }
     .divider {
       text-align: center;
       margin: 2mm 0;
-      letter-spacing: 0.5px;
-      font-weight: bold;
+      font-size: 10px;
     }
-    .items-container { margin: 3mm 0; }
+    .items-container { margin: 2mm 0; }
     .item {
-      margin: 2mm 0;
-      padding: 2mm 0;
+      margin: 1.5mm 0;
+      padding: 1.5mm 0;
       border-bottom: 1px dashed black;
     }
     .item:last-child { border-bottom: none; }
     .item-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 1mm;
     }
     .item-name {
       font-weight: bold;
-      font-size: 13px;
+      font-size: 11px;
       flex: 1;
+      line-height: 1.3;
     }
     .item-qty {
-      font-size: 16px;
+      font-size: 13px;
       font-weight: bold;
-      margin-left: 3mm;
-      padding: 1mm 2mm;
+      margin-left: 2mm;
+      padding: 0.5mm 2mm;
       border: 1px solid black;
       text-align: center;
-      min-width: 18mm;
+      min-width: 12mm;
+      flex-shrink: 0;
     }
     .item-options {
-      font-size: 11px;
+      font-size: 10px;
       margin: 1mm 0 0 2mm;
       line-height: 1.3;
     }
     .option { margin: 0.5mm 0; }
     .notes {
-      margin: 3mm 0 0 0;
+      margin: 2mm 0 0 0;
       padding: 2mm;
-      background-color: #ffffcc;
       border: 1px solid black;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
     }
     .notes-title {
@@ -296,15 +305,15 @@ function generateThermalReceiptHTML(order: Order): string {
     .notes-text { color: #cc0000; }
     .footer {
       text-align: center;
-      font-size: 10px;
+      font-size: 9px;
       margin-top: 3mm;
       color: #666;
     }
     @media print {
-      body {
+      html, body {
         width: 58mm;
         margin: 0;
-        padding: 3mm;
+        padding: 2mm 3mm 4mm 3mm;
         background: white;
       }
     }
