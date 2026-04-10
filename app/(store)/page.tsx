@@ -119,7 +119,7 @@ export default async function Home() {
             />
           </div>
           {/* Slogan */}
-          <p className="mt-1 text-[#D4A017] text-2xl" style={{ fontFamily: "var(--font-dancing)" }}>
+          <p className="-mt-16 text-[#D4A017] text-2xl" style={{ fontFamily: "var(--font-dancing)" }}>
             ¡A la parrilla sabe mejor!
           </p>
           {/* Horario badge */}
