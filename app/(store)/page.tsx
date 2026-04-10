@@ -11,7 +11,15 @@ const HORARIO_CIERRE = 23.99; // 11:59pm
 
 function isOpenBySchedule(): boolean {
   const now = new Date();
-  const currentHour = now.getHours() + now.getMinutes() / 60;
+  const parts = new Intl.DateTimeFormat("es-CO", {
+    timeZone: "America/Bogota",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(now);
+  const hour = parseInt(parts.find((p) => p.type === "hour")?.value ?? "0");
+  const minute = parseInt(parts.find((p) => p.type === "minute")?.value ?? "0");
+  const currentHour = hour + minute / 60;
   return currentHour >= HORARIO_APERTURA && currentHour < HORARIO_CIERRE;
 }
 
