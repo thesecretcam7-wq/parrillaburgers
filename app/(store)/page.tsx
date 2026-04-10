@@ -86,7 +86,7 @@ export default async function Home() {
           <div className="w-80 h-80 rounded-full bg-[#C47800]/8 blur-3xl" />
         </div>
         <div className="relative py-6 px-2 text-center">
-          <div className="relative mx-auto w-fit">
+          <div className="w-64 mx-auto relative">
             {/* Capa metálica dorada encima del logo — blend overlay */}
             <div
               className="absolute inset-0 z-10 pointer-events-none"
