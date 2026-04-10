@@ -49,7 +49,7 @@ export default function CartPage() {
 
         {/* Mesa badge */}
         {mesaNum && (
-          <div className="bg-[#2A2414] border border-[#D4A017]/40 rounded-xl px-4 py-2.5 flex items-center gap-2">
+          <div className="bg-[#2A1E00] border border-[#D4A017]/40 rounded-xl px-4 py-2.5 flex items-center gap-2">
             <span className="text-lg">🪑</span>
             <p className="text-[#D4A017] font-bold text-sm">Mesa {mesaNum}</p>
           </div>
@@ -60,9 +60,9 @@ export default function CartPage() {
           {items.map(({ item, quantity, barra_libre_selected }) => (
             <div
               key={item.id}
-              className="bg-[#1A1B21] rounded-2xl p-4 flex items-center gap-3 border border-[#2E3038]"
+              className="bg-[#16130A] rounded-2xl p-4 flex items-center gap-3 border border-[#2A2210]"
             >
-              <div className="w-14 h-14 rounded-xl bg-[#22242C] flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-14 h-14 rounded-xl bg-[#1C1800] flex items-center justify-center shrink-0 overflow-hidden">
                 {item.image_url ? (
                   <Image src={item.image_url} alt={item.name} width={56} height={56} className="object-cover w-full h-full rounded-xl" />
                 ) : (
@@ -83,7 +83,7 @@ export default function CartPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => updateQuantity(item.id, quantity - 1)}
-                  className="w-7 h-7 rounded-full border border-[#2E3038] text-[#9CA3AF] flex items-center justify-center"
+                  className="w-7 h-7 rounded-full border border-[#2A2210] text-[#9CA3AF] flex items-center justify-center"
                 >
                   <Minus size={13} />
                 </button>
@@ -119,7 +119,7 @@ export default function CartPage() {
         </button>
 
         {/* Summary card */}
-        <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+        <div className="bg-[#16130A] rounded-2xl p-5 border border-[#2A2210]">
           <h2 className="text-white font-bold mb-4">Resumen del pedido</h2>
 
           <div className="space-y-2.5 mb-5 text-sm">
@@ -138,14 +138,14 @@ export default function CartPage() {
                 <span>${delivery.toLocaleString("es-CO")}</span>
               </div>
             )}
-            <div className="border-t border-[#2E3038] pt-2.5 flex justify-between font-bold text-base">
+            <div className="border-t border-[#2A2210] pt-2.5 flex justify-between font-bold text-base">
               <span className="text-white">Total</span>
               <span className="text-[#D4A017]">${grandTotal.toLocaleString("es-CO")}</span>
             </div>
           </div>
 
           {/* Points strip */}
-          <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2 mb-4">
+          <div className="bg-[#2A1E00] rounded-xl px-4 py-2.5 flex items-center gap-2 mb-4">
             <BrandEmoji name="burger" size={28} />
             <p className="text-[#E8B830] text-xs font-medium">
               Ganarás <strong>{Math.floor((mesaNum ? subtotal : grandTotal) / 1000)} puntos</strong> con este pedido

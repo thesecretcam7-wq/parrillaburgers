@@ -63,7 +63,7 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1A1B21] flex items-center justify-center pt-16">
+      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center pt-16">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4A017] mx-auto mb-4" />
           <p className="text-white">Cargando perfil...</p>
@@ -74,7 +74,7 @@ export default function PerfilPage() {
 
   if (!customer) {
     return (
-      <div className="min-h-screen bg-[#1A1B21] flex items-center justify-center pt-16">
+      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center pt-16">
         <div className="text-center px-6">
           <User size={48} className="text-[#D4A017] mx-auto mb-4 opacity-50" />
           <h2 className="text-white text-lg font-bold mb-2">Sin perfil</h2>
@@ -91,10 +91,10 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1A1B21] pt-20 pb-20 px-4">
+    <div className="min-h-screen bg-[#0F1117] pt-20 pb-20 px-4">
       <div className="max-w-[430px] mx-auto">
         {/* Profile Header */}
-        <div className="bg-[#22242C] rounded-2xl p-6 mb-6 border border-[#2E3038]">
+        <div className="bg-[#16130A] rounded-2xl p-6 mb-6 border border-[#2A2210]">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 bg-gradient-to-br from-[#D4A017] to-[#B8860B] rounded-full flex items-center justify-center">
               <User size={32} className="text-black" />
@@ -106,7 +106,7 @@ export default function PerfilPage() {
           </div>
 
           {/* Points Card */}
-          <div className="bg-[#1A1B21] rounded-lg p-4 border border-[#2E3038] flex items-center justify-between">
+          <div className="bg-[#0F1117] rounded-lg p-4 border border-[#2A2210] flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Gift size={24} className="text-[#D4A017]" />
               <div>
@@ -122,7 +122,7 @@ export default function PerfilPage() {
         </div>
 
         {/* Contact Information */}
-        <div className="bg-[#22242C] rounded-2xl p-6 mb-6 border border-[#2E3038]">
+        <div className="bg-[#16130A] rounded-2xl p-6 mb-6 border border-[#2A2210]">
           <h2 className="text-white text-lg font-bold mb-4">Información de Contacto</h2>
 
           <div className="space-y-4">
@@ -159,21 +159,21 @@ export default function PerfilPage() {
         <div className="space-y-3 mb-6">
           <button
             onClick={() => router.push("/mis-pedidos")}
-            className="w-full bg-[#22242C] hover:bg-[#2E3038] text-white py-3 rounded-lg font-semibold transition-colors border border-[#2E3038]"
+            className="w-full bg-[#16130A] hover:bg-[#1C1800] text-white py-3 rounded-xl font-semibold transition-colors border border-[#2A2210]"
           >
             Ver Mis Pedidos
           </button>
 
           <button
             onClick={() => router.push("/menu")}
-            className="w-full bg-[#D4A017] hover:bg-[#E8B92A] text-black py-3 rounded-lg font-semibold transition-colors"
+            className="w-full bg-[#D4A017] hover:bg-[#E8B92A] text-[#0F1117] py-3 rounded-xl font-bold transition-colors"
           >
             Continuar Comprando
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 py-3 rounded-lg font-semibold transition-colors border border-red-600/30 flex items-center justify-center gap-2"
+            className="w-full bg-red-900/20 hover:bg-red-900/30 text-red-400 py-3 rounded-xl font-semibold transition-colors border border-red-800/30 flex items-center justify-center gap-2"
           >
             <LogOut size={18} />
             Cerrar Sesión

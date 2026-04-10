@@ -242,7 +242,7 @@ function TrackingContent() {
         {/* Review form — solo si el pedido se marcó entregado mientras el cliente estaba en pantalla */}
         {showReview && (
           !reviewSent ? (
-            <div className="w-full max-w-xs bg-[#1A1B21] border border-[#2E3038] rounded-2xl p-5 mb-6 space-y-4">
+            <div className="w-full max-w-xs bg-[#16130A] border border-[#2A2210] rounded-2xl p-5 mb-6 space-y-4">
               <p className="text-white font-semibold text-sm text-center">¿Cómo fue tu experiencia?</p>
               <div className="flex justify-center gap-2">
                 {[1, 2, 3, 4, 5].map((s) => (
@@ -256,7 +256,7 @@ function TrackingContent() {
               </div>
               {reviewRating > 0 && (
                 <textarea
-                  className="w-full bg-[#22242C] border border-[#2E3038] rounded-xl px-3 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm resize-none h-20 transition-colors"
+                  className="w-full bg-[#1C1800] border border-[#2A2210] rounded-xl px-3 py-2.5 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] text-sm resize-none h-20 transition-colors"
                   placeholder="Cuéntanos más (opcional)..."
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
@@ -332,7 +332,7 @@ function TrackingContent() {
       <div className="max-w-lg mx-auto space-y-3">
 
         {/* Header */}
-        <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+        <div className="bg-[#16130A] rounded-2xl p-5 border border-[#2A2210]">
           <div className="flex justify-between items-center mb-1">
             <p className="text-[#9CA3AF] text-xs">Número de pedido</p>
             <p className="text-[#9CA3AF] text-xs">Total</p>
@@ -364,7 +364,7 @@ function TrackingContent() {
 
         {/* Tiempo estimado — solo en pedidos activos */}
         {deliveryTime && (
-          <div className="bg-[#2A2414] border border-[#D4A017]/20 rounded-2xl px-5 py-3 flex items-center gap-3">
+          <div className="bg-[#2A1E00] border border-[#D4A017]/30 rounded-2xl px-5 py-3 flex items-center gap-3">
             <Timer size={18} className="text-[#D4A017] shrink-0" />
             <div>
               <p className="text-[#E8B830] text-sm font-semibold">Tiempo estimado de entrega</p>
@@ -374,7 +374,7 @@ function TrackingContent() {
         )}
 
         {/* Status steps */}
-        <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+        <div className="bg-[#16130A] rounded-2xl p-5 border border-[#2A2210]">
           <h3 className="text-white font-bold text-sm mb-4">Estado del pedido</h3>
           <div className="space-y-3">
             {STATUS_STEPS.map((step) => {
@@ -386,7 +386,7 @@ function TrackingContent() {
                 <div
                   key={step.key}
                   className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                    isActive && !isCancelled ? "bg-[#2A2414] border border-[#D4A017]/30" : "bg-[#22242C]"
+                    isActive && !isCancelled ? "bg-[#2A1E00] border border-[#D4A017]/30" : "bg-[#1C1800]"
                   }`}
                 >
                   <div className={`shrink-0 rounded-full p-2 ${
@@ -410,7 +410,7 @@ function TrackingContent() {
         </div>
 
         {/* Items */}
-        <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+        <div className="bg-[#16130A] rounded-2xl p-5 border border-[#2A2210]">
           <h3 className="text-white font-bold text-sm mb-3">Productos</h3>
           <div className="space-y-2">
             {(order.items as any[])?.map((item, i) => (
@@ -425,7 +425,7 @@ function TrackingContent() {
         {/* New order CTA */}
         <Link
           href="/menu"
-          className="block w-full text-center bg-[#1A1B21] border border-[#2E3038] text-[#9CA3AF] hover:text-white hover:border-[#D4A017]/40 font-medium py-3 rounded-2xl text-sm transition-colors"
+          className="block w-full text-center bg-[#16130A] border border-[#2A2210] text-[#9CA3AF] hover:text-white hover:border-[#D4A017]/40 font-medium py-3 rounded-2xl text-sm transition-colors"
         >
           + Hacer otro pedido
         </Link>

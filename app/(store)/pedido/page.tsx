@@ -316,12 +316,12 @@ export default function OrderPage() {
     }
   };
 
-  const inputClass = "w-full bg-[#22242C] border border-[#2E3038] rounded-xl px-4 py-3 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] transition-colors text-sm";
+  const inputClass = "w-full bg-[#1C1800] border border-[#2A2210] rounded-xl px-4 py-3 text-white placeholder-[#6B7280] focus:outline-none focus:border-[#D4A017] transition-colors text-sm";
 
   return (
     <main className="min-h-screen bg-[#0F1117] px-4 py-4 pb-24">
       <div className="max-w-lg mx-auto space-y-3">
-        <div className="bg-[#1A1B21] rounded-2xl p-5 border border-[#2E3038]">
+        <div className="bg-[#16130A] rounded-2xl p-5 border border-[#2A2210]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-bold flex items-center gap-2">
               <User size={18} className="text-[#D4A017]" />
@@ -355,7 +355,7 @@ export default function OrderPage() {
 
           {/* Mesa badge */}
           {mesaNum && (
-            <div className="mb-4 bg-[#2A2414] border border-[#D4A017]/40 rounded-xl px-4 py-2.5 flex items-center gap-2">
+            <div className="mb-4 bg-[#2A1E00] border border-[#D4A017]/40 rounded-xl px-4 py-2.5 flex items-center gap-2">
               <span className="text-lg">🪑</span>
               <p className="text-[#D4A017] font-bold text-sm">Mesa {mesaNum} — pedido en el establecimiento</p>
             </div>
@@ -372,7 +372,7 @@ export default function OrderPage() {
                   className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                     deliveryType === "delivery"
                       ? "bg-[#D4A017]/10 border-[#D4A017]"
-                      : "bg-[#22242C] border-[#2E3038] hover:border-[#D4A017]/50"
+                      : "bg-[#1C1800] border-[#2A2210] hover:border-[#D4A017]/50"
                   }`}
                 >
                   <span className="text-2xl">🛵</span>
@@ -386,7 +386,7 @@ export default function OrderPage() {
                   className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                     deliveryType === "pickup"
                       ? "bg-[#D4A017]/10 border-[#D4A017]"
-                      : "bg-[#22242C] border-[#2E3038] hover:border-[#D4A017]/50"
+                      : "bg-[#1C1800] border-[#2A2210] hover:border-[#D4A017]/50"
                   }`}
                 >
                   <span className="text-2xl">🏪</span>
@@ -460,7 +460,7 @@ export default function OrderPage() {
                     <MapPin size={11} /> Selecciona tu barrio para continuar
                   </p>
                 )}
-                <div className="mt-3 bg-[#1A1B21] border border-[#2E3038] rounded-xl px-4 py-3">
+                <div className="mt-3 bg-[#16130A] border border-[#2A2210] rounded-xl px-4 py-3">
                   <p className="text-[#6B7280] text-xs font-medium mb-1">¿No ves tu barrio?</p>
                   <p className="text-[#555566] text-xs">
                     Por el momento solo hacemos domicilio a los barrios listados. Contáctanos por WhatsApp si quieres más información.
@@ -476,14 +476,14 @@ export default function OrderPage() {
             <p className="text-[#6B7280] text-xs">Al continuar, crearemos una cuenta para acumular puntos y rastrear tus pedidos.</p>
 
             {/* Order summary */}
-            <div className="bg-[#22242C] rounded-xl p-4 space-y-2 text-sm">
+            <div className="bg-[#1C1800] rounded-xl p-4 space-y-2 text-sm">
               {items.map(({ item, quantity }) => (
                 <div key={item.id} className="flex justify-between">
                   <span className="text-[#9CA3AF]">{item.name} <span className="text-[#6B7280]">x{quantity}</span></span>
                   <span className="text-white font-medium">${(item.price * quantity).toLocaleString("es-CO")}</span>
                 </div>
               ))}
-              <div className="flex justify-between text-[#9CA3AF] pt-1 border-t border-[#2E3038]">
+              <div className="flex justify-between text-[#9CA3AF] pt-1 border-t border-[#2A2210]">
                 {mesaNum ? (
                   <>
                     <span>Mesa {mesaNum}</span>
@@ -513,7 +513,7 @@ export default function OrderPage() {
                   <span>-${couponDiscount.toLocaleString("es-CO")}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-base pt-1 border-t border-[#2E3038]">
+              <div className="flex justify-between font-bold text-base pt-1 border-t border-[#2A2210]">
                 <span className="text-white">Total</span>
                 <span className="text-[#D4A017]">${grandTotal.toLocaleString("es-CO")}</span>
               </div>
@@ -589,7 +589,7 @@ export default function OrderPage() {
             )}
 
             {/* Points earned strip */}
-            <div className="bg-[#2A2414] rounded-xl px-4 py-2.5 flex items-center gap-2">
+            <div className="bg-[#2A1E00] rounded-xl px-4 py-2.5 flex items-center gap-2">
               <BrandEmoji name="burger" size={28} />
               <p className="text-[#E8B830] text-xs font-medium">
                 Ganarás <strong>{pointsEarned} puntos</strong> con este pedido

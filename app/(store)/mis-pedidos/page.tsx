@@ -67,7 +67,7 @@ export default function MisPedidosPage() {
   if (noAccount) {
     return (
       <main className="min-h-screen bg-[#0F1117] flex flex-col items-center justify-center px-6 text-center">
-        <div className="w-20 h-20 rounded-full bg-[#22242C] flex items-center justify-center mb-4">
+        <div className="w-20 h-20 rounded-full bg-[#1C1800] flex items-center justify-center mb-4">
           <ClipboardList size={38} className="text-[#6B7280]" />
         </div>
         <h2 className="text-white font-bold text-lg mb-2">Aún no tienes pedidos</h2>
@@ -94,7 +94,7 @@ export default function MisPedidosPage() {
 
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 rounded-full bg-[#22242C] flex items-center justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-[#1C1800] flex items-center justify-center mb-4">
               <ClipboardList size={38} className="text-[#6B7280]" />
             </div>
             <h2 className="text-white font-bold text-lg mb-2">Aún no tienes pedidos</h2>
@@ -154,14 +154,14 @@ function OrderCard({ order, onOpen }: { order: Order; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className={`w-full flex items-center gap-4 bg-[#1A1B21] rounded-2xl p-4 border transition-colors active:scale-[0.99] text-left ${
+      className={`w-full flex items-center gap-4 bg-[#16130A] rounded-2xl p-4 border transition-colors active:scale-[0.99] text-left ${
         isActive
           ? "border-[#D4A017]/30 hover:border-[#D4A017]/60"
-          : "border-[#2E3038] hover:border-[#3E4048]"
+          : "border-[#2A2210] hover:border-[#D4A017]/30"
       }`}
     >
       <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-        isActive ? "bg-[#D4A017]/15" : "bg-[#22242C]"
+        isActive ? "bg-[#D4A017]/15" : "bg-[#1C1800]"
       }`}>
         <span className="text-xl">🍔</span>
       </div>
@@ -228,10 +228,10 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
       className="fixed inset-0 z-[60] bg-black/70 flex items-end sm:items-center justify-center"
       onClick={handleBackdrop}
     >
-      <div className="bg-[#1A1B21] w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden max-h-[90dvh] flex flex-col">
+      <div className="bg-[#16130A] w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden max-h-[90dvh] flex flex-col">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#2E3038]">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#2A2210]">
           <div>
             <p className="text-[#D4A017] font-mono font-bold text-sm">{order.order_number}</p>
             <div className="flex items-center gap-2 mt-1">
@@ -243,7 +243,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#2E3038] flex items-center justify-center text-[#888899] hover:text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-[#1C1800] border border-[#2A2210] flex items-center justify-center text-[#888899] hover:text-white transition-colors"
           >
             <X size={16} />
           </button>
@@ -257,7 +257,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
             <p className="text-[#888899] text-xs font-semibold uppercase tracking-wide mb-3">Productos</p>
             <div className="space-y-2">
               {items.map((item, i) => (
-                <div key={i} className="bg-[#22242C] rounded-xl p-3">
+                <div key={i} className="bg-[#1C1800] rounded-xl p-3">
                   <div className="flex justify-between items-start gap-3">
                     <div className="flex-1">
                       <p className="text-white font-semibold text-sm">{item.menu_item_name}</p>
@@ -291,14 +291,14 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
 
           {/* Notas */}
           {order.notes && (
-            <div className="flex items-start gap-2 bg-[#22242C] rounded-xl p-3">
+            <div className="flex items-start gap-2 bg-[#1C1800] rounded-xl p-3">
               <StickyNote size={14} className="text-[#D4A017] mt-0.5 shrink-0" />
               <p className="text-[#CCCCCC] text-sm">{order.notes}</p>
             </div>
           )}
 
           {/* Totales */}
-          <div className="border-t border-[#2E3038] pt-4 space-y-1.5">
+          <div className="border-t border-[#2A2210] pt-4 space-y-1.5">
             <div className="flex justify-between text-sm text-[#888899]">
               <span>Subtotal</span>
               <span>${order.subtotal?.toLocaleString("es-CO")}</span>
@@ -317,7 +317,7 @@ function OrderDetailModal({ order, onClose }: { order: Order; onClose: () => voi
         </div>
 
         {/* Botones */}
-        <div className="px-5 py-4 border-t border-[#2E3038] flex gap-3">
+        <div className="px-5 py-4 border-t border-[#2A2210] flex gap-3">
           {isActive ? (
             <Link
               href={`/seguimiento?order=${order.order_number}`}
