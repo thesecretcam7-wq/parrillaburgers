@@ -3,35 +3,55 @@ import EscPosEncoder from "esc-pos-encoder";
 import { Order } from "@/lib/types";
 import { generateThermalReceiptHTML } from "./thermal-receipt";
 
-// Configuración de impresora
-const PRINTER_VENDOR_ID = 0x0483; // STMicroelectronics (común en impresoras térmicas)
-// Algunos vendedores comunes:
-// 0x0483 - STMicroelectronics
-// 0x0456 - Cherry GmbH
-// 0x0416 - Winbond
-// Si tu impresora no funciona, busca su vendor/product ID
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let selectedDevice: any = null;
 
 /**
- * Busca y conecta a una impresora térmica USB
+ * Intenta obtener una impresora ya autorizada, o pide seleccionar una nueva
+ */
+async function getOrSelectDevice(): Promise<any | null> {
+  const nav = navigator as any;
+  if (!nav.usb) return null;
+
+  // Si ya tenemos una referencia en memoria, usarla
+  if (selectedDevice) return selectedDevice;
+
+  // Buscar entre impresoras ya autorizadas previamente
+  try {
+    const paired = await nav.usb.getDevices();
+    const printer = paired.find((d: any) =>
+      d.deviceClass === 0x07 ||
+      d.configurations?.some((c: any) =>
+        c.interfaces?.some((i: any) =>
+          i.alternates?.some((a: any) => a.interfaceClass === 0x07)
+        )
+      )
+    );
+    if (printer) {
+      selectedDevice = printer;
+      return printer;
+    }
+  } catch { /* continuar */ }
+
+  return null;
+}
+
+/**
+ * Muestra el selector de impresoras USB (solo la primera vez)
  */
 export async function selectUSBPrinter(): Promise<boolean> {
   try {
     const nav = navigator as any;
     if (!nav.usb) {
-      console.error("WebUSB no está disponible en este navegador");
+      console.error("WebUSB no disponible — usa Chrome/Edge");
       return false;
     }
 
-    const devices = await nav.usb.requestDevice({
-      filters: [
-        { classCode: 0x07 }, // Clase de impresora
-      ],
+    const device = await nav.usb.requestDevice({
+      filters: [{ classCode: 0x07 }], // clase impresora
     });
 
-    selectedDevice = devices;
+    selectedDevice = device;
     return true;
   } catch (error) {
     console.error("Error seleccionando impresora USB:", error);
@@ -135,52 +155,60 @@ function generateESCPOS(order: Order): Uint8Array {
 }
 
 /**
- * Imprime directamente a la impresora USB
+ * Imprime directamente a la impresora USB via WebUSB + ESC/POS
  */
 export async function printUSB(order: Order): Promise<boolean> {
+  let device: any = null;
   try {
     const nav = navigator as any;
-    if (!nav.usb) {
-      throw new Error("WebUSB no disponible");
+    if (!nav.usb) return false;
+
+    // Obtener impresora ya pareada o pedir seleccionar
+    device = await getOrSelectDevice();
+    if (!device) {
+      const ok = await selectUSBPrinter();
+      if (!ok) return false;
+      device = selectedDevice;
+    }
+    if (!device) return false;
+
+    // Abrir dispositivo
+    await device.open();
+
+    // Seleccionar configuración si no está seleccionada
+    if (device.configuration === null) {
+      await device.selectConfiguration(1);
     }
 
-    // Si no hay impresora seleccionada, solicitar
-    if (!selectedDevice) {
-      const success = await selectUSBPrinter();
-      if (!success) {
-        console.error("No se seleccionó impresora");
-        return false;
+    // Reclamar interfaz 0 (interfaz de impresora)
+    await device.claimInterface(0);
+
+    // Detectar automáticamente el endpoint bulk OUT
+    let endpointNumber = 1; // fallback
+    try {
+      const iface = device.configuration?.interfaces[0];
+      if (iface) {
+        const alt = iface.alternates[0];
+        const ep = alt.endpoints.find(
+          (e: any) => e.direction === "out" && e.type === "bulk"
+        );
+        if (ep) endpointNumber = ep.endpointNumber;
       }
-    }
+    } catch { /* usar endpoint 1 por defecto */ }
 
-    if (!selectedDevice) {
-      throw new Error("No se seleccionó impresora");
-    }
-
-    // Conectar
-    await selectedDevice.open();
-
-    // Generar comandos ESC/POS
+    // Generar y enviar comandos ESC/POS
     const data = generateESCPOS(order);
+    await device.transferOut(endpointNumber, data);
 
-    // Enviar datos
-    await selectedDevice.controlTransferOut({
-      requestType: "class",
-      recipient: "interface",
-      request: 0x09,
-      value: 0x0200,
-      index: 0,
-    });
-
-    // Enviar contenido
-    await selectedDevice.bulkTransferOut(1, data);
-
-    // Cerrar conexión
-    await selectedDevice.close();
+    // Liberar interfaz y cerrar
+    await device.releaseInterface(0);
+    await device.close();
 
     return true;
   } catch (error) {
     console.error("Error imprimiendo a USB:", error);
+    // Intentar cerrar si quedó abierto
+    try { await device?.close(); } catch { /* ignorar */ }
     return false;
   }
 }
