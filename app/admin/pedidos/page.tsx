@@ -442,7 +442,10 @@ export default function AdminOrdersPage() {
                   </div>
 
                   <div className="flex gap-3 flex-wrap">
-                    <PrintReceiptButton order={order} />
+                    <PrintReceiptButton
+                      order={order}
+                      onAfterPrint={order.status === "pending" ? () => updateStatus(order.id, "confirmed") : undefined}
+                    />
                   </div>
 
                   <div>

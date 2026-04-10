@@ -9,9 +9,10 @@ import toast from "react-hot-toast";
 interface PrintReceiptButtonProps {
   order: Order;
   className?: string;
+  onAfterPrint?: () => Promise<void>;
 }
 
-export function PrintReceiptButton({ order, className = "" }: PrintReceiptButtonProps) {
+export function PrintReceiptButton({ order, className = "", onAfterPrint }: PrintReceiptButtonProps) {
   const [printing, setPrinting] = useState(false);
   const [usbSupported, setUsbSupported] = useState(false);
 
@@ -35,6 +36,8 @@ export function PrintReceiptButton({ order, className = "" }: PrintReceiptButton
 
       await printWithFallback(order);
       toast.success("✓ Impreso");
+
+      if (onAfterPrint) await onAfterPrint();
     } catch (error) {
       console.error("Error printing receipt:", error);
       toast.error("Error al imprimir");
