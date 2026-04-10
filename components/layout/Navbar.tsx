@@ -71,14 +71,14 @@ export default function Navbar() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 bg-[#1A1B21]/85 backdrop-blur-md border-b border-[#2E3038]/60 h-14"
+      className="fixed top-0 left-0 right-0 z-50 bg-[#0A0B0F]/95 backdrop-blur-md border-b border-[#1E2028] h-14"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div className="flex items-center justify-between h-full px-4 max-w-[430px] mx-auto gap-3 relative">
         {/* Left section: Back button or Logo */}
         <div className="flex items-center gap-3 min-w-0">
           {backHref && title ? (
-            <Link href={backHref} className="w-9 h-9 flex items-center justify-center rounded-full bg-[#22242C] shrink-0 hover:bg-[#2E3038] transition-colors">
+            <Link href={backHref} className="w-9 h-9 flex items-center justify-center rounded-full border border-[#2E3038] shrink-0 hover:border-[#D4A017]/40 transition-colors">
               <ArrowLeft size={18} className="text-white" />
             </Link>
           ) : (
@@ -119,28 +119,29 @@ export default function Navbar() {
           {/* Search Icon */}
           <button
             onClick={() => setShowSearch(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#22242C] hover:bg-[#2E3038] transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-[#2E3038] hover:border-[#D4A017]/40 transition-colors"
             aria-label="Buscar"
           >
-            <Search size={18} className="text-white" />
+            <Search size={17} className="text-white" />
           </button>
 
           {/* Notifications Icon */}
           <button
             onClick={handleNotifications}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#22242C] hover:bg-[#2E3038] transition-colors"
+            className="relative w-9 h-9 flex items-center justify-center rounded-full border border-[#2E3038] hover:border-[#D4A017]/40 transition-colors"
             aria-label="Notificaciones"
           >
-            <Bell size={18} className="text-white" />
+            <Bell size={17} className="text-white" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full" />
           </button>
 
           {/* Profile Icon */}
           <Link
             href="/perfil"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#22242C] hover:bg-[#2E3038] transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-[#2E3038] hover:border-[#D4A017]/40 transition-colors"
             aria-label="Perfil"
           >
-            <User size={18} className="text-white" />
+            <User size={17} className="text-white" />
           </Link>
         </div>
       </div>

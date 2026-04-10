@@ -159,7 +159,7 @@ export default function OrderPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isOpen === false) {
-      toast.error("El local está cerrado, no se pueden hacer pedidos ahora");
+      toast.error("Horario: 6:00 PM - 11:59 PM. El local está cerrado ahora");
       return;
     }
     if (!form.name || !form.email || !form.phone) {
@@ -658,8 +658,9 @@ export default function OrderPage() {
               <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-4 flex items-start gap-3">
                 <Clock size={18} className="text-red-400 mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-red-400 font-bold text-sm">Local cerrado</p>
-                  <p className="text-red-300/70 text-xs mt-0.5">{mensajeCerrado}</p>
+                  <p className="text-red-400 font-bold text-sm">⏰ Local cerrado</p>
+                  <p className="text-red-300/70 text-xs mt-1">Horario: 6:00 PM - 11:59 PM</p>
+                  <p className="text-red-300/50 text-xs mt-0.5">{mensajeCerrado}</p>
                 </div>
               </div>
             ) : (

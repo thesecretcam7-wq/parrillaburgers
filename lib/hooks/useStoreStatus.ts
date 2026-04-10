@@ -3,10 +3,19 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+const HORARIO_APERTURA = 18; // 6pm
+const HORARIO_CIERRE = 23.99; // 11:59pm
+
+function isOpenBySchedule(): boolean {
+  const now = new Date();
+  const currentHour = now.getHours() + now.getMinutes() / 60;
+  return currentHour >= HORARIO_APERTURA && currentHour < HORARIO_CIERRE;
+}
+
 export function useStoreStatus() {
   const [isOpen, setIsOpen] = useState<boolean | null>(null); // null = cargando
   const [mensajeCerrado, setMensajeCerrado] = useState(
-    "Estamos cerrados por el momento. Vuelve pronto 🕐"
+    "Horario: 6:00 PM - 11:59 PM todos los días"
   );
 
   useEffect(() => {
@@ -15,16 +24,20 @@ export function useStoreStatus() {
       .select("key, value")
       .in("key", ["local_abierto", "mensaje_cerrado"])
       .then(({ data }) => {
-        if (!data) { setIsOpen(true); return; }
+        // Validar primero si el local está abierto según horario
+        const openBySchedule = isOpenBySchedule();
+        let manualOverride = null;
 
-        let localAbierto = true;
+        if (data) {
+          data.forEach((row) => {
+            if (row.key === "local_abierto") manualOverride = row.value !== "false";
+            if (row.key === "mensaje_cerrado") setMensajeCerrado(row.value);
+          });
+        }
 
-        data.forEach((row) => {
-          if (row.key === "local_abierto") localAbierto = row.value !== "false";
-          if (row.key === "mensaje_cerrado") setMensajeCerrado(row.value);
-        });
-
-        setIsOpen(localAbierto);
+        // Si hay override manual, usarlo; si no, usar horario automático
+        const finalStatus = manualOverride !== null ? manualOverride : openBySchedule;
+        setIsOpen(finalStatus);
       });
   }, []);
 

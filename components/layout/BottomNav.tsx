@@ -20,7 +20,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[#1A1B21]/85 backdrop-blur-md border-t border-[#2E3038]/60 safe-area-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="flex items-center justify-around h-16 max-w-[430px] mx-auto px-2">
@@ -30,24 +30,21 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 relative transition-all ${
-                isActive ? "text-[#D4A017]" : "text-[#6B7280]"
+              className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 relative transition-all ${
+                isActive ? "text-[#D4A017]" : "text-gray-400"
               }`}
             >
               <div className="relative">
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
                 {href === "/carrito" && itemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#D4A017] text-[#0F1117] text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                  <span className="absolute -top-1.5 -right-1.5 bg-[#D4A017] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
                     {itemCount > 9 ? "9+" : itemCount}
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] font-medium leading-tight ${isActive ? "text-[#D4A017]" : "text-[#6B7280]"}`}>
+              <span className={`text-[10px] font-semibold leading-tight ${isActive ? "text-[#D4A017]" : "text-gray-400"}`}>
                 {label}
               </span>
-              {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-[#D4A017] rounded-full" />
-              )}
             </Link>
           );
         })}
