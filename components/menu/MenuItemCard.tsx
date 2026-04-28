@@ -52,7 +52,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-[#1C1800] to-[#16130A] rounded-3xl overflow-hidden border border-[#2A2210] flex flex-col hover:border-[#D4A017] hover:shadow-[0_12px_48px_rgba(212,160,23,0.15)] transition-all duration-300 h-full">
+      <div className="card-base card-hover bg-gradient-to-br from-[#1C1800] to-[#16130A] rounded-xl overflow-hidden flex flex-col h-full">
         {/* Image section — larger */}
         <button
           type="button"
@@ -163,7 +163,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
                 {qty === 0 ? (
                   <button
                     onClick={handleAdd}
-                    className="bg-gradient-to-r from-[#D4A017] to-[#E8B92A] hover:shadow-[0_8px_20px_rgba(212,160,23,0.4)] text-[#0F1117] rounded-full p-2.5 font-bold active:scale-90 transition-all shadow-md"
+                    className="bg-gradient-to-r from-[#D4A017] to-[#E8B92A] hover:shadow-gold text-[#0F1117] rounded-full p-2.5 font-bold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
                     title="Agregar al carrito"
                   >
                     <Plus size={18} strokeWidth={3} />
@@ -200,7 +200,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
           onClick={() => setShowDetail(false)}
         >
           <div
-            className="bg-[#16130A] border border-[#2A2210] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300"
+            className="modal-base bg-[#16130A] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm overflow-hidden animate-in slide-up duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
@@ -241,7 +241,7 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
               {item.available ? (
                 <button
                   onClick={() => { handleAdd(); setShowDetail(false); }}
-                  className="mt-5 w-full py-3 bg-gradient-to-r from-[#D4A017] to-[#E8B92A] hover:shadow-[0_8px_20px_rgba(212,160,23,0.4)] text-[#0F1117] font-bold rounded-xl transition-all shadow-md active:scale-95"
+                  className="mt-5 w-full py-3 bg-gradient-to-r from-[#D4A017] to-[#E8B92A] text-[#0F1117] font-bold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg hover:shadow-gold hover:scale-105 active:scale-95"
                 >
                   Agregar al carrito
                 </button>
