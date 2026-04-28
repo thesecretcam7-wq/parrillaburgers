@@ -157,7 +157,7 @@ export default async function Home() {
             <Link
               key={offer.id}
               href="/menu"
-              className="relative overflow-hidden rounded-2xl p-4 hover:scale-[1.02] active:scale-95 transition-all duration-200"
+              className="relative overflow-hidden rounded-xl p-4 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
               style={{ background: "linear-gradient(135deg, #C4820A 0%, #8B5A00 60%, #5C3A00 100%)" }}
             >
               {/* Shine overlay */}
@@ -185,7 +185,7 @@ export default async function Home() {
               <Link
                 key={item.id}
                 href="/menu"
-                className="bg-[#16130A] rounded-2xl overflow-hidden border border-[#2A2210] hover:border-[#D4A017]/50 hover:shadow-[0_4px_20px_rgba(212,160,23,0.12)] transition-all duration-300 flex gap-4"
+                className="card-base card-hover bg-[#16130A] rounded-xl overflow-hidden flex gap-4"
               >
                 {/* Image */}
                 <div className="relative w-24 h-24 shrink-0 bg-[#0D0B06]">
@@ -221,7 +221,7 @@ export default async function Home() {
       {/* Barra libre + Features */}
       <div className="px-6 py-6 space-y-4">
         {barraActiva && (
-          <div className="flex items-center gap-3 border-2 border-[#D4A017]/60 px-4 py-3 rounded-2xl" style={{ background: "linear-gradient(135deg, #1A1200 0%, #2A1E00 100%)" }}>
+          <div className="flex items-center gap-3 border-2 border-[#D4A017]/60 px-4 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300" style={{ background: "linear-gradient(135deg, #1A1200 0%, #2A1E00 100%)" }}>
             <span className="text-2xl">{barraEmoji}</span>
             <div>
               <p className="font-bold text-[#D4A017] text-sm">Barra Libre Incluida</p>
@@ -232,16 +232,16 @@ export default async function Home() {
 
         {/* Features */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-[#16130A] border border-[#2A2210] rounded-xl p-3 text-center hover:border-[#D4A017]/40 transition-colors">
+          <div className="card-base bg-[#16130A] rounded-lg p-3 text-center hover:shadow-md hover:scale-105 transition-all duration-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/emojis/scooter.png" alt="" width={24} height={24} className="object-contain mx-auto mb-2" />
             <p className="text-white text-xs font-bold">Domicilio</p>
           </div>
-          <div className="bg-[#16130A] border border-[#2A2210] rounded-xl p-3 text-center hover:border-[#D4A017]/40 transition-colors">
+          <div className="card-base bg-[#16130A] rounded-lg p-3 text-center hover:shadow-md hover:scale-105 transition-all duration-200">
             <span className="text-2xl">🎯</span>
             <p className="text-white text-xs font-bold mt-1">Puntos</p>
           </div>
-          <div className="bg-[#16130A] border border-[#2A2210] rounded-xl p-3 text-center hover:border-[#D4A017]/40 transition-colors">
+          <div className="card-base bg-[#16130A] rounded-lg p-3 text-center hover:shadow-md hover:scale-105 transition-all duration-200">
             <Clock size={20} className="mx-auto mb-1 text-[#D4A017]" />
             <p className="text-white text-xs font-bold">En vivo</p>
           </div>
@@ -252,7 +252,7 @@ export default async function Home() {
       <div className="px-6 py-8">
         <Link
           href="/menu"
-          className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4A017] to-[#E8B92A] text-[#0F1117] font-black text-lg px-8 py-4 rounded-2xl w-full shadow-[0_8px_24px_rgba(212,160,23,0.3)] hover:shadow-[0_12px_40px_rgba(212,160,23,0.5)] hover:scale-[1.02] active:scale-95 transition-all duration-200"
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4A017] to-[#E8B92A] text-[#0F1117] font-black text-lg px-8 py-4 rounded-2xl w-full shadow-md hover:shadow-gold hover:scale-105 active:scale-95 transition-all duration-200"
         >
           Ver Menú Completo
           <ArrowRight size={20} />

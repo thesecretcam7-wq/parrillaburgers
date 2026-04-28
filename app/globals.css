@@ -116,42 +116,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Utility Classes */
-.btn-primary {
-  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;
-  @apply bg-gradient-to-r from-brand-gold to-brand-gold-light;
-  @apply shadow-md hover:shadow-lg;
-  @apply hover:scale-105 active:scale-95;
-  @apply hover:shadow-gold;
-}
-
-.btn-secondary {
-  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;
-  @apply bg-brand-dark border border-brand-border;
-  @apply hover:border-brand-gold hover:shadow-md;
-  @apply hover:scale-105 active:scale-95;
-}
-
-.card-base {
-  @apply bg-brand-card rounded-xl border border-brand-border;
-  @apply shadow-md transition-all duration-300;
-}
-
-.card-hover {
-  @apply hover:shadow-xl hover:-translate-y-1;
-  @apply hover:border-brand-gold/50;
-}
-
-.card-elevated {
-  @apply bg-brand-dark rounded-xl;
-  @apply shadow-lg border border-brand-border/50;
-}
-
-.modal-base {
-  @apply rounded-2xl shadow-xl backdrop-blur-sm;
-  @apply bg-brand-dark border border-brand-border;
-}
-
+/* Utility Classes - Applied via inline Tailwind classes in components */
 .loading-spinner {
   animation: spinSmooth 2s linear infinite;
 }

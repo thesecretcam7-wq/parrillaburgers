@@ -119,7 +119,7 @@ export default function MenuContent({
       <div className="max-w-5xl mx-auto px-3 pb-24">
         {/* Banner local cerrado */}
         {!localAbierto && (
-          <div className="mt-3 bg-red-500/15 border border-red-500/30 rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
+          <div className="mt-3 bg-red-500/15 border border-red-500/30 rounded-2xl px-4 py-3 flex items-center gap-2 mb-4 shadow-md">
             <span className="text-xl">🔒</span>
             <span className="text-red-300 font-semibold text-xs">{mensajeCerrado}</span>
           </div>
@@ -127,7 +127,7 @@ export default function MenuContent({
 
         {/* Banner barra libre */}
         {barraActiva && localAbierto && (
-          <div className="mt-3 border-2 border-[#D4A017]/60 rounded-2xl px-4 py-3 flex items-center gap-2 mb-4" style={{ background: "linear-gradient(135deg, #1A1200 0%, #2A1E00 100%)" }}>
+          <div className="mt-3 border-2 border-[#D4A017]/60 rounded-xl px-4 py-3 flex items-center gap-2 mb-4 shadow-md hover:shadow-lg transition-all duration-300" style={{ background: "linear-gradient(135deg, #1A1200 0%, #2A1E00 100%)" }}>
             <span className="text-xl">{barraEmoji}</span>
             <span className="text-[#D4A017] font-semibold text-xs">{barraTexto}</span>
           </div>

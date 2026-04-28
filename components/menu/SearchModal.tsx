@@ -87,7 +87,7 @@ export default function SearchModal({ items, categories, onClose }: Props) {
       onClick={handleClose}
     >
       <div
-        className="bg-[#1A1B21] border-b border-[#2E3038] w-full shadow-[0_8px_32px_rgba(0,0,0,0.8)] animate-in slide-in-from-top-4 duration-300 max-h-[75vh] flex flex-col"
+        className="bg-[#1A1B21] border-b border-[#2E3038] w-full shadow-xl animate-in slide-in-from-top-4 duration-300 max-h-[75vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header */}
@@ -109,7 +109,7 @@ export default function SearchModal({ items, categories, onClose }: Props) {
             </div>
             <button
               onClick={handleClose}
-              className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-[#22242C] transition-colors active:scale-95"
+              className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-[#22242C] hover:scale-105 active:scale-95 transition-all duration-200"
             >
               <X size={24} className="sm:size-20 text-[#9CA3AF]" />
             </button>
@@ -119,7 +119,7 @@ export default function SearchModal({ items, categories, onClose }: Props) {
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors shrink-0 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 hover:scale-105 active:scale-95 shrink-0 ${
                 selectedCategory === null
                   ? "bg-[#D4A017] text-[#0F1117]"
                   : "bg-[#22242C] text-[#9CA3AF] hover:bg-[#2E3038]"
@@ -135,7 +135,7 @@ export default function SearchModal({ items, categories, onClose }: Props) {
                     selectedCategory === cat.id ? null : cat.id
                   )
                 }
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors shrink-0 ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 hover:scale-105 active:scale-95 shrink-0 ${
                   selectedCategory === cat.id
                     ? "bg-[#D4A017] text-[#0F1117]"
                     : "bg-[#22242C] text-[#9CA3AF] hover:bg-[#2E3038]"
@@ -172,7 +172,7 @@ export default function SearchModal({ items, categories, onClose }: Props) {
                       <button
                         key={term}
                         onClick={() => handleSearch(term)}
-                        className="w-full text-left px-3 py-2 rounded-lg bg-[#22242C] hover:bg-[#2E3038] text-white text-sm transition-colors"
+                        className="w-full text-left px-3 py-2 rounded-lg bg-[#22242C] hover:bg-[#2E3038] hover:scale-105 active:scale-95 text-white text-sm transition-all duration-200"
                       >
                         {term}
                       </button>
@@ -201,7 +201,7 @@ export default function SearchModal({ items, categories, onClose }: Props) {
                 <button
                   key={item.id}
                   onClick={() => handleProductClick(item)}
-                  className="text-left bg-[#22242C] rounded-lg overflow-hidden border border-[#2E3038] hover:border-[#D4A017]/50 transition-colors"
+                  className="text-left bg-[#22242C] rounded-lg overflow-hidden border border-[#2E3038] shadow-md hover:border-[#D4A017]/50 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
                 >
                   <div className="relative h-24 bg-[#1A1B21]">
                     {item.image_url ? (

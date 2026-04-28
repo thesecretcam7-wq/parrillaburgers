@@ -20,7 +20,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-area-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[#0A0B0F]/95 backdrop-blur-md border-t border-[#1E2028] safe-area-bottom shadow-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="flex items-center justify-around h-16 max-w-[430px] mx-auto px-2">
@@ -30,8 +30,8 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 relative transition-all ${
-                isActive ? "text-[#D4A017]" : "text-gray-400"
+              className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 relative transition-all duration-200 hover:scale-110 active:scale-95 ${
+                isActive ? "text-[#D4A017]" : "text-[#9CA3AF]"
               }`}
             >
               <div className="relative">
@@ -42,7 +42,7 @@ export default function BottomNav() {
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] font-semibold leading-tight ${isActive ? "text-[#D4A017]" : "text-gray-400"}`}>
+              <span className={`text-[10px] font-semibold leading-tight ${isActive ? "text-[#D4A017]" : "text-[#9CA3AF]"}`}>
                 {label}
               </span>
             </Link>

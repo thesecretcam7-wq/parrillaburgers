@@ -36,7 +36,7 @@ export default function ProductReviewsModal({
       onClick={onClose}
     >
       <div
-        className="bg-[#1A1B21] border border-[#2E3038] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-[0_-8px_40px_rgba(0,0,0,0.6)] sm:shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 max-h-[80vh] flex flex-col"
+        className="bg-[#1A1B21] border border-[#2E3038] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm shadow-xl overflow-hidden animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -55,7 +55,7 @@ export default function ProductReviewsModal({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#22242C] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#22242C] hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <X size={20} className="text-[#9CA3AF]" />
           </button>
@@ -71,7 +71,7 @@ export default function ProductReviewsModal({
             rating.reviews.map((review) => (
               <div
                 key={review.id}
-                className="bg-[#22242C] rounded-lg p-4 border border-[#2E3038]"
+                className="bg-[#22242C] rounded-lg p-4 border border-[#2E3038] shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>

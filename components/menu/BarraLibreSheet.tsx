@@ -29,7 +29,7 @@ export default function BarraLibreSheet({ item, onConfirm, onClose }: BarraLibre
       />
 
       {/* Bottom sheet — above overlay */}
-      <div className="fixed bottom-0 left-0 right-0 z-[60] bg-[#1A1B21] border-t border-[#2E3038] rounded-t-3xl shadow-2xl max-w-[430px] mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-[60] bg-[#1A1B21] border-t border-[#2E3038] rounded-t-3xl shadow-xl max-w-[430px] mx-auto">
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-[#2E3038] rounded-full" />
@@ -43,7 +43,7 @@ export default function BarraLibreSheet({ item, onConfirm, onClose }: BarraLibre
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#22242C] flex items-center justify-center"
+            className="w-8 h-8 rounded-full bg-[#22242C] flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <X size={16} className="text-[#888899]" />
           </button>
@@ -57,7 +57,7 @@ export default function BarraLibreSheet({ item, onConfirm, onClose }: BarraLibre
               <button
                 key={opcion}
                 onClick={() => toggle(opcion)}
-                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition-all text-left ${
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 text-left ${
                   isSelected
                     ? "border-[#D4A017] bg-[#D4A017]/10"
                     : "border-[#2E3038] bg-[#22242C]"
@@ -87,7 +87,7 @@ export default function BarraLibreSheet({ item, onConfirm, onClose }: BarraLibre
           )}
           <button
             onClick={() => onConfirm(selected)}
-            className="w-full bg-[#D4A017] text-[#111217] font-bold py-3.5 rounded-2xl text-sm active:scale-[0.98] transition-transform"
+            className="w-full bg-[#D4A017] text-[#111217] font-bold py-3.5 rounded-2xl text-sm shadow-md hover:shadow-gold hover:scale-105 active:scale-95 transition-all duration-200"
           >
             {selected.length === 0 ? "Agregar sin barra libre" : `Agregar con ${selected.length} ingrediente${selected.length > 1 ? "s" : ""}`}
           </button>
