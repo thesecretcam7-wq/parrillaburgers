@@ -7,9 +7,9 @@ import { useCartStore } from "@/lib/store/cart";
 
 const tabs = [
   { href: "/", label: "Inicio", icon: Home },
-  { href: "/menu", label: "Menú", icon: UtensilsCrossed },
+  { href: "/menu", label: "Menu", icon: UtensilsCrossed },
   { href: "/carrito", label: "Carrito", icon: ShoppingCart },
-  { href: "/mis-pedidos",  label: "Mis Pedidos", icon: ClipboardList },
+  { href: "/mis-pedidos", label: "Mis Pedidos", icon: ClipboardList },
 ];
 
 export default function BottomNav() {
@@ -20,29 +20,29 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[#0A0B0F]/95 backdrop-blur-md border-t border-[#1E2028] safe-area-bottom shadow-md"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0B0B0B]/82 shadow-[0_-18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl safe-area-bottom md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="flex items-center justify-around h-16 max-w-[430px] mx-auto px-2">
+      <div className="mx-auto flex h-[68px] max-w-[430px] items-center justify-around px-2">
         {tabs.map(({ href, label, icon: Icon }) => {
           const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 py-2 relative transition-all duration-200 hover:scale-110 active:scale-95 ${
-                isActive ? "text-[#D4A017]" : "text-[#9CA3AF]"
+              className={`relative flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-2 transition-all duration-300 active:scale-95 ${
+                isActive ? "text-[#F5B041]" : "text-white/46"
               }`}
             >
-              <div className="relative">
+              <div className={`relative grid h-9 w-11 place-items-center rounded-2xl transition ${isActive ? "bg-[#F5B041]/12 shadow-[0_0_22px_rgba(245,176,65,0.16)]" : ""}`}>
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
-                {href === "/carrito" && itemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#D4A017] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                {href === "/carrito" && itemCount > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF3B1F] text-[9px] font-black leading-none text-white">
                     {itemCount > 9 ? "9+" : itemCount}
                   </span>
-                )}
+                ) : null}
               </div>
-              <span className={`text-[10px] font-semibold leading-tight ${isActive ? "text-[#D4A017]" : "text-[#9CA3AF]"}`}>
+              <span className={`text-[10px] font-bold leading-tight ${isActive ? "text-[#F5B041]" : "text-white/46"}`}>
                 {label}
               </span>
             </Link>

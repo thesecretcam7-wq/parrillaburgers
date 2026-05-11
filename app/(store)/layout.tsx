@@ -12,7 +12,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-[#0F1117] lg:bg-[#07080C]">
+    <div className="min-h-screen bg-[#0B0B0B]">
       <Navbar />
       <AnimatePresence mode="wait">
         <motion.div
@@ -22,7 +22,7 @@ export default function StoreLayout({ children }: { children: ReactNode }) {
           animate="animate"
           exit="exit"
           transition={pageTransition}
-          className="pt-14 pb-20 lg:max-w-[430px] lg:mx-auto lg:border-x lg:border-[#2E3038] lg:bg-[#0F1117] lg:min-h-[calc(100vh-56px-64px)]"
+          className="min-h-screen pb-24"
         >
           {children}
         </motion.div>
